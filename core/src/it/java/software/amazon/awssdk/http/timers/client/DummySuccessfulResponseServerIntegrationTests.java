@@ -15,7 +15,6 @@
 
 package software.amazon.awssdk.http.timers.client;
 
-import static software.amazon.awssdk.internal.http.request.RequestHandlerTestUtils.buildRequestHandlerList;
 import static software.amazon.awssdk.internal.http.timers.TimeoutTestConstants.CLIENT_EXECUTION_TIMEOUT;
 import static software.amazon.awssdk.internal.http.timers.TimeoutTestConstants.SLOW_REQUEST_HANDLER_TIMEOUT;
 import static software.amazon.awssdk.internal.http.timers.TimeoutTestConstants.TEST_TIMEOUT;
@@ -30,7 +29,7 @@ import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.MockServerTestBase;
 import software.amazon.awssdk.http.exception.ClientExecutionTimeoutException;
 import software.amazon.awssdk.http.server.MockServer;
-import software.amazon.awssdk.internal.http.request.SlowRequestHandler;
+import software.amazon.awssdk.internal.http.request.SlowExecutionInterceptor;
 import software.amazon.awssdk.internal.http.response.DummyResponseHandler;
 import software.amazon.awssdk.internal.http.response.UnresponsiveResponseHandler;
 
@@ -64,7 +63,7 @@ public class DummySuccessfulResponseServerIntegrationTests extends MockServerTes
                                      .build();
 
         List<RequestHandler> requestHandlers = buildRequestHandlerList(
-                new SlowRequestHandler().withAfterResponseWaitInSeconds(SLOW_REQUEST_HANDLER_TIMEOUT));
+                new SlowExecutionInterceptor().afterTransmissionWaitInSeconds(SLOW_REQUEST_HANDLER_TIMEOUT));
 
         requestBuilder().executionContext(withHandlers(requestHandlers)).execute(new DummyResponseHandler());
     }
@@ -78,7 +77,7 @@ public class DummySuccessfulResponseServerIntegrationTests extends MockServerTes
                                      .build();
 
         List<RequestHandler> requestHandlers = buildRequestHandlerList(
-                new SlowRequestHandler().withBeforeRequestWaitInSeconds(SLOW_REQUEST_HANDLER_TIMEOUT));
+                new SlowExecutionInterceptor().beforeTransmissionWaitInSeconds(SLOW_REQUEST_HANDLER_TIMEOUT));
 
         requestBuilder().executionContext(withHandlers(requestHandlers)).execute(new DummyResponseHandler());
     }
@@ -88,7 +87,7 @@ public class DummySuccessfulResponseServerIntegrationTests extends MockServerTes
     }
 
     private ExecutionContext withHandlers(List<RequestHandler> requestHandlers) {
-        return ExecutionContext.builder().withRequestHandlers(requestHandlers).build();
+        return ExecutionContext.builder().executionInterceptors(requestHandlers).build();
     }
 
 }

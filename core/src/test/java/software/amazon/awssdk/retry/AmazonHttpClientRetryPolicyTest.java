@@ -35,6 +35,7 @@ import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
+import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 
 /**
@@ -87,8 +88,11 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                                                      .statusText(statusText)
                                                                      .build());
 
-        // The ExecutionContext should collect the expected RequestCount
-        ExecutionContext context = new ExecutionContext(true);
+        // The OldExecutionContext should collect the expected RequestCount
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .withUseRequestMetrics(true)
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         Request<?> testedRepeatableRequest = getSampleRequestWithRepeatableContent(originalRequest);
 
@@ -121,7 +125,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                   EXPECTED_RETRY_COUNT);
 
         // request count = retries + 1
-        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.getAwsRequestMetrics());
+        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.awsRequestMetrics());
     }
 
     /**
@@ -135,8 +139,11 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         when(abortableCallable.call()).thenThrow(simulatedIoException);
 
-        // The ExecutionContext should collect the expected RequestCount
-        ExecutionContext context = new ExecutionContext(true);
+        // The OldExecutionContext should collect the expected RequestCount
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .withUseRequestMetrics(true)
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         Request<?> testedRepeatableRequest = getSampleRequestWithRepeatableContent(originalRequest);
 
@@ -167,7 +174,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                   EXPECTED_RETRY_COUNT);
 
         // request count = retries + 1
-        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.getAwsRequestMetrics());
+        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.awsRequestMetrics());
     }
 
     /**
@@ -184,8 +191,11 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                                                      .statusText(statusText)
                                                                      .build());
 
-        // The ExecutionContext should collect the expected RequestCount
-        ExecutionContext context = new ExecutionContext(true);
+        // The OldExecutionContext should collect the expected RequestCount
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .withUseRequestMetrics(true)
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         // A non-repeatable request
         Request<?> testedNonRepeatableRequest = getSampleRequestWithNonRepeatableContent(originalRequest);
@@ -214,7 +224,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                   null,
                                   EXPECTED_RETRY_COUNT);
         // request count = retries + 1
-        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.getAwsRequestMetrics());
+        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.awsRequestMetrics());
     }
 
     /**
@@ -228,8 +238,11 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         when(abortableCallable.call()).thenThrow(simulatedIOException);
 
-        // The ExecutionContext should collect the expected RequestCount
-        ExecutionContext context = new ExecutionContext(true);
+        // The OldExecutionContext should collect the expected RequestCount
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .withUseRequestMetrics(true)
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         // A non-repeatable request
         Request<?> testedRepeatableRequest = getSampleRequestWithNonRepeatableContent(originalRequest);
@@ -259,7 +272,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                   EXPECTED_RETRY_COUNT);
 
         // request count = retries + 1
-        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.getAwsRequestMetrics());
+        assertRequestCountEquals(EXPECTED_RETRY_COUNT + 1, context.awsRequestMetrics());
     }
 
     /**
@@ -272,8 +285,11 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
         NullPointerException simulatedNPE = new NullPointerException("fake NullPointerException");
         when(abortableCallable.call()).thenThrow(simulatedNPE);
 
-        // The ExecutionContext should collect the expected RequestCount
-        ExecutionContext context = new ExecutionContext(true);
+        // The OldExecutionContext should collect the expected RequestCount
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .withUseRequestMetrics(true)
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         Request<?> testedRepeatableRequest = getSampleRequestWithRepeatableContent(originalRequest);
 
@@ -301,7 +317,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                   0);
 
         // The captured RequestCount should be 1
-        assertRequestCountEquals(1, context.getAwsRequestMetrics());
+        assertRequestCountEquals(1, context.awsRequestMetrics());
     }
 
     private void assertRequestCountEquals(int expectedCount, AwsRequestMetrics actualMetrics) {

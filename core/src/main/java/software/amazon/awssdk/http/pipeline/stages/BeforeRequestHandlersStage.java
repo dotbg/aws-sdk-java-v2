@@ -16,8 +16,6 @@
 package software.amazon.awssdk.http.pipeline.stages;
 
 import software.amazon.awssdk.RequestExecutionContext;
-import software.amazon.awssdk.auth.AwsCredentials;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
 import software.amazon.awssdk.handlers.RequestHandler;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.RequestToRequestPipeline;
@@ -30,12 +28,11 @@ public class BeforeRequestHandlersStage implements RequestToRequestPipeline {
 
     @Override
     public SdkHttpFullRequest execute(SdkHttpFullRequest request, RequestExecutionContext context) throws Exception {
-        AwsCredentials credentials = context.credentialsProvider().getCredentials();
-        SdkHttpFullRequest toReturn = request.toBuilder().handlerContext(AwsHandlerKeys.AWS_CREDENTIALS, credentials).build();
         // Apply any additional service specific request handlers that need to be run
-        for (RequestHandler requestHandler : context.requestHandlers()) {
-            toReturn = requestHandler.beforeRequest(toReturn);
-        }
-        return toReturn;
+//        for (RequestHandler requestHandler : context.executionInterceptors()) {
+//            toReturn = requestHandler.beforeRequest(toReturn);
+//        }
+//        return toReturn;
+        return request;
     }
 }

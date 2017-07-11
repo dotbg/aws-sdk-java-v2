@@ -26,7 +26,7 @@ import java.util.TimeZone;
 import org.junit.Test;
 import software.amazon.awssdk.Protocol;
 import software.amazon.awssdk.auth.AwsCredentials;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullRequestAdapter;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
@@ -36,13 +36,13 @@ import software.amazon.awssdk.services.rds.model.CopyDBSnapshotRequest;
 import software.amazon.awssdk.services.rds.transform.CopyDBSnapshotRequestMarshaller;
 
 /**
- * Unit Tests for {@link PresignRequestHandler}
+ * Unit Tests for {@link PresignInterceptor}
  */
 public class PresignRequestHandlerTest {
     private static final AwsCredentials CREDENTIALS = new AwsCredentials("foo", "bar");
     private static final Region DESTINATION_REGION = Region.of("us-west-2");
 
-    private static PresignRequestHandler<CopyDBSnapshotRequest> presignHandler = new CopyDbSnapshotPresignHandler();
+    private static PresignInterceptor<CopyDBSnapshotRequest> presignHandler = new CopyDbSnapshotPresignInterceptor();
     private final CopyDBSnapshotRequestMarshaller marshaller = new CopyDBSnapshotRequestMarshaller();
 
     @Test
@@ -72,7 +72,7 @@ public class PresignRequestHandlerTest {
         // Note: month is 0-based
         c.set(2016, 11, 21, 18, 7, 35);
 
-        PresignRequestHandler<CopyDBSnapshotRequest> handler = new CopyDbSnapshotPresignHandler(c.getTime());
+        PresignInterceptor<CopyDBSnapshotRequest> handler = new CopyDbSnapshotPresignInterceptor(c.getTime());
 
         handler.beforeRequest(marshallRequest(request));
 
@@ -144,8 +144,8 @@ public class PresignRequestHandlerTest {
                          .endpoint(new DefaultServiceEndpointBuilder(RDSClient.SERVICE_NAME, Protocol.HTTPS.toString())
                                            .withRegion(DESTINATION_REGION)
                                            .getServiceEndpoint())
-                         .handlerContext(AwsHandlerKeys.AWS_CREDENTIALS, CREDENTIALS)
-                         .handlerContext(AwsHandlerKeys.REQUEST_CONFIG, new AmazonWebServiceRequestAdapter(request))
+                         .handlerContext(AwsExecutionAttributes.AWS_CREDENTIALS, CREDENTIALS)
+                         .handlerContext(AwsExecutionAttributes.REQUEST_CONFIG, new AmazonWebServiceRequestAdapter(request))
                          .build();
     }
 

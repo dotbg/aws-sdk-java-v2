@@ -33,6 +33,7 @@ import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.DefaultRequest;
 import software.amazon.awssdk.LegacyClientConfiguration;
 import software.amazon.awssdk.Request;
+import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmazonHttpClientTest {
@@ -61,7 +62,9 @@ public class AmazonHttpClientTest {
 
         when(abortableCallable.call()).thenThrow(ioException);
 
-        ExecutionContext context = new ExecutionContext();
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         try {
             client.requestExecutionBuilder()
@@ -87,7 +90,9 @@ public class AmazonHttpClientTest {
         when(mockHandler.needsConnectionLeftOpen()).thenReturn(false);
         when(mockHandler.handle(any())).thenThrow(exception);
 
-        ExecutionContext context = new ExecutionContext();
+        ExecutionContext context = ExecutionContext.builder()
+                                                   .signerProvider(new NoOpSignerProvider())
+                                                   .build();
 
         try {
             client.requestExecutionBuilder()

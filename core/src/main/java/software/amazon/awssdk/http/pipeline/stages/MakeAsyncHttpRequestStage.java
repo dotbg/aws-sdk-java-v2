@@ -92,7 +92,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
                           .run();
 
         // TODO client execution timer
-        //        context.getClientExecutionTrackerTask().setCurrentHttpRequest(requestCallable);
+        //        context.clientExecutionTrackerTask().setCurrentHttpRequest(requestCallable);
         return future;
     }
 

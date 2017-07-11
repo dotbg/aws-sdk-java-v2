@@ -21,6 +21,7 @@ import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.event.ProgressListener;
 import software.amazon.awssdk.handlers.RequestHandler;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 
@@ -64,9 +65,9 @@ public abstract class RequestConfig {
     public abstract String getRequestType();
 
     /**
-     * @return The original request object. May be delivered to various strategies or hooks for
-     *     extra context. I.E. {@link RequestHandler} or {@link
-     * RetryPolicy}.
+     * @return The original request object, before any modifications by {@link ExecutionInterceptor}s. This should only really
+     * be used for replaying requests in the case of retries. All other cases should use the request as it was modified by the
+     * interceptors.
      */
     public abstract Object getOriginalRequest();
 

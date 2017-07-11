@@ -19,7 +19,7 @@ import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.CanHandleNullCredentials;
 import software.amazon.awssdk.auth.Signer;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
@@ -93,7 +93,7 @@ public class SigningStage implements RequestToRequestPipeline {
     private SdkHttpFullRequest adjustForClockSkew(SdkHttpFullRequest request) {
         if (dependencies.timeOffset() != 0) {
             return request.toBuilder()
-                          .handlerContext(AwsHandlerKeys.TIME_OFFSET, dependencies.timeOffset())
+                          .handlerContext(AwsExecutionAttributes.TIME_OFFSET, dependencies.timeOffset())
                           .build();
         }
         return request;

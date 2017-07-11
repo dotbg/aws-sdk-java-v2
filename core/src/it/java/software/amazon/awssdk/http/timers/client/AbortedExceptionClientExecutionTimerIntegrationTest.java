@@ -47,7 +47,7 @@ import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.exception.ClientExecutionTimeoutException;
 import software.amazon.awssdk.http.server.MockServer;
 import software.amazon.awssdk.internal.http.request.RequestHandlerTestUtils;
-import software.amazon.awssdk.internal.http.request.SlowRequestHandler;
+import software.amazon.awssdk.internal.http.request.SlowExecutionInterceptor;
 import software.amazon.awssdk.internal.http.response.DummyResponseHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -113,7 +113,7 @@ public class AbortedExceptionClientExecutionTimerIntegrationTest extends MockSer
                                                                      .build());
         interruptCurrentThreadAfterDelay(1000);
         List<RequestHandler> requestHandlers = RequestHandlerTestUtils
-                .buildRequestHandlerList(new SlowRequestHandler().withAfterResponseWaitInSeconds(10));
+                .buildRequestHandlerList(new SlowExecutionInterceptor().afterTransmissionWaitInSeconds(10));
         try {
             requestBuilder()
                     .executionContext(withHandlers(requestHandlers))
@@ -131,6 +131,6 @@ public class AbortedExceptionClientExecutionTimerIntegrationTest extends MockSer
     }
 
     private ExecutionContext withHandlers(List<RequestHandler> requestHandlers) {
-        return ExecutionContext.builder().withRequestHandlers(requestHandlers).build();
+        return ExecutionContext.builder().executionInterceptors(requestHandlers).build();
     }
 }

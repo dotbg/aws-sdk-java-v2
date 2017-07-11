@@ -32,7 +32,7 @@ import software.amazon.awssdk.http.MockServerTestBase;
 import software.amazon.awssdk.http.exception.ClientExecutionTimeoutException;
 import software.amazon.awssdk.http.server.MockServer;
 import software.amazon.awssdk.internal.http.request.RequestHandlerTestUtils;
-import software.amazon.awssdk.internal.http.request.SlowRequestHandler;
+import software.amazon.awssdk.internal.http.request.SlowExecutionInterceptor;
 import software.amazon.awssdk.internal.http.response.NullErrorResponseHandler;
 import software.amazon.awssdk.internal.http.response.UnresponsiveErrorResponseHandler;
 
@@ -74,12 +74,12 @@ public class DummyErrorResponseServerIntegrationTests extends MockServerTestBase
                 .build();
 
         List<RequestHandler> requestHandlers = RequestHandlerTestUtils.buildRequestHandlerList(
-                new SlowRequestHandler().withAfterErrorWaitInSeconds(SLOW_REQUEST_HANDLER_TIMEOUT));
+                new SlowExecutionInterceptor().onExecutionFailureWaitInSeconds(SLOW_REQUEST_HANDLER_TIMEOUT));
 
         httpClient.requestExecutionBuilder()
                 .request(newGetRequest())
                 .errorResponseHandler(new NullErrorResponseHandler())
-                .executionContext(ExecutionContext.builder().withRequestHandlers(requestHandlers).build())
+                .executionContext(ExecutionContext.builder().executionInterceptors(requestHandlers).build())
                 .execute();
     }
 

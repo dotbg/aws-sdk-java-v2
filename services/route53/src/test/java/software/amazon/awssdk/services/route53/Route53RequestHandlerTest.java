@@ -21,7 +21,7 @@ import org.junit.Test;
 import software.amazon.awssdk.Response;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.handlers.RequestHandler;
-import software.amazon.awssdk.services.route53.internal.Route53IdRequestHandler;
+import software.amazon.awssdk.services.route53.internal.Route53IdInterceptor;
 import software.amazon.awssdk.services.route53.model.CreateHostedZoneResponse;
 import software.amazon.awssdk.services.route53.model.CreateReusableDelegationSetResponse;
 import software.amazon.awssdk.services.route53.model.DelegationSet;
@@ -49,7 +49,7 @@ public class Route53RequestHandlerTest {
     @Test
     public void testDelegationSetPrefixRemoval() {
 
-        Route53IdRequestHandler requestHandler = new Route53IdRequestHandler();
+        Route53IdInterceptor requestHandler = new Route53IdInterceptor();
 
         DelegationSet delegationSet = DelegationSet.builder().id(delegationSetId).build();
 

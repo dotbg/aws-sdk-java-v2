@@ -18,7 +18,7 @@ package software.amazon.awssdk.internal.http.response;
 import software.amazon.awssdk.AmazonServiceException;
 import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.annotation.SdkInternalApi;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
@@ -42,7 +42,7 @@ public class AwsErrorResponseHandler implements HttpResponseHandler<SdkBaseExcep
     public AmazonServiceException handle(HttpResponse response) throws Exception {
         final AmazonServiceException ase = (AmazonServiceException) handleAse(response);
         ase.setStatusCode(response.getStatusCode());
-        ase.setServiceName(response.getRequest().handlerContext(AwsHandlerKeys.SERVICE_NAME));
+        ase.setServiceName(response.getRequest().handlerContext(AwsExecutionAttributes.SERVICE_NAME));
         awsRequestMetrics.addPropertyWith(AwsRequestMetrics.Field.AWSRequestID, ase.getRequestId())
                          .addPropertyWith(AwsRequestMetrics.Field.AWSErrorCode, ase.getErrorCode())
                          .addPropertyWith(AwsRequestMetrics.Field.StatusCode, ase.getStatusCode());

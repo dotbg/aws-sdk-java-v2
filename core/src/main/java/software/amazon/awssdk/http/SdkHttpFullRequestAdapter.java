@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import software.amazon.awssdk.Request;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 
 /**
  * Adapts a {@link Request} to the new {@link SdkHttpFullRequest} interface.
@@ -42,9 +42,7 @@ public class SdkHttpFullRequestAdapter {
                 .headers(adaptHeaders(request.getHeaders()))
                 .queryParameters(request.getParameters())
                 .endpoint(request.getEndpoint())
-                .resourcePath(request.getResourcePath())
-                // TODO find a better place to set this
-                .handlerContext(AwsHandlerKeys.SERVICE_NAME, request.getServiceName());
+                .resourcePath(request.getResourcePath());
     }
 
     private static Map<String, List<String>> adaptHeaders(Map<String, String> headers) {

@@ -20,7 +20,7 @@ import static software.amazon.awssdk.utils.FunctionalUtils.invokeSafely;
 import java.nio.ByteBuffer;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.utils.IoUtils;
 
@@ -45,7 +45,7 @@ public class SimpleRequestProvider implements SdkHttpRequestProvider {
     }
 
     private int getReadLimit(SdkHttpFullRequest request) {
-        return request.handlerContext(AwsHandlerKeys.REQUEST_CONFIG).getRequestClientOptions().getReadLimit();
+        return request.handlerContext(AwsExecutionAttributes.REQUEST_CONFIG).getRequestClientOptions().getReadLimit();
     }
 
     @Override

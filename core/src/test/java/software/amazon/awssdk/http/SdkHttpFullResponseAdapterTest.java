@@ -186,6 +186,11 @@ public class SdkHttpFullResponseAdapterTest {
             return new Builder();
         }
 
+        @Override
+        public SdkHttpFullRequest.Builder toBuilder() {
+            throw new UnsupportedOperationException();
+        }
+
         /**
          * Builder for a {@link SimpleSdkHttpFullResponse}.
          */

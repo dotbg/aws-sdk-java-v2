@@ -105,6 +105,8 @@ public class BaseClientBuilderClass implements ClassSpec {
         String requestHandlerDirectory = Utils.packageToDirectory(model.getMetadata().getFullClientPackageName());
         String requestHandlerPath = String.format("/%s/request.handler2s", requestHandlerDirectory);
 
+        boolean crc32FromCompressedDataEnabled = model.getCustomizationConfig().isCalculateCrc32FromCompressedData();
+
         return MethodSpec.methodBuilder("serviceDefaults")
                          .addAnnotation(Override.class)
                          .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
@@ -113,6 +115,7 @@ public class BaseClientBuilderClass implements ClassSpec {
                          .addCode("         .defaultSignerProvider(this::defaultSignerProvider)\n")
                          .addCode("         .addRequestHandlerPath($S)\n", requestHandlerPath)
                          .addCode("         .defaultEndpoint(this::defaultEndpoint)\n")
+                         .addCode("         .crc32FromCompressedDataEnabled($L)\n", crc32FromCompressedDataEnabled)
                          .addCode("         .build();\n")
                          .build();
     }

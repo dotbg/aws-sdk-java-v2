@@ -47,7 +47,7 @@ public interface SdkHttpFullRequest
     /**
      * Builder interface for {@link SdkHttpFullRequest}.
      */
-    interface Builder extends CopyableBuilder<Builder, SdkHttpFullRequest>, SdkHttpRequest {
+    interface Builder extends CopyableBuilder<Builder, SdkHttpFullRequest> {
 
         /**
          * Adds the header to the builder.
@@ -176,24 +176,15 @@ public interface SdkHttpFullRequest
          */
         Builder content(InputStream content);
 
-        /**
-         * Returns the optional stream containing the payload data to include for
-         * this request.
-         * <br/>
-         * Not all requests will contain payload data.
-         *
-         * @return The optional stream containing the payload data to include for this request or null if there is no payload.
-         */
-        InputStream getContent();
-
-        /**
-         * Adds to the handler context for the builder.
-         *
-         * @param key   Key to add context under.
-         * @param value Value associated with key.
-         * @return This builder for method chaining.
-         */
-        <T> Builder handlerContext(HandlerContextKey<T> key, T value);
+//        /**
+//         * Returns the optional stream containing the payload data to include for
+//         * this request.
+//         * <br/>
+//         * Not all requests will contain payload data.
+//         *
+//         * @return The optional stream containing the payload data to include for this request or null if there is no payload.
+//         */
+//        InputStream getContent();
 
     }
 

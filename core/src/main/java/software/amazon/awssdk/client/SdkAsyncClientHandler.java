@@ -17,8 +17,10 @@ package software.amazon.awssdk.client;
 
 import java.util.concurrent.CompletableFuture;
 import software.amazon.awssdk.AmazonWebServiceRequest;
+import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.ThreadSafe;
+import software.amazon.awssdk.config.AsyncClientConfiguration;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
 import software.amazon.awssdk.internal.http.response.AwsErrorResponseHandler;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
@@ -32,8 +34,10 @@ public class SdkAsyncClientHandler extends AsyncClientHandler {
 
     private final AsyncClientHandler delegateHandler;
 
-    public SdkAsyncClientHandler(ClientHandlerParams handlerParams) {
-        this.delegateHandler = new AsyncClientHandlerImpl(handlerParams);
+    public SdkAsyncClientHandler(AsyncClientConfiguration asyncClientConfiguration,
+                                 ServiceAdvancedConfiguration serviceAdvancedConfiguration) { // TODO: Builder?
+        super(asyncClientConfiguration, serviceAdvancedConfiguration);
+        this.delegateHandler = new AsyncClientHandlerImpl(asyncClientConfiguration, serviceAdvancedConfiguration);
     }
 
     @Override

@@ -26,6 +26,7 @@ import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.Response;
 import software.amazon.awssdk.SdkClientException;
+import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
@@ -42,13 +43,13 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
 
     private final RequestPipeline<SdkHttpFullRequest, Response<OutputT>> wrapped;
     private final ClientExecutionTimer clientExecutionTimer;
-    private final LegacyClientConfiguration config;
+    private final ClientConfiguration clientConfig;
 
     public ClientExecutionTimedStage(HttpClientDependencies dependencies,
                                      RequestPipeline<SdkHttpFullRequest, Response<OutputT>> wrapped) {
         this.wrapped = wrapped;
         this.clientExecutionTimer = dependencies.clientExecutionTimer();
-        this.config = dependencies.config();
+        this.clientConfig = dependencies.clientConfiguration();
     }
 
     @Override
@@ -69,11 +70,11 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
      */
     private Response<OutputT> executeWithTimer(SdkHttpFullRequest request, RequestExecutionContext context) throws Exception {
         try {
-            context.setClientExecutionTrackerTask(
-                    clientExecutionTimer.startTimer(getClientExecutionTimeout(context.requestConfig())));
+            context.clientExecutionTrackerTask(
+                    clientExecutionTimer.startTimer(getClientExecutionTimeoutInMillis(context.requestConfig())));
             return wrapped.execute(request, context);
         } finally {
-            context.getClientExecutionTrackerTask().cancelTask();
+            context.clientExecutionTrackerTask().cancelTask();
         }
     }
 
@@ -93,7 +94,7 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
                     .map(HttpResponse::getContent)
                     .ifPresent(r -> invokeSafely(r::close));
         }
-        if (context.getClientExecutionTrackerTask().hasTimeoutExpired()) {
+        if (context.clientExecutionTrackerTask().hasTimeoutExpired()) {
             // Clear the interrupt status
             Thread.interrupted();
             return new ClientExecutionTimeoutException();
@@ -113,7 +114,7 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
      * caused by the {@link ClientExecutionTimer}. Otherwise throws the original {@link AbortedException}
      */
     private RuntimeException handleAbortedException(RequestExecutionContext context, final AbortedException ae) {
-        if (context.getClientExecutionTrackerTask().hasTimeoutExpired()) {
+        if (context.clientExecutionTrackerTask().hasTimeoutExpired()) {
             return new ClientExecutionTimeoutException();
         } else {
             return ae;
@@ -127,11 +128,11 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
      * @param requestConfig Current request configuration
      * @return Client Execution timeout value or 0 if none is set
      */
-    private int getClientExecutionTimeout(RequestConfig requestConfig) {
+    private long getClientExecutionTimeoutInMillis(RequestConfig requestConfig) {
         if (requestConfig.getClientExecutionTimeout() != null) {
             return requestConfig.getClientExecutionTimeout();
         } else {
-            return config.getClientExecutionTimeout();
+            return clientConfig.overrideConfiguration().totalExecutionTimeout().toMillis();
         }
     }
 }

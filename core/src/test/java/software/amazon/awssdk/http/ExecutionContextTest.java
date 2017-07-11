@@ -29,7 +29,10 @@ public class ExecutionContextTest {
     @Test
     public void legacyGetSignerBehavior() throws Exception {
         AmazonWebServiceClient webServiceClient = mock(AmazonWebServiceClient.class);
-        ExecutionContext executionContext = new ExecutionContext(null, false, webServiceClient);
+        ExecutionContext executionContext = ExecutionContext.builder()
+                                                            .withUseRequestMetrics(false)
+                                                            .awsClient(webServiceClient)
+                                                            .build();
         URI testUri = new URI("http://foo.amazon.com");
         executionContext.getSigner(SignerProviderContext.builder().withUri(testUri).build());
         verify(webServiceClient, times(1)).getSignerByUri(testUri);

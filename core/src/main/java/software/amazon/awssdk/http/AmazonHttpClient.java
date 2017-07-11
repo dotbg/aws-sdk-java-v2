@@ -15,13 +15,10 @@
 
 package software.amazon.awssdk.http;
 
-import static software.amazon.awssdk.utils.Validate.paramNotNull;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.AmazonServiceException;
 import software.amazon.awssdk.AmazonWebServiceResponse;
-import software.amazon.awssdk.LegacyClientConfiguration;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.RequestExecutionContext;
@@ -32,12 +29,12 @@ import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.annotation.SdkTestInternalApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
+import software.amazon.awssdk.config.SyncClientConfiguration;
 import software.amazon.awssdk.http.exception.SdkInterruptedException;
 import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
 import software.amazon.awssdk.http.pipeline.stages.AfterCallbackStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyTransactionIdStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyUserAgentStage;
-import software.amazon.awssdk.http.pipeline.stages.AttachRequestConfigStage;
 import software.amazon.awssdk.http.pipeline.stages.BeforeRequestHandlersStage;
 import software.amazon.awssdk.http.pipeline.stages.BeforeUnmarshallingCallbackStage;
 import software.amazon.awssdk.http.pipeline.stages.ClientExecutionTimedStage;
@@ -57,13 +54,12 @@ import software.amazon.awssdk.http.pipeline.stages.SigningStage;
 import software.amazon.awssdk.http.pipeline.stages.TimerExceptionHandlingStage;
 import software.amazon.awssdk.http.pipeline.stages.UnwrapResponseContainer;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
+import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.response.AwsErrorResponseHandler;
 import software.amazon.awssdk.internal.http.response.AwsResponseHandlerAdapter;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionTimer;
 import software.amazon.awssdk.metrics.AwsSdkMetrics;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
-import software.amazon.awssdk.retry.RetryPolicyAdapter;
-import software.amazon.awssdk.retry.v2.RetryPolicy;
 import software.amazon.awssdk.util.CapacityManager;
 
 @ThreadSafe
@@ -112,9 +108,21 @@ public class AmazonHttpClient implements AutoCloseable {
 
     private final HttpClientDependencies httpClientDependencies;
 
-    private AmazonHttpClient(HttpClientDependencies httpClientDependencies, RequestMetricCollector requestMetricCollector) {
-        this.httpClientDependencies = paramNotNull(httpClientDependencies, "HttpClientDependencies");
-        this.requestMetricCollector = requestMetricCollector;
+    private AmazonHttpClient(Builder builder) {
+        this.httpClientDependencies = HttpSyncClientDependencies.builder()
+                                                                .clientExecutionTimer(new ClientExecutionTimer())
+                                                                .syncClientConfiguration(builder.syncClientConfiguration)
+                                                                .capacityManager(createCapacityManager())
+                                                                .sdkHttpClient(builder.sdkHttpClient)
+                                                                .build();
+        this.requestMetricCollector = builder.syncClientConfiguration.overrideConfiguration().requestMetricCollector();
+    }
+
+    private CapacityManager createCapacityManager() {
+        // When enabled, total retry capacity is computed based on retry cost and desired number of retries.
+        // TODO: Allow customers to configure throttled retries (https://github.com/aws/aws-sdk-java-v2/issues/17)
+        int throttledRetryMaxCapacity = -1;
+        return new CapacityManager(throttledRetryMaxCapacity);
     }
 
     public static Builder builder() {
@@ -144,7 +152,7 @@ public class AmazonHttpClient implements AutoCloseable {
     }
 
     /**
-     * Package protected for unit-testing.
+     * For unit testing only.
      */
     @SdkTestInternalApi
     public ClientExecutionTimer getClientExecutionTimer() {
@@ -152,8 +160,7 @@ public class AmazonHttpClient implements AutoCloseable {
     }
 
     /**
-     * Returns the httpClientSettings client specific request metric collector; or null if there is
-     * none.
+     * Returns the httpClientSettings client specific request metric collector; or null if there is none.
      */
     public RequestMetricCollector getRequestMetricCollector() {
         return requestMetricCollector;
@@ -206,11 +213,11 @@ public class AmazonHttpClient implements AutoCloseable {
                          ExecutionContext executionContext) {
         HttpResponseHandler<T> adaptedRespHandler = new AwsResponseHandlerAdapter<>(
                 getNonNullResponseHandler(responseHandler),
-                executionContext.getAwsRequestMetrics());
+                executionContext.awsRequestMetrics());
         return requestExecutionBuilder()
                 .request(request)
                 .requestConfig(new AmazonWebServiceRequestAdapter(request.getOriginalRequest()))
-                .errorResponseHandler(new AwsErrorResponseHandler(errorResponseHandler, executionContext.getAwsRequestMetrics()))
+                .errorResponseHandler(new AwsErrorResponseHandler(errorResponseHandler, executionContext.awsRequestMetrics()))
                 .executionContext(executionContext)
                 .execute(adaptedRespHandler);
     }
@@ -303,33 +310,14 @@ public class AmazonHttpClient implements AutoCloseable {
     }
 
     public static class Builder {
-
-        private LegacyClientConfiguration clientConfig;
-        private RetryPolicy retryPolicy;
-        private RequestMetricCollector requestMetricCollector;
-        private boolean calculateCrc32FromCompressedData;
+        private SyncClientConfiguration syncClientConfiguration;
         private SdkHttpClient sdkHttpClient;
 
         private Builder() {
         }
 
-        public Builder clientConfiguration(LegacyClientConfiguration clientConfig) {
-            this.clientConfig = clientConfig;
-            return this;
-        }
-
-        public Builder retryPolicy(RetryPolicy retryPolicy) {
-            this.retryPolicy = retryPolicy;
-            return this;
-        }
-
-        public Builder requestMetricCollector(RequestMetricCollector requestMetricCollector) {
-            this.requestMetricCollector = requestMetricCollector;
-            return this;
-        }
-
-        public Builder calculateCrc32FromCompressedData(boolean calculateCrc32FromCompressedData) {
-            this.calculateCrc32FromCompressedData = calculateCrc32FromCompressedData;
+        public Builder syncClientConfiguration(SyncClientConfiguration syncClientConfiguration) {
+            this.syncClientConfiguration = syncClientConfiguration;
             return this;
         }
 
@@ -339,28 +327,7 @@ public class AmazonHttpClient implements AutoCloseable {
         }
 
         public AmazonHttpClient build() {
-            return new AmazonHttpClient(
-                    HttpClientDependencies.builder()
-                                          .clientExecutionTimer(new ClientExecutionTimer())
-                                          .config(clientConfig)
-                                          .retryCapacity(createCapacityManager())
-                                          .retryPolicy(resolveRetryPolicy())
-                                          .calculateCrc32FromCompressedData(calculateCrc32FromCompressedData)
-                                          .sdkHttpClient(sdkHttpClient)
-                                          .build(),
-                    requestMetricCollector);
-        }
-
-        private CapacityManager createCapacityManager() {
-            // When enabled, total retry capacity is computed based on retry cost
-            // and desired number of retries.
-            int throttledRetryMaxCapacity = clientConfig.useThrottledRetries()
-                    ? THROTTLED_RETRY_COST * THROTTLED_RETRIES : -1;
-            return new CapacityManager(throttledRetryMaxCapacity);
-        }
-
-        private RetryPolicy resolveRetryPolicy() {
-            return retryPolicy == null ? new RetryPolicyAdapter(clientConfig.getRetryPolicy(), clientConfig) : retryPolicy;
+            return new AmazonHttpClient(this);
         }
     }
 
@@ -381,7 +348,9 @@ public class AmazonHttpClient implements AutoCloseable {
         private SdkHttpFullRequest request;
         private RequestConfig requestConfig;
         private HttpResponseHandler<? extends SdkBaseException> errorResponseHandler;
-        private ExecutionContext executionContext = new ExecutionContext();
+        private ExecutionContext executionContext = ExecutionContext.builder()
+                                                                    .signerProvider(new NoOpSignerProvider())
+                                                                    .build();
 
         @Override
         public RequestExecutionBuilder request(Request<?> request) {
@@ -419,8 +388,7 @@ public class AmazonHttpClient implements AutoCloseable {
         public <OutputT> OutputT execute(HttpResponseHandler<OutputT> responseHandler) {
             try {
                 return RequestPipelineBuilder
-                        .first(AttachRequestConfigStage::new) // TODO Remove this after merge with generated s3 client
-                        .then(BeforeRequestHandlersStage::new)
+                        .first(BeforeRequestHandlersStage::new)
                         // Start of mutating request
                         .then(MakeRequestMutable::new)
                         .then(ApplyTransactionIdStage::new)

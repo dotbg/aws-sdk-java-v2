@@ -37,7 +37,7 @@ public class BeforeUnmarshallingCallbackStage
         if (!toReturn.isSuccessful()) {
             return toReturn;
         }
-        for (RequestHandler requestHandler : context.requestHandlers()) {
+        for (RequestHandler requestHandler : context.executionInterceptors()) {
             toReturn = requestHandler.beforeUnmarshalling(input.left(), toReturn);
         }
         return toReturn;

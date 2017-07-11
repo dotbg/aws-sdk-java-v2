@@ -19,7 +19,6 @@ import static software.amazon.awssdk.utils.FunctionalUtils.invokeSafely;
 
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.annotation.SdkInternalApi;
@@ -29,9 +28,9 @@ import software.amazon.awssdk.auth.Signer;
 import software.amazon.awssdk.auth.SignerFactory;
 import software.amazon.awssdk.client.AwsSyncClientParams;
 import software.amazon.awssdk.client.builder.AwsClientBuilder;
-import software.amazon.awssdk.handlers.RequestHandler;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.ExecutionContext;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.internal.auth.DefaultSignerProvider;
 import software.amazon.awssdk.log.CommonsLogFactory;
 import software.amazon.awssdk.log.InternalLogFactory;
@@ -82,7 +81,7 @@ public abstract class AmazonWebServiceClient {
     /**
      * Optional request handlers for additional request processing.
      */
-    protected final List<RequestHandler> requestHandlers;
+    protected List<ExecutionInterceptor> executionInterceptors;
     /**
      * The service endpoint to which this client will send requests.
      * <p>
@@ -154,24 +153,9 @@ public abstract class AmazonWebServiceClient {
     protected AmazonWebServiceClient(LegacyClientConfiguration clientConfiguration,
                                      RequestMetricCollector requestMetricCollector,
                                      boolean disableStrictHostNameVerification) {
-        this.clientConfiguration = clientConfiguration;
-        requestHandlers = new CopyOnWriteArrayList<>();
-        client = AmazonHttpClient.builder()
-                .clientConfiguration(clientConfiguration)
-                .requestMetricCollector(requestMetricCollector)
-                .calculateCrc32FromCompressedData(calculateCrc32FromCompressedData())
-                .build();
     }
 
     protected AmazonWebServiceClient(AwsSyncClientParams clientParams) {
-        this.clientConfiguration = clientParams.getClientConfiguration();
-        requestHandlers = clientParams.getRequestHandlers();
-        client = AmazonHttpClient.builder()
-                                 .sdkHttpClient(clientParams.sdkHttpClient())
-                                 .clientConfiguration(clientConfiguration)
-                                 .requestMetricCollector(clientParams.getRequestMetricCollector())
-                                 .calculateCrc32FromCompressedData(calculateCrc32FromCompressedData())
-                                 .build();
     }
 
     /**
@@ -376,12 +360,7 @@ public abstract class AmazonWebServiceClient {
     @SuppressWarnings("unchecked")
     protected final <T extends AmazonWebServiceRequest> T beforeMarshalling(
             T request) {
-
-        T local = request;
-        for (RequestHandler handler : requestHandlers) {
-            local = (T) handler.beforeMarshalling(local);
-        }
-        return local;
+        return request;
     }
 
     protected ExecutionContext createExecutionContext(AmazonWebServiceRequest req) {
@@ -390,12 +369,7 @@ public abstract class AmazonWebServiceClient {
 
     protected ExecutionContext createExecutionContext(AmazonWebServiceRequest req,
                                                       SignerProvider signerProvider) {
-        boolean isMetricsEnabled = isRequestMetricsEnabled(req);
-        return ExecutionContext.builder()
-                .withRequestHandlers(requestHandlers)
-                .withUseRequestMetrics(isMetricsEnabled)
-                .withAwsClient(this)
-                .withSignerProvider(signerProvider).build();
+        return null;
     }
 
     protected final ExecutionContext createExecutionContext(Request<?> req) {

@@ -19,7 +19,7 @@ import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.ThreadSafe;
 import software.amazon.awssdk.client.ClientExecutionParams;
 import software.amazon.awssdk.client.ClientHandler;
-import software.amazon.awssdk.client.ClientHandlerImpl;
+import software.amazon.awssdk.client.SyncClientHandlerImpl;
 import software.amazon.awssdk.client.ClientHandlerParams;
 import software.amazon.awssdk.opensdk.BaseRequest;
 
@@ -34,7 +34,7 @@ public class SdkClientHandler extends ClientHandler {
     private final ClientHandler delegateHandler;
 
     public SdkClientHandler(ClientHandlerParams handlerParams) {
-        this.delegateHandler = new ClientHandlerImpl(handlerParams);
+        this.delegateHandler = new SyncClientHandlerImpl(handlerParams);
     }
 
     @Override

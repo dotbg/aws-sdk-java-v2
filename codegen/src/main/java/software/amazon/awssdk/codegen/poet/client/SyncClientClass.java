@@ -40,6 +40,8 @@ import software.amazon.awssdk.codegen.poet.client.specs.Ec2ProtocolSpec;
 import software.amazon.awssdk.codegen.poet.client.specs.JsonProtocolSpec;
 import software.amazon.awssdk.codegen.poet.client.specs.ProtocolSpec;
 import software.amazon.awssdk.codegen.poet.client.specs.QueryXmlProtocolSpec;
+import software.amazon.awssdk.config.AsyncClientConfiguration;
+import software.amazon.awssdk.config.SyncClientConfiguration;
 
 public class SyncClientClass implements ClassSpec {
 
@@ -73,12 +75,10 @@ public class SyncClientClass implements ClassSpec {
                                         .addMethods(operations());
 
         if (model.getCustomizationConfig().getServiceSpecificClientConfigClass() != null) {
-            classBuilder.addMethod(constructor());
             classBuilder.addMethod(constructorWithAdvancedConfiguration());
         } else {
             classBuilder.addMethod(constructor());
         }
-
 
         protocolSpec.createErrorResponseHandler().ifPresent(classBuilder::addMethod);
 
@@ -115,29 +115,11 @@ public class SyncClientClass implements ClassSpec {
     }
 
     private MethodSpec constructor() {
-        if (model.getCustomizationConfig().getServiceSpecificClientConfigClass() != null) {
-            return MethodSpec.constructorBuilder()
-                             .addModifiers(Modifier.PROTECTED)
-                             .addParameter(AwsSyncClientParams.class, "clientParams")
-                             .addStatement(
-                                     "this($N, null)",
-                                     "clientParams")
-                             .build();
-        }
-
         return MethodSpec.constructorBuilder()
                          .addModifiers(Modifier.PROTECTED)
-                         .addParameter(AwsSyncClientParams.class, "clientParams")
-                         .addStatement(
-                                 "this.$N = new $T(new $T()\n" +
-                                 ".withClientParams($N)\n" +
-                                 ".withCalculateCrc32FromCompressedDataEnabled($L))",
-                                 "clientHandler",
-                                 protocolSpec.getClientHandlerClass(),
-                                 ClientHandlerParams.class,
-                                 "clientParams",
-                                 model.getCustomizationConfig().isCalculateCrc32FromCompressedData())
-                         .addStatement("this.clientParams = clientParams")
+                         .addParameter(SyncClientConfiguration.class, "clientConfiguration")
+                         .addStatement("this.clientHandler = new $T(clientConfiguration, null)",
+                                       protocolSpec.getClientHandlerClass())
                          .addStatement("this.$N = init()", protocolSpec.protocolFactory(model).name)
                          .build();
     }
@@ -147,18 +129,10 @@ public class SyncClientClass implements ClassSpec {
                                                         model.getCustomizationConfig().getServiceSpecificClientConfigClass());
         return MethodSpec.constructorBuilder()
                          .addModifiers(Modifier.PROTECTED)
-                         .addParameter(AwsSyncClientParams.class, "clientParams")
-                         .addParameter(advancedConfiguration, "advancedConfiguration")
-                         .addStatement(
-                                 "this.$N = new $T(new $T().withClientParams($N).withServiceAdvancedConfiguration($N)" +
-                                 ".withCalculateCrc32FromCompressedDataEnabled($L))",
-                                 "clientHandler",
-                                 protocolSpec.getClientHandlerClass(),
-                                 ClientHandlerParams.class,
-                                 "clientParams",
-                                 "advancedConfiguration",
-                                 model.getCustomizationConfig().isCalculateCrc32FromCompressedData())
-                         .addStatement("this.clientParams = clientParams")
+                         .addParameter(SyncClientConfiguration.class, "clientConfiguration")
+                         .addParameter(advancedConfiguration, "serviceConfiguration")
+                         .addStatement("this.clientHandler = new $T(clientConfiguration, serviceConfiguration)",
+                                       protocolSpec.getClientHandlerClass())
                          .addStatement("this.$N = init()", protocolSpec.protocolFactory(model).name)
                          .build();
     }
@@ -200,7 +174,7 @@ public class SyncClientClass implements ClassSpec {
                          .addStatement("return new $T($T.builder()" +
                                        ".endpoint(clientParams.getEndpoint())" +
                                        ".credentialsProvider(clientParams.getCredentialsProvider())" +
-                                       ".signerProvider(clientParams.getSignerProvider())" +
+                                       ".signerProvider(clientParams.signerProvider())" +
                                        ".build())",
                                        presigners,
                                        PresignerParams.class)

@@ -15,21 +15,21 @@
 
 package software.amazon.awssdk.http;
 
-import java.net.URI;
 import java.util.List;
-import software.amazon.awssdk.AmazonWebServiceClient;
 import software.amazon.awssdk.annotation.NotThreadSafe;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.Signer;
-import software.amazon.awssdk.handlers.RequestHandler;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 import software.amazon.awssdk.runtime.auth.SignerProvider;
 import software.amazon.awssdk.runtime.auth.SignerProviderContext;
 import software.amazon.awssdk.util.AwsRequestMetricsFullSupport;
+import software.amazon.awssdk.utils.Validate;
 
 /**
  * @NotThreadSafe This class should only be accessed by a single thread and be used throughout
@@ -39,8 +39,8 @@ import software.amazon.awssdk.util.AwsRequestMetricsFullSupport;
 @SdkProtectedApi
 public class ExecutionContext {
     private final AwsRequestMetrics awsRequestMetrics;
-    private final List<RequestHandler> requestHandlers;
-    private final AmazonWebServiceClient awsClient;
+    private final List<ExecutionInterceptor> executionInterceptors;
+    private final ExecutionAttributes executionAttributes;
     private final SignerProvider signerProvider;
 
     private boolean retryCapacityConsumed;
@@ -53,51 +53,27 @@ public class ExecutionContext {
 
     private ClientExecutionAbortTrackerTask clientExecutionTrackerTask;
 
-    /** For testing purposes. */
-    public ExecutionContext(boolean isMetricEnabled) {
-        this(builder().withUseRequestMetrics(isMetricEnabled).withSignerProvider(new NoOpSignerProvider()));
-    }
-
-    /** For testing purposes. */
-    public ExecutionContext() {
-        this(builder().withSignerProvider(new NoOpSignerProvider()));
-    }
-
-    @Deprecated
-    public ExecutionContext(List<RequestHandler> requestHandlers, boolean isMetricEnabled,
-                            AmazonWebServiceClient awsClient) {
-        this.requestHandlers = requestHandlers;
-        awsRequestMetrics = isMetricEnabled ? new AwsRequestMetricsFullSupport() : new AwsRequestMetrics();
-        this.awsClient = awsClient;
-        this.signerProvider = new SignerProvider() {
-            @Override
-            public Signer getSigner(SignerProviderContext context) {
-                return getSignerByUri(context.getUri());
-            }
-        };
-    }
-
     private ExecutionContext(final Builder builder) {
-        this.requestHandlers = builder.requestHandlers;
+        this.executionInterceptors = Validate.paramNotNull(builder.executionInterceptors, "executionInterceptors");
+        this.executionAttributes = Validate.paramNotNull(builder.executionAttributes, "executionAttributes");
         this.awsRequestMetrics = builder.useRequestMetrics ? new AwsRequestMetricsFullSupport() : new AwsRequestMetrics();
-        this.awsClient = builder.awsClient;
-        this.signerProvider = builder.signerProvider;
+        this.signerProvider = Validate.paramNotNull(builder.signerProvider, "signerProvider");
     }
 
     public static ExecutionContext.Builder builder() {
         return new ExecutionContext.Builder();
     }
 
-    public List<RequestHandler> getRequestHandlers() {
-        return requestHandlers;
+    public List<ExecutionInterceptor> executionInterceptors() {
+        return executionInterceptors;
     }
 
-    public AwsRequestMetrics getAwsRequestMetrics() {
+    public ExecutionAttributes executionAttributes() {
+        return executionAttributes;
+    }
+
+    public AwsRequestMetrics awsRequestMetrics() {
         return awsRequestMetrics;
-    }
-
-    protected AmazonWebServiceClient getAwsClient() {
-        return awsClient;
     }
 
     /**
@@ -138,14 +114,6 @@ public class ExecutionContext {
     }
 
     /**
-     * Returns the signer for the given uri. Note S3 in particular overrides this method.
-     */
-    @Deprecated
-    public Signer getSignerByUri(URI uri) {
-        return awsClient == null ? null : awsClient.getSignerByUri(uri);
-    }
-
-    /**
      * Returns the credentials provider used for fetching the credentials. The credentials fetched
      * is used for signing the request. If there is no credential provider, then the runtime will
      * not attempt to sign (or resign on retries) requests.
@@ -183,62 +151,30 @@ public class ExecutionContext {
     public static class Builder {
 
         private boolean useRequestMetrics;
-        private List<RequestHandler> requestHandlers;
-        private AmazonWebServiceClient awsClient;
+        private List<ExecutionInterceptor> executionInterceptors;
+        private ExecutionAttributes executionAttributes;
         private SignerProvider signerProvider = new NoOpSignerProvider();
 
         private Builder() {
         }
 
-        public boolean useRequestMetrics() {
-            return useRequestMetrics;
-        }
-
-        public void setUseRequestMetrics(final boolean useRequestMetrics) {
-            this.useRequestMetrics = useRequestMetrics;
-        }
-
-        public Builder withUseRequestMetrics(final boolean withUseRequestMetrics) {
-            setUseRequestMetrics(withUseRequestMetrics);
+        public Builder withUseRequestMetrics(boolean withUseRequestMetrics) {
+            this.useRequestMetrics = withUseRequestMetrics;
             return this;
         }
 
-        public List<RequestHandler> getRequestHandlers() {
-            return requestHandlers;
-        }
-
-        public void setRequestHandlers(final List<RequestHandler> requestHandlers) {
-            this.requestHandlers = requestHandlers;
-        }
-
-        public Builder withRequestHandlers(final List<RequestHandler> requestHandlers) {
-            setRequestHandlers(requestHandlers);
+        public Builder executionInterceptors(List<ExecutionInterceptor> executionInterceptors) {
+            this.executionInterceptors = executionInterceptors;
             return this;
         }
 
-        public AmazonWebServiceClient getAwsClient() {
-            return awsClient;
-        }
-
-        public void setAwsClient(final AmazonWebServiceClient awsClient) {
-            this.awsClient = awsClient;
-        }
-
-        public Builder withAwsClient(final AmazonWebServiceClient awsClient) {
-            setAwsClient(awsClient);
+        public Builder executionAttributes(ExecutionAttributes executionAttributes) {
+            this.executionAttributes = executionAttributes;
             return this;
         }
 
-        public SignerProvider getSignerProvider() {
-            return signerProvider;
-        }
-
-        public void setSignerProvider(final SignerProvider signerProvider) {
+        public Builder signerProvider(SignerProvider signerProvider) {
             this.signerProvider = signerProvider;
-        }
-
-        public Builder withSignerProvider(final SignerProvider signerProvider) {
-            setSignerProvider(signerProvider);
             return this;
         }
 

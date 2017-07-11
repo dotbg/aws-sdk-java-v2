@@ -32,7 +32,7 @@ import software.amazon.awssdk.metrics.RequestMetricCollector;
  * Base class for all user facing web service requests.
  */
 @NotThreadSafe
-public abstract class AmazonWebServiceRequest implements Cloneable, ReadLimitInfo {
+public abstract class AmazonWebServiceRequest extends SdkRequest implements Cloneable, ReadLimitInfo {
 
     public static final AmazonWebServiceRequest NOOP = new AmazonWebServiceRequest() {
     };

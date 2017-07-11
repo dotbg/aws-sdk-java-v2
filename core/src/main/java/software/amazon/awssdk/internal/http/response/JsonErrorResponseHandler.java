@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.AmazonServiceException;
 import software.amazon.awssdk.AmazonServiceException.ErrorType;
 import software.amazon.awssdk.annotation.SdkInternalApi;
-import software.amazon.awssdk.handlers.AwsHandlerKeys;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.internal.http.ErrorCodeParser;
@@ -72,7 +72,7 @@ public class JsonErrorResponseHandler implements HttpResponseHandler<AmazonServi
         }
 
         ase.setErrorCode(errorCode);
-        ase.setServiceName(response.getRequest().handlerContext(AwsHandlerKeys.SERVICE_NAME));
+        ase.setServiceName(response.getRequest().handlerContext(AwsExecutionAttributes.SERVICE_NAME));
         ase.setStatusCode(response.getStatusCode());
         ase.setErrorType(getErrorTypeFromStatusCode(response.getStatusCode()));
         ase.setRawResponse(jsonContent.getRawContent());

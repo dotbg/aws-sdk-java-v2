@@ -63,7 +63,7 @@ public class MakeHttpRequestStage
                                                           .metrics(context.awsRequestMetrics())
                                                           .build());
 
-        context.getClientExecutionTrackerTask().setCurrentHttpRequest(requestCallable);
+        context.clientExecutionTrackerTask().setCurrentHttpRequest(requestCallable);
         return requestCallable.call();
     }
 }

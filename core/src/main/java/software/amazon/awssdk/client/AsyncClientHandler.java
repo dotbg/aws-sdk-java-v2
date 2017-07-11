@@ -16,13 +16,20 @@
 package software.amazon.awssdk.client;
 
 import java.util.concurrent.CompletableFuture;
+import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
+import software.amazon.awssdk.config.ClientConfiguration;
 
 /**
  * Client interface to invoke an API.
  */
 @SdkProtectedApi
-public abstract class AsyncClientHandler implements AutoCloseable {
+public abstract class AsyncClientHandler extends BaseClientHandler implements AutoCloseable {
+
+    AsyncClientHandler(ClientConfiguration clientConfiguration,
+                       ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
+        super(clientConfiguration, serviceAdvancedConfiguration);
+    }
 
     /**
      * Execute's a web service request. Handles marshalling and unmarshalling of data and making the
