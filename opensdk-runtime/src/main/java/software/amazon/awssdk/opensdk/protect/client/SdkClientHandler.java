@@ -15,12 +15,13 @@
 
 package software.amazon.awssdk.opensdk.protect.client;
 
+import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.ThreadSafe;
 import software.amazon.awssdk.client.ClientExecutionParams;
 import software.amazon.awssdk.client.ClientHandler;
 import software.amazon.awssdk.client.SyncClientHandlerImpl;
-import software.amazon.awssdk.client.ClientHandlerParams;
+import software.amazon.awssdk.config.SyncClientConfiguration;
 import software.amazon.awssdk.opensdk.BaseRequest;
 
 /**
@@ -33,8 +34,10 @@ public class SdkClientHandler extends ClientHandler {
 
     private final ClientHandler delegateHandler;
 
-    public SdkClientHandler(ClientHandlerParams handlerParams) {
-        this.delegateHandler = new SyncClientHandlerImpl(handlerParams);
+    public SdkClientHandler(SyncClientConfiguration clientConfiguration,
+                            ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
+        super(clientConfiguration, serviceAdvancedConfiguration);
+        this.delegateHandler = new SyncClientHandlerImpl(clientConfiguration, serviceAdvancedConfiguration);
     }
 
     @Override

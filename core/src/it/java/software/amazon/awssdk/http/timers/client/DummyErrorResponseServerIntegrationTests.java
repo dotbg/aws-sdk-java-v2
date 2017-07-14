@@ -79,7 +79,7 @@ public class DummyErrorResponseServerIntegrationTests extends MockServerTestBase
         httpClient.requestExecutionBuilder()
                 .request(newGetRequest())
                 .errorResponseHandler(new NullErrorResponseHandler())
-                .executionContext(ExecutionContext.builder().executionInterceptors(requestHandlers).build())
+                .executionContext(ExecutionContext.builder().interceptorChain(requestHandlers).build())
                 .execute();
     }
 

@@ -25,9 +25,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.auth.presign.PresignerParams;
-import software.amazon.awssdk.client.AwsSyncClientParams;
 import software.amazon.awssdk.client.ClientHandler;
-import software.amazon.awssdk.client.ClientHandlerParams;
 import software.amazon.awssdk.codegen.emitters.GeneratorTaskParams;
 import software.amazon.awssdk.codegen.model.intermediate.IntermediateModel;
 import software.amazon.awssdk.codegen.model.intermediate.OperationModel;
@@ -40,7 +38,6 @@ import software.amazon.awssdk.codegen.poet.client.specs.Ec2ProtocolSpec;
 import software.amazon.awssdk.codegen.poet.client.specs.JsonProtocolSpec;
 import software.amazon.awssdk.codegen.poet.client.specs.ProtocolSpec;
 import software.amazon.awssdk.codegen.poet.client.specs.QueryXmlProtocolSpec;
-import software.amazon.awssdk.config.AsyncClientConfiguration;
 import software.amazon.awssdk.config.SyncClientConfiguration;
 
 public class SyncClientClass implements ClassSpec {
@@ -71,7 +68,6 @@ public class SyncClientClass implements ClassSpec {
                                                     interfaceClass)
                                         .addField(ClientHandler.class, "clientHandler", Modifier.PRIVATE, Modifier.FINAL)
                                         .addField(protocolSpec.protocolFactory(model))
-                                        .addField(clientParamsField())
                                         .addMethods(operations());
 
         if (model.getCustomizationConfig().getServiceSpecificClientConfigClass() != null) {
@@ -101,12 +97,6 @@ public class SyncClientClass implements ClassSpec {
         classBuilder.addMethods(protocolSpec.additionalMethods());
 
         return classBuilder.build();
-    }
-
-    private FieldSpec clientParamsField() {
-        return FieldSpec.builder(AwsSyncClientParams.class, "clientParams")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .build();
     }
 
     @Override

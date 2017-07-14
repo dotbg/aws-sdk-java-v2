@@ -40,34 +40,11 @@ public class AfterCallbackStage<OutputT> implements RequestToResponsePipeline<Ou
 
     @Override
     public Response<OutputT> execute(SdkHttpFullRequest request, RequestExecutionContext context) throws Exception {
-        Response<OutputT> response = null;
         try {
-            response = wrapped.execute(request, context);
-//            afterResponse(context.executionInterceptors(), request, response);
-            return response;
+            return wrapped.execute(request, context);
         } catch (Exception e) {
             publishProgress(context.requestConfig().getProgressListener(), ProgressEventType.CLIENT_REQUEST_FAILED_EVENT);
-//            afterError(context.executionInterceptors(), request, response, e);
             throw e;
         }
     }
-
-//    private <T> void afterResponse(List<RequestHandler> requestHandlers,
-//                                   SdkHttpFullRequest request,
-//                                   Response<T> response) throws InterruptedException {
-//        for (RequestHandler handler : requestHandlers) {
-//            handler.afterResponse(request, response);
-//            AmazonHttpClient.checkInterrupted(response);
-//        }
-//    }
-//
-//    private void afterError(List<RequestHandler> requestHandlers,
-//                            SdkHttpFullRequest request,
-//                            Response<?> response,
-//                            Exception e) throws InterruptedException {
-//        for (RequestHandler handler : requestHandlers) {
-//            handler.afterError(request, response, e);
-//            AmazonHttpClient.checkInterrupted(response);
-//        }
-//    }
 }

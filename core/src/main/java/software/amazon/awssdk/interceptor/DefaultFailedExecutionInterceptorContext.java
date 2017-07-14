@@ -28,7 +28,8 @@ import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 
 @SdkInternalApi
 public class DefaultFailedExecutionInterceptorContext
-        implements ToCopyableBuilder<DefaultFailedExecutionInterceptorContext.Builder, DefaultFailedExecutionInterceptorContext> {
+        implements ToCopyableBuilder<DefaultFailedExecutionInterceptorContext.Builder, DefaultFailedExecutionInterceptorContext>,
+                   FailedExecutionContext {
     private SdkRequest request;
     private SdkHttpFullRequest httpRequest;
     private SdkHttpFullResponse httpResponse;
@@ -52,22 +53,27 @@ public class DefaultFailedExecutionInterceptorContext
         return new Builder(this);
     }
 
+    @Override
     public SdkRequest request() {
         return request;
     }
 
+    @Override
     public Optional<SdkHttpFullRequest> httpRequest() {
         return Optional.ofNullable(httpRequest);
     }
 
+    @Override
     public Optional<SdkHttpFullResponse> httpResponse() {
         return Optional.ofNullable(httpResponse);
     }
 
+    @Override
     public Optional<SdkResponse> response() {
         return Optional.ofNullable(response);
     }
 
+    @Override
     public Exception exception() {
         return exception;
     }

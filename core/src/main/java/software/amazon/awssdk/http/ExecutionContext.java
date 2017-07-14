@@ -15,14 +15,15 @@
 
 package software.amazon.awssdk.http;
 
-import java.util.List;
 import software.amazon.awssdk.annotation.NotThreadSafe;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
+import software.amazon.awssdk.annotation.SdkTestInternalApi;
 import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.Signer;
+import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.ExecutionInterceptor;
+import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
@@ -39,9 +40,10 @@ import software.amazon.awssdk.utils.Validate;
 @SdkProtectedApi
 public class ExecutionContext {
     private final AwsRequestMetrics awsRequestMetrics;
-    private final List<ExecutionInterceptor> executionInterceptors;
-    private final ExecutionAttributes executionAttributes;
     private final SignerProvider signerProvider;
+    private final DefaultInterceptorContext interceptorContext;
+    private final ExecutionInterceptorChain interceptorChain;
+    private final ExecutionAttributes executionAttributes;
 
     private boolean retryCapacityConsumed;
 
@@ -54,18 +56,23 @@ public class ExecutionContext {
     private ClientExecutionAbortTrackerTask clientExecutionTrackerTask;
 
     private ExecutionContext(final Builder builder) {
-        this.executionInterceptors = Validate.paramNotNull(builder.executionInterceptors, "executionInterceptors");
-        this.executionAttributes = Validate.paramNotNull(builder.executionAttributes, "executionAttributes");
         this.awsRequestMetrics = builder.useRequestMetrics ? new AwsRequestMetricsFullSupport() : new AwsRequestMetrics();
         this.signerProvider = Validate.paramNotNull(builder.signerProvider, "signerProvider");
+        this.interceptorContext = Validate.paramNotNull(builder.interceptorContext, "interceptorContext");
+        this.interceptorChain = Validate.paramNotNull(builder.interceptorChain, "interceptorChain");
+        this.executionAttributes = Validate.paramNotNull(builder.executionAttributes, "executionAttributes");
     }
 
     public static ExecutionContext.Builder builder() {
         return new ExecutionContext.Builder();
     }
 
-    public List<ExecutionInterceptor> executionInterceptors() {
-        return executionInterceptors;
+    public DefaultInterceptorContext interceptorContext() {
+        return interceptorContext;
+    }
+
+    public ExecutionInterceptorChain interceptorChain() {
+        return interceptorChain;
     }
 
     public ExecutionAttributes executionAttributes() {
@@ -74,17 +81,6 @@ public class ExecutionContext {
 
     public AwsRequestMetrics awsRequestMetrics() {
         return awsRequestMetrics;
-    }
-
-    /**
-     * There is in general no need to set the signer in the execution context, since the signer for
-     * each request may differ depending on the URI of the request. The exception is S3 where the
-     * signer is currently determined only when the S3 client is constructed. Hence the need for
-     * this method. We may consider supporting a per request level signer determination for S3 later
-     * on.
-     */
-    @Deprecated
-    public void setSigner(Signer signer) {
     }
 
     /**
@@ -103,14 +99,6 @@ public class ExecutionContext {
      */
     public void markRetryCapacityConsumed() {
         this.retryCapacityConsumed = true;
-    }
-
-    /**
-     * Passes in the provided {@link SignerProviderContext} into a {@link SignerProvider} and returns
-     * a {@link Signer} instance.
-     */
-    public Signer getSigner(SignerProviderContext context) {
-        return signerProvider.getSigner(context);
     }
 
     /**
@@ -149,22 +137,27 @@ public class ExecutionContext {
     }
 
     public static class Builder {
-
-        private boolean useRequestMetrics;
-        private List<ExecutionInterceptor> executionInterceptors;
+        private DefaultInterceptorContext interceptorContext;
+        private ExecutionInterceptorChain interceptorChain;
         private ExecutionAttributes executionAttributes;
         private SignerProvider signerProvider = new NoOpSignerProvider();
+        private boolean useRequestMetrics;
 
         private Builder() {
         }
 
-        public Builder withUseRequestMetrics(boolean withUseRequestMetrics) {
+        public Builder interceptorContext(DefaultInterceptorContext interceptorContext) {
+            this.interceptorContext = interceptorContext;
+            return this;
+        }
+
+        public Builder useRequestMetrics(boolean withUseRequestMetrics) {
             this.useRequestMetrics = withUseRequestMetrics;
             return this;
         }
 
-        public Builder executionInterceptors(List<ExecutionInterceptor> executionInterceptors) {
-            this.executionInterceptors = executionInterceptors;
+        public Builder interceptorChain(ExecutionInterceptorChain interceptorChain) {
+            this.interceptorChain = interceptorChain;
             return this;
         }
 

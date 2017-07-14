@@ -26,8 +26,6 @@ import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.auth.RegionAwareSigner;
 import software.amazon.awssdk.auth.Signer;
 import software.amazon.awssdk.auth.SignerFactory;
-import software.amazon.awssdk.client.AwsSyncClientParams;
-import software.amazon.awssdk.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;

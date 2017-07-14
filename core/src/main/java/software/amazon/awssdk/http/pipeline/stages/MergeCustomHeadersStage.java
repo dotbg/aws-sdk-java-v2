@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import software.amazon.awssdk.LegacyClientConfiguration;
 import software.amazon.awssdk.RequestExecutionContext;
+import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.MutableRequestToRequestPipeline;
@@ -30,16 +30,16 @@ import software.amazon.awssdk.http.pipeline.MutableRequestToRequestPipeline;
  */
 public class MergeCustomHeadersStage implements MutableRequestToRequestPipeline {
 
-    private final LegacyClientConfiguration config;
+    private final ClientConfiguration config;
 
     public MergeCustomHeadersStage(HttpClientDependencies dependencies) {
-        this.config = dependencies.config();
+        this.config = dependencies.clientConfiguration();
     }
 
     @Override
     public SdkHttpFullRequest.Builder execute(SdkHttpFullRequest.Builder request, RequestExecutionContext context)
             throws Exception {
-        return request.headers(adaptHeaders(config.getHeaders()))
+        return request.headers(config.overrideConfiguration().additionalHttpHeaders())
                       .headers(adaptHeaders(context.requestConfig().getCustomRequestHeaders()));
     }
 

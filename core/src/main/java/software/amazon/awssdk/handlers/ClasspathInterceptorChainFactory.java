@@ -31,9 +31,9 @@ import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.util.ClassLoaderHelper;
 
 /**
- * Factory for creating request/response handler chains.
+ * Factory for creating request/response handler chains from the classpath.
  */
-public final class ExecutionInterceptorChainFactory {
+public final class ClasspathInterceptorChainFactory {
 
     private static final String GLOBAL_INTERCEPTOR_PATH = "software/amazon/awssdk/global/handlers/execution.interceptors";
 

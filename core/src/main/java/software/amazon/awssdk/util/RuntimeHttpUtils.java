@@ -22,11 +22,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import software.amazon.awssdk.AwsSystemSetting;
-import software.amazon.awssdk.LegacyClientConfiguration;
 import software.amazon.awssdk.Protocol;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.SdkClientException;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
+import software.amazon.awssdk.config.AdvancedClientOption;
+import software.amazon.awssdk.config.ClientConfiguration;
+import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 
 public class RuntimeHttpUtils {
@@ -35,15 +37,16 @@ public class RuntimeHttpUtils {
 
     private static final String AWS_EXECUTION_ENV_PREFIX = "exec-env/";
 
-    public static String getUserAgent(final LegacyClientConfiguration config, final String userAgentMarker) {
-        String userDefinedPrefix = config != null ? config.getUserAgentPrefix() : "";
-        String userDefinedSuffix = config != null ? config.getUserAgentSuffix() : "";
+    public static String getUserAgent(ClientConfiguration config, final String userAgentMarker) {
+        ClientOverrideConfiguration overrideConfig = config.overrideConfiguration();
+        String userDefinedPrefix = overrideConfig.advancedOption(AdvancedClientOption.USER_AGENT_PREFIX);
+        String userDefinedSuffix = overrideConfig.advancedOption(AdvancedClientOption.USER_AGENT_SUFFIX);
         String awsExecutionEnvironment = AwsSystemSetting.AWS_EXECUTION_ENV.getStringValue().orElse(null);
 
         StringBuilder userAgent = new StringBuilder(userDefinedPrefix.trim());
 
-        if (!LegacyClientConfiguration.DEFAULT_USER_AGENT.equals(userDefinedPrefix)) {
-            userAgent.append(COMMA).append(LegacyClientConfiguration.DEFAULT_USER_AGENT);
+        if (!VersionInfoUtils.getUserAgent().equals(userDefinedPrefix)) {
+            userAgent.append(COMMA).append(VersionInfoUtils.getUserAgent());
         }
 
         if (StringUtils.hasValue(userDefinedSuffix)) {
@@ -59,20 +62,6 @@ public class RuntimeHttpUtils {
         }
 
         return userAgent.toString();
-    }
-
-    /**
-     * Returns an URI for the given endpoint.
-     * Prefixes the protocol if the endpoint given does not have it.
-     *
-     * @throws IllegalArgumentException if the inputs are null.
-     */
-    public static URI toUri(String endpoint, LegacyClientConfiguration config) {
-
-        if (config == null) {
-            throw new IllegalArgumentException("ClientConfiguration cannot be null");
-        }
-        return toUri(endpoint, config.getProtocol());
     }
 
     /**

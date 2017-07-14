@@ -17,6 +17,7 @@ package software.amazon.awssdk;
 
 import java.util.List;
 import java.util.Map;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.event.ProgressListener;
@@ -47,6 +48,7 @@ public abstract class RequestConfig {
     /**
      * @return A non null map of custom headers to inject into the request.
      */
+    @ReviewBeforeRelease("Should be String, List<String> to match client config.")
     public abstract Map<String, String> getCustomRequestHeaders();
 
     /**

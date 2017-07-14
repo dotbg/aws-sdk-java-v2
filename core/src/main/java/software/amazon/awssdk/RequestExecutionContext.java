@@ -15,8 +15,6 @@
 
 package software.amazon.awssdk;
 
-import java.util.Collections;
-import java.util.List;
 import software.amazon.awssdk.auth.AnonymousCredentialsProvider;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.MetricsReportingCredentialsProvider;
@@ -24,7 +22,7 @@ import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.ExecutionInterceptor;
+import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 import software.amazon.awssdk.runtime.auth.SignerProvider;
@@ -40,7 +38,7 @@ public final class RequestExecutionContext {
     private final RequestConfig requestConfig;
     private final AwsRequestMetrics awsRequestMetrics;
     private final AwsCredentialsProvider credentialsProvider;
-    private final List<ExecutionInterceptor> executionInterceptors;
+    private final ExecutionInterceptorChain interceptorChain;
     private final ExecutionAttributes executionAttributes;
     private final SignerProvider signerProvider;
 
@@ -51,7 +49,7 @@ public final class RequestExecutionContext {
         this.requestConfig = Validate.paramNotNull(builder.requestConfig, "requestConfig");
 
         Validate.paramNotNull(builder.executionContext, "executionContext");
-        this.executionInterceptors = resolveRequestHandlers(builder.executionContext);
+        this.interceptorChain = builder.executionContext.interceptorChain();
         this.executionAttributes = builder.executionContext.executionAttributes();
         this.awsRequestMetrics = builder.executionContext.awsRequestMetrics();
         this.signerProvider = builder.executionContext.getSignerProvider();
@@ -60,14 +58,6 @@ public final class RequestExecutionContext {
         this.credentialsProvider = contextCredentialsProvider != null
                                    ? new MetricsReportingCredentialsProvider(contextCredentialsProvider, awsRequestMetrics)
                                    : new AnonymousCredentialsProvider();
-    }
-
-    private List<ExecutionInterceptor> resolveRequestHandlers(ExecutionContext context) {
-        List<ExecutionInterceptor> executionInterceptors = context.executionInterceptors();
-        if (executionInterceptors == null) {
-            return Collections.emptyList();
-        }
-        return executionInterceptors;
     }
 
     /**
@@ -91,8 +81,8 @@ public final class RequestExecutionContext {
     /**
      * @return Execution interceptors to hook into execution lifecycle.
      */
-    public List<ExecutionInterceptor> executionInterceptors() {
-        return Collections.unmodifiableList(executionInterceptors);
+    public ExecutionInterceptorChain interceptorChain() {
+        return interceptorChain;
     }
 
     public ExecutionAttributes executionAttributes() {

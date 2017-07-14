@@ -56,6 +56,8 @@ public class SyncClientHandlerImpl extends ClientHandler {
     public <InputT, OutputT> OutputT execute(ClientExecutionParams<InputT, OutputT> executionParams) {
         final InputT inputT = executionParams.getInput();
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
+        runBeforeExecutionInterceptors(executionContext);
+        runModifyRequestInterceptors(executionContext);
         AwsRequestMetrics awsRequestMetrics = executionContext.awsRequestMetrics();
         awsRequestMetrics.startEvent(AwsRequestMetrics.Field.ClientExecuteTime);
         Request<InputT> request = null;
@@ -88,6 +90,10 @@ public class SyncClientHandlerImpl extends ClientHandler {
         }
     }
 
+    private void runModifyRequestInterceptors(ExecutionContext executionContext) {
+
+    }
+
     @Override
     public void close() throws Exception {
         client.close();
@@ -114,10 +120,10 @@ public class SyncClientHandlerImpl extends ClientHandler {
      * request level.
      **/
     private <OutputT> OutputT invoke(SdkHttpFullRequest request,
-                                             RequestConfig requestConfig,
-                                             ExecutionContext executionContext,
-                                             HttpResponseHandler<OutputT> responseHandler,
-                                             HttpResponseHandler<? extends SdkBaseException> errorResponseHandler) {
+                                     RequestConfig requestConfig,
+                                     ExecutionContext executionContext,
+                                     HttpResponseHandler<OutputT> responseHandler,
+                                     HttpResponseHandler<? extends SdkBaseException> errorResponseHandler) {
 
         executionContext.setCredentialsProvider(
                 CredentialUtils.getCredentialsProvider(requestConfig, syncClientConfiguration.credentialsProvider()));
@@ -131,15 +137,20 @@ public class SyncClientHandlerImpl extends ClientHandler {
      * configured in the OldExecutionContext beforehand.
      **/
     private <OutputT> OutputT doInvoke(SdkHttpFullRequest request,
-                                               RequestConfig requestConfig,
-                                               ExecutionContext executionContext,
-                                               HttpResponseHandler<OutputT> responseHandler,
-                                               HttpResponseHandler<? extends SdkBaseException> errorResponseHandler) {
+                                       RequestConfig requestConfig,
+                                       ExecutionContext executionContext,
+                                       HttpResponseHandler<OutputT> responseHandler,
+                                       HttpResponseHandler<? extends SdkBaseException> errorResponseHandler) {
         return client.requestExecutionBuilder()
                      .request(request)
                      .requestConfig(requestConfig)
                      .executionContext(executionContext)
                      .errorResponseHandler(errorResponseHandler)
                      .execute(responseHandler);
+    }
+
+    private void runBeforeExecutionInterceptors(ExecutionContext executionContext) {
+        executionContext.interceptorChain().beforeExecution(executionContext.interceptorContext(),
+                                                            executionContext.executionAttributes());
     }
 }

@@ -25,7 +25,7 @@ import software.amazon.awssdk.config.ClientConfiguration;
 @SdkProtectedApi
 public abstract class ClientHandler extends BaseClientHandler implements AutoCloseable {
 
-    ClientHandler(ClientConfiguration clientConfiguration,
+    public ClientHandler(ClientConfiguration clientConfiguration,
                   ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
         super(clientConfiguration, serviceAdvancedConfiguration);
     }

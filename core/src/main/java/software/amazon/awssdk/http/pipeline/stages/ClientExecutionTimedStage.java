@@ -20,7 +20,6 @@ import static software.amazon.awssdk.utils.FunctionalUtils.invokeSafely;
 import java.util.Optional;
 import software.amazon.awssdk.AbortedException;
 import software.amazon.awssdk.AmazonWebServiceRequest;
-import software.amazon.awssdk.LegacyClientConfiguration;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.RequestExecutionContext;
@@ -123,7 +122,7 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
 
     /**
      * Gets the correct client execution timeout taking into account precedence of the
-     * configuration in {@link AmazonWebServiceRequest} versus {@link LegacyClientConfiguration}.
+     * configuration in {@link AmazonWebServiceRequest} versus {@link ClientConfiguration}.
      *
      * @param requestConfig Current request configuration
      * @return Client Execution timeout value or 0 if none is set

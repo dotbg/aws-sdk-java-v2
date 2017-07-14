@@ -24,8 +24,6 @@ import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.Modifier;
 import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.client.AsyncClientHandler;
-import software.amazon.awssdk.client.AwsAsyncClientParams;
-import software.amazon.awssdk.client.ClientHandlerParams;
 import software.amazon.awssdk.client.SdkAsyncClientHandler;
 import software.amazon.awssdk.codegen.emitters.GeneratorTaskParams;
 import software.amazon.awssdk.codegen.model.intermediate.OperationModel;

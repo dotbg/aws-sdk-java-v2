@@ -24,6 +24,7 @@ import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
+import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.metrics.AwsSdkMetrics;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
@@ -50,9 +51,9 @@ abstract class BaseClientHandler {
                                          .putAttribute(AwsExecutionAttributes.REQUEST_CONFIG, requestConfig);
 
         return ExecutionContext.builder()
-                               .executionInterceptors(overrideConfiguration.executionInterceptors())
+                               .interceptorChain(new ExecutionInterceptorChain(overrideConfiguration.executionInterceptors()))
                                .executionAttributes(executionAttributes)
-                               .withUseRequestMetrics(isMetricsEnabled)
+                               .useRequestMetrics(isMetricsEnabled)
                                .signerProvider(overrideConfiguration.advancedOption(AdvancedClientOption.SIGNER_PROVIDER))
                                .build();
     }

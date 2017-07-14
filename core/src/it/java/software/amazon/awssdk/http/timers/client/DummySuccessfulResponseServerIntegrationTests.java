@@ -87,7 +87,7 @@ public class DummySuccessfulResponseServerIntegrationTests extends MockServerTes
     }
 
     private ExecutionContext withHandlers(List<RequestHandler> requestHandlers) {
-        return ExecutionContext.builder().executionInterceptors(requestHandlers).build();
+        return ExecutionContext.builder().interceptorChain(requestHandlers).build();
     }
 
 }

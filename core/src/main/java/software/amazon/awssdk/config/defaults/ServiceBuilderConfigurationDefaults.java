@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.handlers.ExecutionInterceptorChainFactory;
+import software.amazon.awssdk.handlers.ClasspathInterceptorChainFactory;
 import software.amazon.awssdk.runtime.auth.SignerProvider;
 
 /**
@@ -60,7 +60,7 @@ public class ServiceBuilderConfigurationDefaults extends ClientConfigurationDefa
         builder.advancedOption(CRC32_FROM_COMPRESSED_DATA_ENABLED,
                                applyDefault(currentValue, () -> crc32FromCompressedDataEnabled));
 
-        ExecutionInterceptorChainFactory chainFactory = new ExecutionInterceptorChainFactory();
+        ClasspathInterceptorChainFactory chainFactory = new ClasspathInterceptorChainFactory();
         requestHandlerPaths.forEach(path -> chainFactory.getInterceptors(path).forEach(builder::addExecutionInterceptor));
     }
 

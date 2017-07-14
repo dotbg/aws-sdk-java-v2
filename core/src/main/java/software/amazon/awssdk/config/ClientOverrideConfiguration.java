@@ -52,7 +52,7 @@ public class ClientOverrideConfiguration
     private ClientOverrideConfiguration(DefaultClientOverrideConfigurationBuilder builder) {
         this.httpRequestTimeout = builder.httpRequestTimeout;
         this.totalExecutionTimeout = builder.totalExecutionTimeout;
-        this.additionalHttpHeaders = CollectionUtils.deepCopiedUnmodifiableMap(builder.additionalHttpHeaders);
+        this.additionalHttpHeaders = CollectionUtils.deepUnmodifiableMap(builder.additionalHttpHeaders);
         this.gzipEnabled = builder.gzipEnabled;
         this.requestMetricCollector = builder.requestMetricCollector;
         this.retryPolicy = builder.retryPolicy;

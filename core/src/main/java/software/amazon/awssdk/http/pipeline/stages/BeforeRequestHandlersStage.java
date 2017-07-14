@@ -29,7 +29,7 @@ public class BeforeRequestHandlersStage implements RequestToRequestPipeline {
     @Override
     public SdkHttpFullRequest execute(SdkHttpFullRequest request, RequestExecutionContext context) throws Exception {
         // Apply any additional service specific request handlers that need to be run
-//        for (RequestHandler requestHandler : context.executionInterceptors()) {
+//        for (RequestHandler requestHandler : context.interceptorChain()) {
 //            toReturn = requestHandler.beforeRequest(toReturn);
 //        }
 //        return toReturn;

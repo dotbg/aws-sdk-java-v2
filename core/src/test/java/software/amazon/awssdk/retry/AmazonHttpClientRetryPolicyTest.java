@@ -90,7 +90,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         // The OldExecutionContext should collect the expected RequestCount
         ExecutionContext context = ExecutionContext.builder()
-                                                   .withUseRequestMetrics(true)
+                                                   .useRequestMetrics(true)
                                                    .signerProvider(new NoOpSignerProvider())
                                                    .build();
 
@@ -141,7 +141,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         // The OldExecutionContext should collect the expected RequestCount
         ExecutionContext context = ExecutionContext.builder()
-                                                   .withUseRequestMetrics(true)
+                                                   .useRequestMetrics(true)
                                                    .signerProvider(new NoOpSignerProvider())
                                                    .build();
 
@@ -193,7 +193,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         // The OldExecutionContext should collect the expected RequestCount
         ExecutionContext context = ExecutionContext.builder()
-                                                   .withUseRequestMetrics(true)
+                                                   .useRequestMetrics(true)
                                                    .signerProvider(new NoOpSignerProvider())
                                                    .build();
 
@@ -240,7 +240,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         // The OldExecutionContext should collect the expected RequestCount
         ExecutionContext context = ExecutionContext.builder()
-                                                   .withUseRequestMetrics(true)
+                                                   .useRequestMetrics(true)
                                                    .signerProvider(new NoOpSignerProvider())
                                                    .build();
 
@@ -287,7 +287,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
 
         // The OldExecutionContext should collect the expected RequestCount
         ExecutionContext context = ExecutionContext.builder()
-                                                   .withUseRequestMetrics(true)
+                                                   .useRequestMetrics(true)
                                                    .signerProvider(new NoOpSignerProvider())
                                                    .build();
 

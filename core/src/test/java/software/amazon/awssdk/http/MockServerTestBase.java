@@ -15,10 +15,15 @@
 
 package software.amazon.awssdk.http;
 
+import static software.amazon.awssdk.internal.http.timers.TimeoutTestConstants.CLIENT_EXECUTION_TIMEOUT;
+
 import org.junit.After;
 import org.junit.Before;
+import software.amazon.awssdk.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.config.MutableClientConfiguration;
 import software.amazon.awssdk.http.server.MockServer;
 import software.amazon.awssdk.internal.http.request.EmptyHttpRequest;
+import software.amazon.awssdk.internal.http.timers.TimeoutTestConstants;
 
 public abstract class MockServerTestBase {
 
@@ -37,6 +42,18 @@ public abstract class MockServerTestBase {
 
     protected EmptyHttpRequest newGetRequest() {
         return new EmptyHttpRequest(server.getEndpoint(), HttpMethodName.GET);
+    }
+
+    protected AmazonHttpClient createTestAmazonHttpClient(SdkHttpClient httpClient) {
+        ClientOverrideConfiguration overrideConfiguration =
+                ClientOverrideConfiguration.builder()
+                                           .totalExecutionTimeout(TimeoutTestConstants.CLIENT_EXECUTION_TIMEOUT)
+                                           .build();
+        return AmazonHttpClient.builder()
+                               .syncClientConfiguration(new MutableClientConfiguration()
+                                                                .overrideConfiguration(overrideConfiguration))
+                               .sdkHttpClient(httpClient)
+                               .build();
     }
 
     /**
