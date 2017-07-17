@@ -15,11 +15,11 @@
 
 package software.amazon.awssdk.internal.http.request;
 
+import software.amazon.awssdk.interceptor.BeforeResponseUnmarshallingContext;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.interceptor.FailedExecutionContext;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
-import software.amazon.awssdk.interceptor.MarshalledResponseContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 
 /**
  * Implementation of {@link ExecutionInterceptor} with configurable wait times
@@ -31,12 +31,12 @@ public class SlowExecutionInterceptor implements ExecutionInterceptor {
     private int onExecutionFailureWait;
 
     @Override
-    public void beforeTransmission(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public void beforeTransmission(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         wait(beforeTransmissionWait);
     }
 
     @Override
-    public void afterTransmission(MarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    public void afterTransmission(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
         wait(afterTransmissionWait);
     }
 

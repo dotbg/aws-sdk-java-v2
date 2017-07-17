@@ -18,9 +18,15 @@ package software.amazon.awssdk.interceptor;
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.annotation.SdkPublicApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpFullResponse;
 
 @ThreadSafe
 @SdkPublicApi
-public interface UnmarshalledRequestContext {
+public interface BeforeResponseUnmarshallingContext {
     SdkRequest request();
+
+    SdkHttpFullRequest httpRequest();
+
+    SdkHttpFullResponse httpResponse();
 }

@@ -21,7 +21,7 @@ import java.util.Date;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 import software.amazon.awssdk.util.AwsHostNameUtils;
 
 /**
@@ -31,7 +31,7 @@ public final class Aws4SignerRequestParams {
     /**
      * The current immutable state of the execution.
      */
-    private final MarshalledRequestContext execution;
+    private final BeforeRequestTransmissionContext execution;
 
     /**
      * Mutable attributes attached to the current execution.
@@ -81,7 +81,7 @@ public final class Aws4SignerRequestParams {
      * TODO: This is a lot of parameters. Clean up with signing refactor? There is also a lot of other things passed around with
      * this object elsewhere. More should be moved here, or this shouldn't be used.
      */
-    public Aws4SignerRequestParams(MarshalledRequestContext execution, ExecutionAttributes executionAttributes,
+    public Aws4SignerRequestParams(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes,
                                    Date signingDateOverride, String regionNameOverride,
                                    String serviceName, String signingAlgorithm) {
         if (signingAlgorithm == null) {
@@ -128,7 +128,7 @@ public final class Aws4SignerRequestParams {
     /**
      * Returns the immutable state of the execution.
      */
-    public MarshalledRequestContext getMarshalledRequestContext() {
+    public BeforeRequestTransmissionContext getMarshalledRequestContext() {
         return execution;
     }
 

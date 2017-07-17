@@ -17,7 +17,7 @@ package software.amazon.awssdk.auth;
 
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 
 /**
  * A strategy for applying cryptographic signatures to a request, proving that the request was made by someone in possession of
@@ -31,5 +31,5 @@ public interface Signer {
      * @param executionAttributes Additional mutable attributes attached to the execution.
      * @return The signed request.
      */
-    SdkHttpFullRequest sign(MarshalledRequestContext execution, ExecutionAttributes executionAttributes);
+    SdkHttpFullRequest sign(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes);
 }

@@ -26,7 +26,7 @@ import software.amazon.awssdk.http.SdkHttpFullRequestAdapter;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.EC2Client;
 import software.amazon.awssdk.services.ec2.model.CopySnapshotRequest;
@@ -40,7 +40,7 @@ import software.amazon.awssdk.util.SdkHttpUtils;
 public class GeneratePreSignUrlInterceptor implements ExecutionInterceptor {
 
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
         Object originalRequest = execution.request();
 

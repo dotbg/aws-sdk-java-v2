@@ -20,7 +20,7 @@ import software.amazon.awssdk.auth.RequestSigner;
 import software.amazon.awssdk.auth.Signer;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 import software.amazon.awssdk.opensdk.protect.auth.RequestSignerAware;
 import software.amazon.awssdk.opensdk.protect.auth.RequestSignerNotFoundException;
 import software.amazon.awssdk.opensdk.protect.auth.RequestSignerProvider;
@@ -57,7 +57,7 @@ public final class SignerProviderAdapter extends SignerProvider {
         }
 
         @Override
-        public SdkHttpFullRequest sign(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+        public SdkHttpFullRequest sign(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
             return authorizer.sign(execution.httpRequest());
         }
     }

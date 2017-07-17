@@ -26,8 +26,8 @@ import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
-import software.amazon.awssdk.interceptor.UnmarshalledResponseContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.BeforeResponseCompletionContext;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSpotInstanceRequestsResponse;
 import software.amazon.awssdk.services.ec2.model.GroupIdentifier;
@@ -44,7 +44,7 @@ import software.amazon.awssdk.utils.Base64Utils;
 
 public class EC2Interceptor implements ExecutionInterceptor {
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
         SdkRequest originalRequest = execution.request();
         SdkHttpFullRequest.Builder mutableRequest = request.toBuilder();
@@ -100,7 +100,7 @@ public class EC2Interceptor implements ExecutionInterceptor {
     }
 
     @Override
-    public SdkResponse modifyResponse(UnmarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    public SdkResponse modifyResponse(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
         SdkResponse awsResponse = execution.response();
         /*
          * For backwards compatibility, we preserve the existing List<String> of

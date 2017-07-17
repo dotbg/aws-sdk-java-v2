@@ -21,7 +21,7 @@ import java.util.Map;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 
 public class SqsExecutionInterceptor implements ExecutionInterceptor {
 
@@ -40,7 +40,7 @@ public class SqsExecutionInterceptor implements ExecutionInterceptor {
     }
 
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
         URI endpoint = request.getEndpoint();
 

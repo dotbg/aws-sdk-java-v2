@@ -15,10 +15,6 @@
 
 package software.amazon.awssdk.interceptor;
 
-import software.amazon.awssdk.utils.AttributeMap;
+public class ExecutionAttribute<T> {
 
-public class ExecutionAttribute<T> extends AttributeMap.Key<Object> {
-    public ExecutionAttribute() {
-        super(Object.class);
-    }
 }

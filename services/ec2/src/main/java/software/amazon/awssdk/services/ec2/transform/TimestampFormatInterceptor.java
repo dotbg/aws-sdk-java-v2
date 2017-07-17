@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 import software.amazon.awssdk.services.ec2.model.DescribeSpotFleetRequestHistoryRequest;
 import software.amazon.awssdk.services.ec2.model.RequestSpotFleetRequest;
 
@@ -41,7 +41,7 @@ public final class TimestampFormatInterceptor implements ExecutionInterceptor {
     private static final String VALID_UNTIL = "SpotFleetRequestConfig.ValidUntil";
 
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
         Object original = execution.request();
         if (original instanceof DescribeSpotFleetRequestHistoryRequest) {

@@ -65,51 +65,51 @@ public interface ExecutionInterceptor {
      * @param executionAttributes A mutable set of attributes scoped to one specific request/response cycle that can be used to
      *                            give data to future lifecycle methods.
      */
-    default void beforeExecution(UnmarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeExecution(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkRequest modifyRequest(UnmarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    default SdkRequest modifyRequest(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
         return execution.request();
     }
 
-    default void beforeMarshalling(UnmarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeMarshalling(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default void afterMarshalling(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    default void afterMarshalling(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkHttpFullRequest modifyHttpRequest(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    default SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         return execution.httpRequest();
     }
 
-    default void beforeTransmission(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeTransmission(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default void afterTransmission(MarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    default void afterTransmission(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkHttpFullResponse modifyHttpResponse(MarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    default SdkHttpFullResponse modifyHttpResponse(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
         return execution.httpResponse();
     }
 
-    default void beforeUnmarshalling(MarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeUnmarshalling(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default void afterUnmarshalling(UnmarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    default void afterUnmarshalling(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkResponse modifyResponse(UnmarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    default SdkResponse modifyResponse(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
         return execution.response();
     }
 
-    default void afterExecution(UnmarshalledResponseContext execution, ExecutionAttributes executionAttributes) {
+    default void afterExecution(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 

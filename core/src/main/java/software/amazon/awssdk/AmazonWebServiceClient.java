@@ -153,9 +153,6 @@ public abstract class AmazonWebServiceClient {
                                      boolean disableStrictHostNameVerification) {
     }
 
-    protected AmazonWebServiceClient(AwsSyncClientParams clientParams) {
-    }
-
     /**
      * Returns the signer.
      * <p>

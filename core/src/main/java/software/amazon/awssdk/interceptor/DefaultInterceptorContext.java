@@ -28,7 +28,8 @@ import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 
 @SdkInternalApi
 public class DefaultInterceptorContext
-        implements UnmarshalledRequestContext, MarshalledRequestContext, UnmarshalledResponseContext, MarshalledResponseContext,
+        implements BeforeRequestMarshallingContext, BeforeRequestTransmissionContext, BeforeResponseCompletionContext,
+                   BeforeResponseUnmarshallingContext,
                    ToCopyableBuilder<DefaultInterceptorContext.Builder, DefaultInterceptorContext> {
     private SdkRequest request;
     private SdkHttpFullRequest httpRequest;

@@ -19,7 +19,7 @@ import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.UnmarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestMarshallingContext;
 import software.amazon.awssdk.services.s3.BucketUtils;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
@@ -29,7 +29,7 @@ public class CreateBucketInterceptor implements ExecutionInterceptor {
     @ReviewBeforeRelease("Automatically set location constraint to the bucket region if not provided. Also" +
                          " perhaps remove the location constraint from the model so that is may only be" +
                          " the current region.")
-    public void beforeMarshalling(UnmarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public void beforeMarshalling(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
         SdkRequest request = execution.request();
 
         if (request instanceof CreateBucketRequest) {

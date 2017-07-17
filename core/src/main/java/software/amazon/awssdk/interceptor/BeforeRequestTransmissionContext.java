@@ -19,14 +19,11 @@ import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.annotation.SdkPublicApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.http.SdkHttpFullResponse;
 
 @ThreadSafe
 @SdkPublicApi
-public interface MarshalledResponseContext {
+public interface BeforeRequestTransmissionContext {
     SdkRequest request();
 
     SdkHttpFullRequest httpRequest();
-
-    SdkHttpFullResponse httpResponse();
 }

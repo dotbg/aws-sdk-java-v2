@@ -21,29 +21,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import software.amazon.awssdk.AmazonServiceException;
-import software.amazon.awssdk.AmazonWebServiceRequest;
-import software.amazon.awssdk.Response;
-import software.amazon.awssdk.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.http.HttpResponse;
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.http.SdkHttpFullResponse;
-import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.MarshalledResponseContext;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesRequest;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
 import software.amazon.awssdk.test.AwsIntegrationTestBase;
-import software.amazon.awssdk.util.StringInputStream;
 
 public class ExecutionInterceptorIntegrationTest extends AwsIntegrationTestBase {
 
@@ -113,7 +95,7 @@ public class ExecutionInterceptorIntegrationTest extends AwsIntegrationTestBase 
 //        final String injectedTableName = "SomeInjectedTableName";
 //        ExecutionInterceptor executionInterceptor = new ExecutionInterceptor() {
 //            @Override
-//            public SdkHttpFullResponse modifyHttpResponse(MarshalledResponseContext execution,
+//            public SdkHttpFullResponse modifyHttpResponse(BeforeResponseUnmarshallingContext execution,
 //                                                          ExecutionAttributes executionAttributes) {
 //                try {
 //                    String newContent = "{\"TableNames\":[\"" + injectedTableName + "\"]}";

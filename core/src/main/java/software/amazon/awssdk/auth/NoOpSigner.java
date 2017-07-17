@@ -17,7 +17,7 @@ package software.amazon.awssdk.auth;
 
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 
 /**
  * A No-Op Signer Implementation.
@@ -25,7 +25,7 @@ import software.amazon.awssdk.interceptor.MarshalledRequestContext;
 public class NoOpSigner implements Signer {
 
     @Override
-    public SdkHttpFullRequest sign(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest sign(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         return execution.httpRequest();
     }
 }

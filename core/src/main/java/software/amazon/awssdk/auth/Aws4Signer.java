@@ -39,7 +39,7 @@ import software.amazon.awssdk.auth.internal.SignerKey;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.MarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
 import software.amazon.awssdk.internal.collections.FifoCache;
 import software.amazon.awssdk.util.CredentialUtils;
 import software.amazon.awssdk.util.DateUtils;
@@ -172,7 +172,7 @@ public class Aws4Signer extends AbstractAwsSigner
     }
 
     @Override
-    public SdkHttpFullRequest sign(MarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest sign(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
         // anonymous credentials, don't sign
         if (CredentialUtils.isAnonymous(executionAttributes.getAttribute(AWS_CREDENTIALS))) {
             return execution.httpRequest();
@@ -185,7 +185,7 @@ public class Aws4Signer extends AbstractAwsSigner
     }
 
     private SdkHttpFullRequest.Builder doSign(SdkHttpFullRequest.Builder mutableRequest,
-                                              MarshalledRequestContext execution,
+                                              BeforeRequestTransmissionContext execution,
                                               ExecutionAttributes executionAttributes) {
         AwsCredentials sanitizedCredentials =
                 sanitizeCredentials(executionAttributes.getAttribute(AWS_CREDENTIALS));
@@ -223,7 +223,7 @@ public class Aws4Signer extends AbstractAwsSigner
     }
 
     @Override
-    public SdkHttpFullRequest presignRequest(MarshalledRequestContext execution,
+    public SdkHttpFullRequest presignRequest(BeforeRequestTransmissionContext execution,
                                              ExecutionAttributes executionAttributes,
                                              Date userSpecifiedExpirationDate) {
 

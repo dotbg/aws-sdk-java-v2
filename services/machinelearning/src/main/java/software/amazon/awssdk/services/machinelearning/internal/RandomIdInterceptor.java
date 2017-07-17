@@ -20,7 +20,7 @@ import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.UnmarshalledRequestContext;
+import software.amazon.awssdk.interceptor.BeforeRequestMarshallingContext;
 import software.amazon.awssdk.services.machinelearning.model.CreateBatchPredictionRequest;
 import software.amazon.awssdk.services.machinelearning.model.CreateDataSourceFromRDSRequest;
 import software.amazon.awssdk.services.machinelearning.model.CreateDataSourceFromRedshiftRequest;
@@ -36,7 +36,7 @@ import software.amazon.awssdk.services.machinelearning.model.CreateMLModelReques
 public class RandomIdInterceptor implements ExecutionInterceptor {
 
     @Override
-    public SdkRequest modifyRequest(UnmarshalledRequestContext execution, ExecutionAttributes executionAttributes) {
+    public SdkRequest modifyRequest(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
         SdkRequest request = execution.request();
 
         if (request instanceof CreateBatchPredictionRequest) {
