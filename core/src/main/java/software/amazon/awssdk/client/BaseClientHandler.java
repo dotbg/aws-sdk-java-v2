@@ -23,11 +23,15 @@ import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.ExecutionContext;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.interceptor.DefaultFailedExecutionInterceptorContext;
+import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.metrics.AwsSdkMetrics;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
+import software.amazon.awssdk.util.AwsRequestMetricsFullSupport;
 
 abstract class BaseClientHandler {
     private final ClientConfiguration clientConfiguration;
@@ -39,9 +43,10 @@ abstract class BaseClientHandler {
         this.serviceAdvancedConfiguration = serviceAdvancedConfiguration;
     }
 
-
     ExecutionContext createExecutionContext(RequestConfig requestConfig) {
-        boolean isMetricsEnabled = isRequestMetricsEnabled(requestConfig);
+        AwsRequestMetrics requestMetrics = isRequestMetricsEnabled(requestConfig) ? new AwsRequestMetricsFullSupport()
+                                                                                  : new AwsRequestMetrics();
+
         ClientOverrideConfiguration overrideConfiguration = clientConfiguration.overrideConfiguration();
         ExecutionAttributes executionAttributes =
                 new ExecutionAttributes().putAttribute(AwsExecutionAttributes.SERVICE_ADVANCED_CONFIG,
@@ -53,7 +58,7 @@ abstract class BaseClientHandler {
         return ExecutionContext.builder()
                                .interceptorChain(new ExecutionInterceptorChain(overrideConfiguration.executionInterceptors()))
                                .executionAttributes(executionAttributes)
-                               .useRequestMetrics(isMetricsEnabled)
+                               .awsRequestMetrics(requestMetrics)
                                .signerProvider(overrideConfiguration.advancedOption(AdvancedClientOption.SIGNER_PROVIDER))
                                .build();
     }
@@ -84,7 +89,7 @@ abstract class BaseClientHandler {
      * Returns the client specific request metric collector if there is one; or the one at the AWS
      * SDK level otherwise.
      */
-    RequestMetricCollector clientRequestMetricCollector() {
+    private RequestMetricCollector clientRequestMetricCollector() {
         RequestMetricCollector clientLevelMetricCollector = clientConfiguration.overrideConfiguration().requestMetricCollector();
         return clientLevelMetricCollector != null ? clientLevelMetricCollector :
                AwsSdkMetrics.getRequestMetricCollector();
@@ -114,5 +119,53 @@ abstract class BaseClientHandler {
     private RequestMetricCollector findRequestMetricCollector(RequestConfig requestConfig) {
         RequestMetricCollector reqLevelMetricsCollector = requestConfig.getRequestMetricsCollector();
         return reqLevelMetricsCollector != null ? reqLevelMetricsCollector : clientRequestMetricCollector();
+    }
+
+    protected void runBeforeExecutionInterceptors(ExecutionContext executionContext) {
+        executionContext.interceptorChain().beforeExecution(executionContext.interceptorContext(),
+                                                            executionContext.executionAttributes());
+    }
+
+    protected void runModifyRequestInterceptors(ExecutionContext executionContext) {
+        DefaultInterceptorContext interceptorContext =
+                executionContext.interceptorChain().modifyRequest(executionContext.interceptorContext(),
+                                                                  executionContext.executionAttributes());
+        executionContext.interceptorContext(interceptorContext);
+    }
+
+    protected void runBeforeMarshallingInterceptors(ExecutionContext executionContext) {
+        executionContext.interceptorChain().beforeMarshalling(executionContext.interceptorContext(),
+                                                              executionContext.executionAttributes());
+    }
+
+    protected void addHttpRequest(ExecutionContext executionContext, SdkHttpFullRequest request) {
+        DefaultInterceptorContext interceptorContext = executionContext.interceptorContext().modify(b -> b.httpRequest(request));
+        executionContext.interceptorContext(interceptorContext);
+    }
+
+    protected void runAfterMarshallingInterceptors(ExecutionContext executionContext) {
+        executionContext.interceptorChain().afterMarshalling(executionContext.interceptorContext(),
+                                                             executionContext.executionAttributes());
+    }
+
+    protected void runModifyHttpRequestInterceptors(ExecutionContext executionContext) {
+        DefaultInterceptorContext interceptorContext =
+                executionContext.interceptorChain().modifyHttpRequest(executionContext.interceptorContext(),
+                                                                      executionContext.executionAttributes());
+        executionContext.interceptorContext(interceptorContext);
+    }
+
+    protected void runAfterExecutionInterceptors(ExecutionContext executionContext) {
+        executionContext.interceptorChain().afterExecution(executionContext.interceptorContext(),
+                                                           executionContext.executionAttributes());
+    }
+
+    protected void runOnFailureInterceptors(ExecutionContext executionContext, Exception e) {
+        DefaultFailedExecutionInterceptorContext interceptorContext =
+                DefaultFailedExecutionInterceptorContext.builder()
+                                                        .exception(e)
+                                                        .interceptorContext(executionContext.interceptorContext())
+                                                        .build();
+        executionContext.interceptorChain().onExecutionFailure(interceptorContext, executionContext.executionAttributes());
     }
 }

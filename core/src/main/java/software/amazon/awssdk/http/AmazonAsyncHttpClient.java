@@ -18,7 +18,6 @@ package software.amazon.awssdk.http;
 import static software.amazon.awssdk.http.pipeline.RequestPipelineBuilder.async;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledExecutorService;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.RequestExecutionContext;
@@ -35,7 +34,7 @@ import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
 import software.amazon.awssdk.http.pipeline.stages.ApplyTransactionIdStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyUserAgentStage;
 import software.amazon.awssdk.http.pipeline.stages.AsyncRetryableStage;
-import software.amazon.awssdk.http.pipeline.stages.BeforeRequestHandlersStage;
+import software.amazon.awssdk.http.pipeline.stages.BeforeTransmissionExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.MakeAsyncHttpRequestStage;
 import software.amazon.awssdk.http.pipeline.stages.MakeRequestImmutable;
 import software.amazon.awssdk.http.pipeline.stages.MakeRequestMutable;
@@ -64,7 +63,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
      */
     private final RequestMetricCollector requestMetricCollector;
 
-    private final HttpClientDependencies httpClientDependencies;
+    private final HttpAsyncClientDependencies httpClientDependencies;
 
     private AmazonAsyncHttpClient(Builder builder) {
         this.httpClientDependencies = HttpAsyncClientDependencies.builder()
@@ -246,8 +245,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
         public <OutputT> CompletableFuture<OutputT> execute(SdkHttpResponseHandler<OutputT> responseHandler) {
             try {
                 return RequestPipelineBuilder
-                        .first(BeforeRequestHandlersStage::new)
-                        .then(MakeRequestMutable::new)
+                        .first(MakeRequestMutable::new)
                         .then(ApplyTransactionIdStage::new)
                         .then(ApplyUserAgentStage::new)
                         .then(MergeCustomHeadersStage::new)
@@ -257,6 +255,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
                         .then(ReportRequestContentLengthStage::new)
                         .then(RequestPipelineBuilder
                                       .first(SigningStage::new)
+                                      .then(BeforeTransmissionExecutionInterceptorsStage::new)
                                       .then(d -> new MakeAsyncHttpRequestStage<>(responseHandler, errorResponseHandler, d))
                                       // TODO BeforeUnmarshallingStage
                                       .wrap(AsyncRetryableStage::new)

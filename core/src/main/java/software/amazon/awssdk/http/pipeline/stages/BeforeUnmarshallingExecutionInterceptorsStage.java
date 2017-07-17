@@ -26,20 +26,14 @@ import software.amazon.awssdk.utils.Pair;
  * Invoke the {@link RequestHandler#beforeUnmarshalling(software.amazon.awssdk.http.SdkHttpFullRequest, HttpResponse)} callback
  * to allow for pre-processing on the {@link HttpResponse} before it is handed off to the unmarshaller.
  */
-public class BeforeUnmarshallingCallbackStage
+public class BeforeUnmarshallingExecutionInterceptorsStage
         implements RequestPipeline<Pair<SdkHttpFullRequest, HttpResponse>, HttpResponse> {
 
     @Override
     public HttpResponse execute(Pair<SdkHttpFullRequest, HttpResponse> input,
                                 RequestExecutionContext context) throws Exception {
-        // TODO we should consider invoking beforeUnmarshalling regardless of success or error.
-        HttpResponse toReturn = input.right();
-        if (!toReturn.isSuccessful()) {
-            return toReturn;
-        }
-        for (RequestHandler requestHandler : context.executionInterceptors()) {
-            toReturn = requestHandler.beforeUnmarshalling(input.left(), toReturn);
-        }
-        return toReturn;
+        context.interceptorChain().beforeUnmarshalling(context.executionContext().interceptorContext(),
+                                                       context.executionAttributes());
+        return input.right();
     }
 }

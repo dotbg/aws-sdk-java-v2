@@ -24,6 +24,7 @@ import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.RequestToRequestPipeline;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 import software.amazon.awssdk.runtime.auth.SignerProviderContext;
 
@@ -56,7 +57,8 @@ public class SigningStage implements RequestToRequestPipeline {
         if (shouldSign(signer, credentials)) {
             context.awsRequestMetrics().startEvent(AwsRequestMetrics.Field.RequestSigningTime);
             try {
-                return signer.sign(adjustForClockSkew(request), credentials);
+                adjustForClockSkew(context.executionAttributes());
+                return signer.sign(context.executionContext().interceptorContext(), context.executionAttributes());
             } finally {
                 context.awsRequestMetrics().endEvent(AwsRequestMetrics.Field.RequestSigningTime);
             }
@@ -90,13 +92,10 @@ public class SigningStage implements RequestToRequestPipeline {
      * Always use the client level timeOffset if it's non-zero. Otherwise, we respect the timeOffset in the request, which could
      * have been externally configured (at least for the 1st non-retry request).
      */
-    private SdkHttpFullRequest adjustForClockSkew(SdkHttpFullRequest request) {
+    private void adjustForClockSkew(ExecutionAttributes attributes) {
         if (dependencies.timeOffset() != 0) {
-            return request.toBuilder()
-                          .handlerContext(AwsExecutionAttributes.TIME_OFFSET, dependencies.timeOffset())
-                          .build();
+            attributes.putAttribute(AwsExecutionAttributes.TIME_OFFSET, dependencies.timeOffset());
         }
-        return request;
     }
 
 }

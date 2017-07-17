@@ -17,20 +17,17 @@ package software.amazon.awssdk.http;
 
 import software.amazon.awssdk.annotation.NotThreadSafe;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
-import software.amazon.awssdk.annotation.SdkTestInternalApi;
 import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.Signer;
 import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
-import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 import software.amazon.awssdk.runtime.auth.SignerProvider;
-import software.amazon.awssdk.runtime.auth.SignerProviderContext;
-import software.amazon.awssdk.util.AwsRequestMetricsFullSupport;
 import software.amazon.awssdk.utils.Validate;
+import software.amazon.awssdk.utils.builder.CopyableBuilder;
+import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 
 /**
  * @NotThreadSafe This class should only be accessed by a single thread and be used throughout
@@ -38,10 +35,10 @@ import software.amazon.awssdk.utils.Validate;
  */
 @NotThreadSafe
 @SdkProtectedApi
-public class ExecutionContext {
+public class ExecutionContext implements ToCopyableBuilder<ExecutionContext.Builder, ExecutionContext> {
     private final AwsRequestMetrics awsRequestMetrics;
     private final SignerProvider signerProvider;
-    private final DefaultInterceptorContext interceptorContext;
+    private DefaultInterceptorContext interceptorContext;
     private final ExecutionInterceptorChain interceptorChain;
     private final ExecutionAttributes executionAttributes;
 
@@ -56,7 +53,7 @@ public class ExecutionContext {
     private ClientExecutionAbortTrackerTask clientExecutionTrackerTask;
 
     private ExecutionContext(final Builder builder) {
-        this.awsRequestMetrics = builder.useRequestMetrics ? new AwsRequestMetricsFullSupport() : new AwsRequestMetrics();
+        this.awsRequestMetrics = Validate.paramNotNull(builder.awsRequestMetrics, "awsRequestMetrics");
         this.signerProvider = Validate.paramNotNull(builder.signerProvider, "signerProvider");
         this.interceptorContext = Validate.paramNotNull(builder.interceptorContext, "interceptorContext");
         this.interceptorChain = Validate.paramNotNull(builder.interceptorChain, "interceptorChain");
@@ -69,6 +66,12 @@ public class ExecutionContext {
 
     public DefaultInterceptorContext interceptorContext() {
         return interceptorContext;
+    }
+
+    public ExecutionContext interceptorContext(DefaultInterceptorContext interceptorContext) {
+        // TODO: this shouldn't be mutable
+        this.interceptorContext = interceptorContext;
+        return this;
     }
 
     public ExecutionInterceptorChain interceptorChain() {
@@ -132,18 +135,31 @@ public class ExecutionContext {
         this.clientExecutionTrackerTask = clientExecutionTrackerTask;
     }
 
-    public SignerProvider getSignerProvider() {
+    public SignerProvider signerProvider() {
         return signerProvider;
     }
 
-    public static class Builder {
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
+    public static class Builder implements CopyableBuilder<Builder, ExecutionContext> {
         private DefaultInterceptorContext interceptorContext;
         private ExecutionInterceptorChain interceptorChain;
         private ExecutionAttributes executionAttributes;
-        private SignerProvider signerProvider = new NoOpSignerProvider();
-        private boolean useRequestMetrics;
+        private SignerProvider signerProvider;
+        private AwsRequestMetrics awsRequestMetrics;
 
         private Builder() {
+        }
+
+        public Builder(ExecutionContext executionContext) {
+            this.awsRequestMetrics = executionContext.awsRequestMetrics;
+            this.signerProvider = executionContext.signerProvider;
+            this.interceptorContext = executionContext.interceptorContext;
+            this.interceptorChain = executionContext.interceptorChain;
+            this.executionAttributes = executionContext.executionAttributes;
         }
 
         public Builder interceptorContext(DefaultInterceptorContext interceptorContext) {
@@ -151,8 +167,8 @@ public class ExecutionContext {
             return this;
         }
 
-        public Builder useRequestMetrics(boolean withUseRequestMetrics) {
-            this.useRequestMetrics = withUseRequestMetrics;
+        public Builder awsRequestMetrics(AwsRequestMetrics awsRequestMetrics) {
+            this.awsRequestMetrics = awsRequestMetrics;
             return this;
         }
 

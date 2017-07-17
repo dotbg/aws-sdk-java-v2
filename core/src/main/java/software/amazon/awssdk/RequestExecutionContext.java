@@ -36,11 +36,8 @@ public final class RequestExecutionContext {
 
     private final SdkHttpRequestProvider requestProvider;
     private final RequestConfig requestConfig;
-    private final AwsRequestMetrics awsRequestMetrics;
     private final AwsCredentialsProvider credentialsProvider;
-    private final ExecutionInterceptorChain interceptorChain;
-    private final ExecutionAttributes executionAttributes;
-    private final SignerProvider signerProvider;
+    private final ExecutionContext executionContext;
 
     private ClientExecutionAbortTrackerTask clientExecutionTrackerTask;
 
@@ -48,15 +45,12 @@ public final class RequestExecutionContext {
         this.requestProvider = builder.requestProvider;
         this.requestConfig = Validate.paramNotNull(builder.requestConfig, "requestConfig");
 
-        Validate.paramNotNull(builder.executionContext, "executionContext");
-        this.interceptorChain = builder.executionContext.interceptorChain();
-        this.executionAttributes = builder.executionContext.executionAttributes();
-        this.awsRequestMetrics = builder.executionContext.awsRequestMetrics();
-        this.signerProvider = builder.executionContext.getSignerProvider();
+        this.executionContext = Validate.paramNotNull(builder.executionContext, "executionContext");
 
         AwsCredentialsProvider contextCredentialsProvider = builder.executionContext.getCredentialsProvider();
         this.credentialsProvider = contextCredentialsProvider != null
-                                   ? new MetricsReportingCredentialsProvider(contextCredentialsProvider, awsRequestMetrics)
+                                   ? new MetricsReportingCredentialsProvider(contextCredentialsProvider,
+                                                                             builder.executionContext.awsRequestMetrics())
                                    : new AnonymousCredentialsProvider();
     }
 
@@ -82,18 +76,23 @@ public final class RequestExecutionContext {
      * @return Execution interceptors to hook into execution lifecycle.
      */
     public ExecutionInterceptorChain interceptorChain() {
-        return interceptorChain;
+        return executionContext.interceptorChain();
     }
 
     public ExecutionAttributes executionAttributes() {
-        return executionAttributes;
+        return executionContext.executionAttributes();
+    }
+
+    public ExecutionContext executionContext() {
+        // TODO: This should be cleaned up. Why delegate for others, but return here?
+        return executionContext;
     }
 
     /**
      * @return AwsRequestMetrics object to report timing and events.
      */
     public AwsRequestMetrics awsRequestMetrics() {
-        return awsRequestMetrics;
+        return executionContext.awsRequestMetrics();
     }
 
     /**
@@ -107,7 +106,7 @@ public final class RequestExecutionContext {
      * @return SignerProvider used to obtain an instance of a {@link software.amazon.awssdk.auth.Signer}.
      */
     public SignerProvider signerProvider() {
-        return signerProvider;
+        return executionContext.signerProvider();
     }
 
     /**

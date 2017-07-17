@@ -30,17 +30,11 @@ import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 public class DefaultFailedExecutionInterceptorContext
         implements ToCopyableBuilder<DefaultFailedExecutionInterceptorContext.Builder, DefaultFailedExecutionInterceptorContext>,
                    FailedExecutionContext {
-    private SdkRequest request;
-    private SdkHttpFullRequest httpRequest;
-    private SdkHttpFullResponse httpResponse;
-    private SdkResponse response;
-    private Exception exception;
+    private final DefaultInterceptorContext interceptorContext;
+    private final Exception exception;
 
     private DefaultFailedExecutionInterceptorContext(Builder builder) {
-        this.request = Validate.paramNotNull(builder.request, "request");
-        this.httpRequest = builder.httpRequest;
-        this.httpResponse = builder.httpResponse;
-        this.response = builder.response;
+        this.interceptorContext = Validate.paramNotNull(builder.interceptorContext, "interceptorContext");
         this.exception = Validate.paramNotNull(builder.exception, "exception");
     }
 
@@ -55,22 +49,22 @@ public class DefaultFailedExecutionInterceptorContext
 
     @Override
     public SdkRequest request() {
-        return request;
+        return interceptorContext.request();
     }
 
     @Override
     public Optional<SdkHttpFullRequest> httpRequest() {
-        return Optional.ofNullable(httpRequest);
+        return Optional.ofNullable(interceptorContext.httpRequest());
     }
 
     @Override
     public Optional<SdkHttpFullResponse> httpResponse() {
-        return Optional.ofNullable(httpResponse);
+        return Optional.ofNullable(interceptorContext.httpResponse());
     }
 
     @Override
     public Optional<SdkResponse> response() {
-        return Optional.ofNullable(response);
+        return Optional.ofNullable(interceptorContext.response());
     }
 
     @Override
@@ -80,10 +74,7 @@ public class DefaultFailedExecutionInterceptorContext
 
     @NotThreadSafe
     public static final class Builder implements CopyableBuilder<Builder, DefaultFailedExecutionInterceptorContext> {
-        private SdkRequest request;
-        private SdkHttpFullRequest httpRequest;
-        private SdkHttpFullResponse httpResponse;
-        private SdkResponse response;
+        private DefaultInterceptorContext interceptorContext;
         private Exception exception;
 
         private Builder() {
@@ -91,30 +82,12 @@ public class DefaultFailedExecutionInterceptorContext
         }
 
         private Builder(DefaultFailedExecutionInterceptorContext context) {
-            this.request = context.request;
-            this.httpRequest = context.httpRequest;
-            this.httpResponse = context.httpResponse;
-            this.response = context.response;
+            this.interceptorContext = context.interceptorContext;
             this.exception = context.exception;
         }
 
-        public Builder request(SdkRequest request) {
-            this.request = request;
-            return this;
-        }
-
-        public Builder httpRequest(SdkHttpFullRequest httpRequest) {
-            this.httpRequest = httpRequest;
-            return this;
-        }
-
-        public Builder httpResponse(SdkHttpFullResponse httpResponse) {
-            this.httpResponse = httpResponse;
-            return this;
-        }
-
-        public Builder response(SdkResponse response) {
-            this.response = response;
+        public Builder interceptorContext(DefaultInterceptorContext interceptorContext) {
+            this.interceptorContext = interceptorContext;
             return this;
         }
 

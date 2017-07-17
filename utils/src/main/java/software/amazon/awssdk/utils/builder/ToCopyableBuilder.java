@@ -15,7 +15,7 @@
 
 package software.amazon.awssdk.utils.builder;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Implementors of this interface provide a way to get from an instance of T to a {@link CopyableBuilder}. This allows
@@ -39,9 +39,9 @@ public interface ToCopyableBuilder<B extends CopyableBuilder<B, T>, T extends To
      * @param modifier A function that mutates this immutable object using the provided builder.
      * @return A new copy of this object with the requested modifications.
      */
-    default T modify(BiConsumer<T, B> modifier) {
+    default T modify(Consumer<B> modifier) {
         return toBuilder().apply(b -> {
-            modifier.accept((T) this, b);
+            modifier.accept(b);
             return b;
         }).build();
     }

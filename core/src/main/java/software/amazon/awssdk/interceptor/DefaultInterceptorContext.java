@@ -37,9 +37,9 @@ public class DefaultInterceptorContext
 
     private DefaultInterceptorContext(Builder builder) {
         this.request = Validate.paramNotNull(builder.request, "request");
-        this.httpRequest = Validate.paramNotNull(builder.httpRequest, "httpRequest");
-        this.httpResponse = Validate.paramNotNull(builder.httpResponse, "httpResponse");
-        this.response = Validate.paramNotNull(builder.response, "response");
+        this.httpRequest = builder.httpRequest;
+        this.httpResponse = builder.httpResponse;
+        this.response = builder.response;
     }
 
     public static Builder builder() {

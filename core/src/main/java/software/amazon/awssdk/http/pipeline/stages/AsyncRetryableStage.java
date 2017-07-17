@@ -63,12 +63,15 @@ public class AsyncRetryableStage<OutputT> implements RequestPipeline<SdkHttpFull
     private final CapacityManager retryCapacity;
     private final RetryPolicy retryPolicy;
 
-    public AsyncRetryableStage(HttpAsyncClientDependencies dependencies,
+    public AsyncRetryableStage(HttpClientDependencies dependencies,
                                RequestPipeline<SdkHttpFullRequest, CompletableFuture<Response<OutputT>>> requestPipeline) {
+        // TODO: Ewww!
+        HttpAsyncClientDependencies asyncDependencies = (HttpAsyncClientDependencies) dependencies;
+
         this.dependencies = dependencies;
-        this.retrySubmitter = dependencies.asyncClientConfiguration().asyncExecutorService();
+        this.retrySubmitter = asyncDependencies.asyncClientConfiguration().asyncExecutorService();
         this.retryCapacity = dependencies.retryCapacity();
-        this.retryPolicy = dependencies.asyncClientConfiguration().overrideConfiguration().retryPolicy();
+        this.retryPolicy = asyncDependencies.asyncClientConfiguration().overrideConfiguration().retryPolicy();
         this.requestPipeline = requestPipeline;
     }
 

@@ -68,12 +68,15 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
     public <InputT, OutputT> CompletableFuture<OutputT> execute(ClientExecutionParams<InputT, OutputT> executionParams) {
         final InputT inputT = executionParams.getInput();
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
+        runBeforeExecutionInterceptors(executionContext);
+        runModifyRequestInterceptors(executionContext);
         AwsRequestMetrics awsRequestMetrics = executionContext.awsRequestMetrics();
         awsRequestMetrics.startEvent(AwsRequestMetrics.Field.ClientExecuteTime);
         Request<InputT> request;
 
         awsRequestMetrics.startEvent(AwsRequestMetrics.Field.RequestMarshallTime);
         try {
+            runBeforeMarshallingInterceptors(executionContext);
             request = executionParams.getMarshaller().marshall(inputT);
             request.setAwsRequestMetrics(awsRequestMetrics);
             request.setEndpoint(asyncClientConfiguration.endpoint());
@@ -88,6 +91,10 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
         }
 
         SdkHttpFullRequest marshalled = SdkHttpFullRequestAdapter.toHttpFullRequest(request);
+        addHttpRequest(executionContext, marshalled);
+        runAfterMarshallingInterceptors(executionContext);
+        runModifyHttpRequestInterceptors(executionContext);
+
         SdkHttpRequestProvider requestProvider = executionParams.getAsyncRequestProvider() != null ?
                 adaptAsyncRequestProvider(executionParams.getAsyncRequestProvider()) : null;
 
@@ -110,7 +117,11 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
                         if (err != null) {
                             throw Throwables.failure(err);
                         }
+                        runAfterExecutionInterceptors(executionContext);
                         return resp;
+                    } catch (Exception e) {
+                        runOnFailureInterceptors(executionContext, e);
+                        throw e;
                     } finally {
                         endClientExecution(awsRequestMetrics, executionParams.getRequestConfig(), request, resp);
                     }

@@ -66,7 +66,7 @@ public class SyncClientHandlerImpl extends ClientHandler {
         try {
             awsRequestMetrics.startEvent(AwsRequestMetrics.Field.RequestMarshallTime);
             try {
-//                InputT tryBeforeMarshalling = tryBeforeMarshalling(inputT);
+                runBeforeMarshallingInterceptors(executionContext);
                 request = executionParams.getMarshaller().marshall(inputT);
                 request.setAwsRequestMetrics(awsRequestMetrics);
                 request.setEndpoint(syncClientConfiguration.endpoint());
@@ -79,41 +79,30 @@ public class SyncClientHandlerImpl extends ClientHandler {
             }
 
             SdkHttpFullRequest marshalled = SdkHttpFullRequestAdapter.toHttpFullRequest(request);
+            addHttpRequest(executionContext, marshalled);
+            runAfterMarshallingInterceptors(executionContext);
+            runModifyHttpRequestInterceptors(executionContext);
+
             response = invoke(marshalled,
-                          executionParams.getRequestConfig(),
-                          executionContext,
-                          executionParams.getResponseHandler(),
-                          executionParams.getErrorResponseHandler());
+                              executionParams.getRequestConfig(),
+                              executionContext,
+                              executionParams.getResponseHandler(),
+                              executionParams.getErrorResponseHandler());
+
+            runAfterExecutionInterceptors(executionContext);
             return response;
+        } catch (RuntimeException e) {
+            runOnFailureInterceptors(executionContext, e);
+            throw e;
         } finally {
             endClientExecution(awsRequestMetrics, executionParams.getRequestConfig(), request, response);
         }
-    }
-
-    private void runModifyRequestInterceptors(ExecutionContext executionContext) {
-
     }
 
     @Override
     public void close() throws Exception {
         client.close();
     }
-
-//    /**
-//     * Runs the {@code beforeMarshalling} method of any {@code RequestHandler2}s associated with
-//     * this client.
-//     *
-//     * @param request the request passed in from the user
-//     * @return The (possibly different) request to marshall
-//     */
-//    @SuppressWarnings("unchecked")
-//    private <T extends AmazonWebServiceRequest> T beforeMarshalling(T request) {
-//        T local = request;
-//        for (RequestHandler handler : requestHandlers) {
-//            local = (T) handler.beforeMarshalling(local);
-//        }
-//        return local;
-//    }
 
     /**
      * Normal invoke with authentication. Credentials are required and may be overriden at the
@@ -147,10 +136,5 @@ public class SyncClientHandlerImpl extends ClientHandler {
                      .executionContext(executionContext)
                      .errorResponseHandler(errorResponseHandler)
                      .execute(responseHandler);
-    }
-
-    private void runBeforeExecutionInterceptors(ExecutionContext executionContext) {
-        executionContext.interceptorChain().beforeExecution(executionContext.interceptorContext(),
-                                                            executionContext.executionAttributes());
     }
 }

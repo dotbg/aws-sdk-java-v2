@@ -23,9 +23,11 @@ import org.reactivestreams.Publisher;
 import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.Response;
 import software.amazon.awssdk.SdkBaseException;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.event.ProgressEventType;
 import software.amazon.awssdk.event.ProgressListener;
 import software.amazon.awssdk.http.AmazonHttpClient;
+import software.amazon.awssdk.http.HttpAsyncClientDependencies;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpStatusCodes;
@@ -40,6 +42,7 @@ import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.http.async.SimpleRequestProvider;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
+import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
 
 /**
  * Delegate to the HTTP implementation to make an HTTP request and receive the response.
@@ -54,9 +57,11 @@ public class MakeAsyncHttpRequestStage<OutputT>
     public MakeAsyncHttpRequestStage(SdkHttpResponseHandler<OutputT> responseHandler,
                                      SdkHttpResponseHandler<? extends SdkBaseException> errorResponseHandler,
                                      HttpClientDependencies dependencies) {
+        // TODO: Ewww!
+        HttpAsyncClientDependencies asyncDependencies = (HttpAsyncClientDependencies) dependencies;
         this.responseHandler = responseHandler;
         this.errorResponseHandler = errorResponseHandler;
-        this.sdkAsyncHttpClient = dependencies.sdkAsyncHttpClient();
+        this.sdkAsyncHttpClient = asyncDependencies.sdkAsyncHttpClient();
     }
 
     /**
@@ -77,7 +82,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
                                                                     ProgressListener listener) throws Exception {
         CompletableFuture<Response<OutputT>> future = new CompletableFuture<>();
 
-        SdkHttpResponseHandler<Response<OutputT>> handler = new ResponseHandler(request, future, listener);
+        SdkHttpResponseHandler<Response<OutputT>> handler = new ResponseHandler(request, future, listener, context);
 
         SdkHttpRequestProvider requestProvider = context.requestProvider() == null ? new SimpleRequestProvider(request)
                 : context.requestProvider();
@@ -122,6 +127,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
         private final ProgressListener listener;
         private final SdkHttpFullRequest request;
         private final CompletableFuture<Response<OutputT>> future;
+        private final RequestExecutionContext context;
 
         private volatile SdkHttpResponse response;
         private volatile boolean isSuccess = false;
@@ -130,13 +136,16 @@ public class MakeAsyncHttpRequestStage<OutputT>
          * @param request  Request being made
          * @param future   Future to notify when response has been handled.
          * @param listener Listener to report HTTP end event.
+         * @param context The current request execution context
          */
         private ResponseHandler(SdkHttpFullRequest request,
                                 CompletableFuture<Response<OutputT>> future,
-                                ProgressListener listener) {
+                                ProgressListener listener,
+                                RequestExecutionContext context) {
             this.listener = listener;
             this.request = request;
             this.future = future;
+            this.context = context;
         }
 
         @Override
@@ -168,11 +177,30 @@ public class MakeAsyncHttpRequestStage<OutputT>
 
         @Override
         public Response<OutputT> complete() {
+            SdkHttpFullResponse httpFullResponse = (SdkHttpFullResponse) this.response;
+
             publishProgress(listener, ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT);
-            final HttpResponse httpResponse = SdkHttpResponseAdapter.adapt(false, request, (SdkHttpFullResponse) response);
+            beforeUnmarshalling(httpFullResponse); // TODO: Why so gross?!
+            final HttpResponse httpResponse = SdkHttpResponseAdapter.adapt(false, request, httpFullResponse);
             Response<OutputT> toReturn = handleResponse(httpResponse);
             future.complete(toReturn);
             return toReturn;
+        }
+
+        private void beforeUnmarshalling(SdkHttpFullResponse response) {
+            // TODO: Duplicate code
+            // Update interceptor context
+            DefaultInterceptorContext interceptorContext =
+                    context.executionContext().interceptorContext().modify(b -> b.httpResponse(response));
+
+            // interceptors.afterTransmission
+            context.interceptorChain().afterTransmission(interceptorContext, context.executionAttributes());
+
+            // interceptors.modifyHttpResponse
+            interceptorContext = context.interceptorChain().modifyHttpResponse(interceptorContext, context.executionAttributes());
+
+            // Store updated context
+            context.executionContext().interceptorContext(interceptorContext);
         }
 
         /**
@@ -184,10 +212,33 @@ public class MakeAsyncHttpRequestStage<OutputT>
 
         private Response<OutputT> handleResponse(HttpResponse httpResponse) {
             if (isSuccess) {
-                return Response.fromSuccess(responseHandler.complete(), httpResponse);
+                OutputT response = callExecutionInterceptors(responseHandler.complete());
+                return Response.fromSuccess(response, httpResponse);
             } else {
                 return Response.fromFailure(errorResponseHandler.complete(), httpResponse);
             }
+        }
+
+        private OutputT callExecutionInterceptors(OutputT legacyResponse) {
+            // TODO: Duplicate code
+            // Super-huge hack. Drop this when we drop the Response<> type.
+            SdkResponse response = (SdkResponse) legacyResponse;
+
+            // Update interceptor context
+            DefaultInterceptorContext interceptorContext =
+                    context.executionContext().interceptorContext().modify(b -> b.response(response));
+
+            // interceptors.afterUnmarshalling
+            context.interceptorChain().afterUnmarshalling(interceptorContext, context.executionAttributes());
+
+            // interceptors.modifyResponse
+            interceptorContext = context.interceptorChain().modifyResponse(interceptorContext, context.executionAttributes());
+
+            // Store updated context
+            context.executionContext().interceptorContext(interceptorContext);
+
+            // Super-huge hack. Drop this when we drop the Response<> type.
+            return (OutputT) interceptorContext.response();
         }
     }
 }

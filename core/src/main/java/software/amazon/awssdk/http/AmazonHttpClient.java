@@ -33,10 +33,11 @@ import software.amazon.awssdk.config.SyncClientConfiguration;
 import software.amazon.awssdk.http.exception.SdkInterruptedException;
 import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
 import software.amazon.awssdk.http.pipeline.stages.AfterCallbackStage;
+import software.amazon.awssdk.http.pipeline.stages.AfterTransmissionExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyTransactionIdStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyUserAgentStage;
-import software.amazon.awssdk.http.pipeline.stages.BeforeRequestHandlersStage;
-import software.amazon.awssdk.http.pipeline.stages.BeforeUnmarshallingCallbackStage;
+import software.amazon.awssdk.http.pipeline.stages.BeforeTransmissionExecutionInterceptorsStage;
+import software.amazon.awssdk.http.pipeline.stages.BeforeUnmarshallingExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.ClientExecutionTimedStage;
 import software.amazon.awssdk.http.pipeline.stages.ExceptionReportingStage;
 import software.amazon.awssdk.http.pipeline.stages.HandleResponseStage;
@@ -388,9 +389,8 @@ public class AmazonHttpClient implements AutoCloseable {
         public <OutputT> OutputT execute(HttpResponseHandler<OutputT> responseHandler) {
             try {
                 return RequestPipelineBuilder
-                        .first(BeforeRequestHandlersStage::new)
                         // Start of mutating request
-                        .then(MakeRequestMutable::new)
+                        .first(MakeRequestMutable::new)
                         .then(ApplyTransactionIdStage::new)
                         .then(ApplyUserAgentStage::new)
                         .then(MergeCustomHeadersStage::new)
@@ -401,10 +401,12 @@ public class AmazonHttpClient implements AutoCloseable {
                         .then(ReportRequestContentLengthStage::new)
                         .then(RequestPipelineBuilder
                                       .first(SigningStage::new)
+                                      .then(BeforeTransmissionExecutionInterceptorsStage::new)
                                       .then(MakeHttpRequestStage::new)
+                                      .then(AfterTransmissionExecutionInterceptorsStage::new)
                                       .then(HttpResponseAdaptingStage::new)
                                       .then(InstrumentHttpResponseContentStage::new)
-                                      .then(BeforeUnmarshallingCallbackStage::new)
+                                      .then(BeforeUnmarshallingExecutionInterceptorsStage::new)
                                       .then(() -> new HandleResponseStage<>(getNonNullResponseHandler(responseHandler),
                                                                             getNonNullResponseHandler(errorResponseHandler)))
                                       .wrap(ExceptionReportingStage::new)

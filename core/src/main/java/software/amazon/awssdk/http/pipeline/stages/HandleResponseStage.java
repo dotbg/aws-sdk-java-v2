@@ -24,12 +24,15 @@ import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.Response;
 import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.SdkClientException;
+import software.amazon.awssdk.SdkResponse;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.event.ProgressEventType;
 import software.amazon.awssdk.event.ProgressListener;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
+import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 
 /**
@@ -38,6 +41,7 @@ import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
  *
  * @param <OutputT> Type of successful unmarshalled POJO.
  */
+@ReviewBeforeRelease("Should this be broken up? It's doing quite a lot...")
 public class HandleResponseStage<OutputT> implements RequestPipeline<HttpResponse, Response<OutputT>> {
 
     private final HttpResponseHandler<OutputT> successResponseHandler;
@@ -51,24 +55,46 @@ public class HandleResponseStage<OutputT> implements RequestPipeline<HttpRespons
 
     @Override
     public Response<OutputT> execute(HttpResponse httpResponse, RequestExecutionContext context) throws Exception {
-        Optional<Response<OutputT>> response = Optional.empty();
+        boolean didRequestFail = true;
         try {
-            response = Optional.of(handleResponse(httpResponse, context));
+            Response<OutputT> response = handleResponse(httpResponse, context);
+            didRequestFail = didRequestFail(response);
+            return response;
         } finally {
-            closeInputStreamIfNeeded(httpResponse, didRequestFail(response));
+            closeInputStreamIfNeeded(httpResponse, didRequestFail);
         }
-
-        return response.orElseThrow(() -> new IllegalStateException("Response should not be null"));
     }
 
     private Response<OutputT> handleResponse(HttpResponse httpResponse,
                                              RequestExecutionContext context)
             throws IOException, InterruptedException {
         if (httpResponse.isSuccessful()) {
-            return Response.fromSuccess(handleSuccessResponse(httpResponse, context), httpResponse);
+            OutputT response = callExecutionInterceptors(handleSuccessResponse(httpResponse, context), context);
+            return Response.fromSuccess(response, httpResponse);
         } else {
             return Response.fromFailure(handleErrorResponse(httpResponse), httpResponse);
         }
+    }
+
+    private OutputT callExecutionInterceptors(OutputT legacyResponse, RequestExecutionContext context) {
+        // Super-huge hack. Drop this when we drop the Response<> type.
+        SdkResponse response = (SdkResponse) legacyResponse;
+
+        // Update interceptor context
+        DefaultInterceptorContext interceptorContext =
+                context.executionContext().interceptorContext().modify(b -> b.response(response));
+
+        // interceptors.afterUnmarshalling
+        context.interceptorChain().afterUnmarshalling(interceptorContext, context.executionAttributes());
+
+        // interceptors.modifyResponse
+        interceptorContext = context.interceptorChain().modifyResponse(interceptorContext, context.executionAttributes());
+
+        // Store updated context
+        context.executionContext().interceptorContext(interceptorContext);
+
+        // Super-huge hack. Drop this when we drop the Response<> type.
+        return (OutputT) interceptorContext.response();
     }
 
     /**
@@ -156,7 +182,7 @@ public class HandleResponseStage<OutputT> implements RequestPipeline<HttpRespons
      * @param response Optional of unmarshalled response.
      * @return True if the response was a failure. False if it was a success.
      */
-    private boolean didRequestFail(Optional<Response<OutputT>> response) {
-        return response.map(Response::isFailure).orElse(true);
+    private boolean didRequestFail(Response<OutputT> response) {
+        return response.isFailure();
     }
 }

@@ -16,23 +16,14 @@
 package software.amazon.awssdk.http.pipeline.stages;
 
 import software.amazon.awssdk.RequestExecutionContext;
-import software.amazon.awssdk.handlers.RequestHandler;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.RequestToRequestPipeline;
 
-/**
- * Runs the {@link RequestHandler#beforeRequest(SdkHttpFullRequest)} callback to pre-process the marshalled request before
- * making an HTTP call.
- */
-public class BeforeRequestHandlersStage implements RequestToRequestPipeline {
-
+public class BeforeTransmissionExecutionInterceptorsStage implements RequestToRequestPipeline {
     @Override
-    public SdkHttpFullRequest execute(SdkHttpFullRequest request, RequestExecutionContext context) throws Exception {
-        // Apply any additional service specific request handlers that need to be run
-//        for (RequestHandler requestHandler : context.interceptorChain()) {
-//            toReturn = requestHandler.beforeRequest(toReturn);
-//        }
-//        return toReturn;
-        return request;
+    public SdkHttpFullRequest execute(SdkHttpFullRequest input, RequestExecutionContext context) throws Exception {
+        context.interceptorChain().beforeTransmission(context.executionContext().interceptorContext(),
+                                                      context.executionAttributes());
+        return input;
     }
 }
