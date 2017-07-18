@@ -20,6 +20,15 @@ import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
+import software.amazon.awssdk.interceptor.context.AfterExecutionContext;
+import software.amazon.awssdk.interceptor.context.AfterMarshallingContext;
+import software.amazon.awssdk.interceptor.context.AfterTransmissionContext;
+import software.amazon.awssdk.interceptor.context.AfterUnmarshallingContext;
+import software.amazon.awssdk.interceptor.context.BeforeExecutionContext;
+import software.amazon.awssdk.interceptor.context.BeforeMarshallingContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeUnmarshallingContext;
+import software.amazon.awssdk.interceptor.context.FailedExecutionContext;
 
 /**
  * An interceptor that is invoked during the execution lifecycle of a request/response (execution). This can be used to publish
@@ -65,51 +74,52 @@ public interface ExecutionInterceptor {
      * @param executionAttributes A mutable set of attributes scoped to one specific request/response cycle that can be used to
      *                            give data to future lifecycle methods.
      */
-    default void beforeExecution(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeExecution(BeforeExecutionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkRequest modifyRequest(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default SdkRequest modifyRequest(BeforeMarshallingContext execution, ExecutionAttributes executionAttributes) {
         return execution.request();
     }
 
-    default void beforeMarshalling(BeforeRequestMarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeMarshalling(BeforeMarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default void afterMarshalling(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    default void afterMarshalling(AfterMarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    default SdkHttpFullRequest modifyHttpRequest(BeforeTransmissionContext execution,
+                                                 ExecutionAttributes executionAttributes) {
         return execution.httpRequest();
     }
 
-    default void beforeTransmission(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeTransmission(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default void afterTransmission(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default void afterTransmission(AfterTransmissionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkHttpFullResponse modifyHttpResponse(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default SdkHttpFullResponse modifyHttpResponse(BeforeUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
         return execution.httpResponse();
     }
 
-    default void beforeUnmarshalling(BeforeResponseUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default void beforeUnmarshalling(BeforeUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default void afterUnmarshalling(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
+    default void afterUnmarshalling(AfterUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
 
     }
 
-    default SdkResponse modifyResponse(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
+    default SdkResponse modifyResponse(AfterExecutionContext execution, ExecutionAttributes executionAttributes) {
         return execution.response();
     }
 
-    default void afterExecution(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
+    default void afterExecution(AfterExecutionContext execution, ExecutionAttributes executionAttributes) {
 
     }
 

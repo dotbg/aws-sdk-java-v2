@@ -95,7 +95,7 @@ public class ExecutionInterceptorIntegrationTest extends AwsIntegrationTestBase 
 //        final String injectedTableName = "SomeInjectedTableName";
 //        ExecutionInterceptor executionInterceptor = new ExecutionInterceptor() {
 //            @Override
-//            public SdkHttpFullResponse modifyHttpResponse(BeforeResponseUnmarshallingContext execution,
+//            public SdkHttpFullResponse modifyHttpResponse(AfterTransmissionContext execution,
 //                                                          ExecutionAttributes executionAttributes) {
 //                try {
 //                    String newContent = "{\"TableNames\":[\"" + injectedTableName + "\"]}";

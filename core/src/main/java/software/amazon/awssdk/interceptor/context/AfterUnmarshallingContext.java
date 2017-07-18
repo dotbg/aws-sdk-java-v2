@@ -13,14 +13,14 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.interceptor;
+package software.amazon.awssdk.interceptor.context;
 
-import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.annotation.SdkPublicApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
 
 @ThreadSafe
 @SdkPublicApi
-public interface BeforeRequestMarshallingContext {
-    SdkRequest request();
+public interface AfterUnmarshallingContext extends BeforeUnmarshallingContext {
+    SdkResponse response();
 }

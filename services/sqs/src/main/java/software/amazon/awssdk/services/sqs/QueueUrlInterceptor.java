@@ -24,7 +24,7 @@ import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 
 /**
  * Custom request handler for SQS that processes the request before it gets routed to the client
@@ -38,7 +38,7 @@ public class QueueUrlInterceptor implements ExecutionInterceptor {
     private static final String QUEUE_URL_PARAMETER = "QueueUrl";
 
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
 
         final Map<String, List<String>> requestParams = request.getParameters();

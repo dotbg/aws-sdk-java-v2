@@ -13,26 +13,14 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.interceptor;
+package software.amazon.awssdk.interceptor.context;
 
-import java.util.Optional;
 import software.amazon.awssdk.SdkRequest;
-import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.annotation.SdkPublicApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.http.SdkHttpFullResponse;
 
 @ThreadSafe
 @SdkPublicApi
-public interface FailedExecutionContext {
+public interface BeforeExecutionContext {
     SdkRequest request();
-
-    Optional<SdkHttpFullRequest> httpRequest();
-
-    Optional<SdkHttpFullResponse> httpResponse();
-
-    Optional<SdkResponse> response();
-
-    Exception exception();
 }

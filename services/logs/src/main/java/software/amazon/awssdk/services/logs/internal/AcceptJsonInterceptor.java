@@ -18,11 +18,11 @@ package software.amazon.awssdk.services.logs.internal;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 
 public final class AcceptJsonInterceptor implements ExecutionInterceptor {
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
         return execution.httpRequest()
                         .toBuilder()
                         .header("Accept", "application/json")

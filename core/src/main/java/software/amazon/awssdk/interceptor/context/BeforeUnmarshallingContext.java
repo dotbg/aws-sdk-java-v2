@@ -13,19 +13,12 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.auth;
+package software.amazon.awssdk.interceptor.context;
 
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
+import software.amazon.awssdk.annotation.SdkPublicApi;
+import software.amazon.awssdk.annotation.ThreadSafe;
 
-/**
- * A No-Op Signer Implementation.
- */
-public class NoOpSigner implements Signer {
-
-    @Override
-    public SdkHttpFullRequest sign(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
-        return execution.httpRequest();
-    }
+@ThreadSafe
+@SdkPublicApi
+public interface BeforeUnmarshallingContext extends AfterTransmissionContext {
 }

@@ -13,17 +13,14 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.interceptor;
+package software.amazon.awssdk.interceptor.context;
 
-import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.annotation.SdkPublicApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
-import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpFullResponse;
 
 @ThreadSafe
 @SdkPublicApi
-public interface BeforeRequestTransmissionContext {
-    SdkRequest request();
-
-    SdkHttpFullRequest httpRequest();
+public interface AfterTransmissionContext extends BeforeTransmissionContext {
+    SdkHttpFullResponse httpResponse();
 }

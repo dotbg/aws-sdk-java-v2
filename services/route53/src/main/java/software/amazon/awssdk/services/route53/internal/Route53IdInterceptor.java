@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.BeforeResponseCompletionContext;
+import software.amazon.awssdk.interceptor.context.AfterExecutionContext;
 import software.amazon.awssdk.services.route53.model.AliasTarget;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsResponse;
@@ -48,7 +48,7 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
  */
 public class Route53IdInterceptor implements ExecutionInterceptor {
     @Override
-    public SdkResponse modifyResponse(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
+    public SdkResponse modifyResponse(AfterExecutionContext execution, ExecutionAttributes executionAttributes) {
         SdkResponse response = execution.response();
         if (response instanceof ChangeResourceRecordSetsResponse) {
             ChangeResourceRecordSetsResponse result = (ChangeResourceRecordSetsResponse) response;

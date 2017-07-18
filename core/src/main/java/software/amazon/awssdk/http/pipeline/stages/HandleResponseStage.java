@@ -32,7 +32,7 @@ import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
-import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 
 /**

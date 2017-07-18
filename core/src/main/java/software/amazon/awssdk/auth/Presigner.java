@@ -18,7 +18,7 @@ package software.amazon.awssdk.auth;
 import java.util.Date;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 
 /**
  * A request signer that has special-case logic to presign requests, generating
@@ -33,7 +33,7 @@ public interface Presigner {
      * @param signingRequest The data required for performing the signing
      * @param expiration    The time when this presigned URL will expire.
      */
-    SdkHttpFullRequest presignRequest(BeforeRequestTransmissionContext execution,
+    SdkHttpFullRequest presignRequest(BeforeTransmissionContext execution,
                                       ExecutionAttributes executionAttributes,
                                       Date expiration);
 }

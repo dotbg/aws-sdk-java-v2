@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.interceptor;
+package software.amazon.awssdk.interceptor.context;
 
 import java.util.Optional;
 import software.amazon.awssdk.SdkRequest;

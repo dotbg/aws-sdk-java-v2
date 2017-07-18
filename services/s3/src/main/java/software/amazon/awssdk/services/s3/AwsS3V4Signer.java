@@ -27,7 +27,7 @@ import software.amazon.awssdk.auth.Aws4Signer;
 import software.amazon.awssdk.auth.internal.Aws4SignerRequestParams;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpRequest;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 import software.amazon.awssdk.services.s3.auth.AwsChunkedEncodingInputStream;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
@@ -138,7 +138,7 @@ public class AwsS3V4Signer extends Aws4Signer {
     private boolean useChunkEncoding(Aws4SignerRequestParams signerRequestParams) {
         // If chunked encoding is explicitly disabled through client options return right here.
         // Chunked encoding only makes sense to do when the payload is signed
-        BeforeRequestTransmissionContext execution = signerRequestParams.getMarshalledRequestContext();
+        BeforeTransmissionContext execution = signerRequestParams.getMarshalledRequestContext();
         if (!isPayloadSigningEnabled(execution.httpRequest()) ||
             isChunkedEncodingDisabled()) {
             return false;

@@ -25,7 +25,7 @@ import software.amazon.awssdk.SdkClientException;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 import software.amazon.awssdk.util.CredentialUtils;
 
 /**
@@ -47,7 +47,7 @@ public class QueryStringSigner extends AbstractAwsSigner {
      * @param request     request to be signed.
      * @param credentials The credentials used to use to sign the request.
      */
-    public SdkHttpFullRequest sign(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes)
+    public SdkHttpFullRequest sign(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes)
             throws SdkClientException {
         // annonymous credentials, don't sign
         if (CredentialUtils.isAnonymous(executionAttributes.getAttribute(AWS_CREDENTIALS))) {

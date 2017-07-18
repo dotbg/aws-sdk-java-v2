@@ -18,6 +18,8 @@ package software.amazon.awssdk.interceptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import software.amazon.awssdk.interceptor.context.DefaultFailedExecutionInterceptorContext;
+import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
 import software.amazon.awssdk.utils.Validate;
 
 public class ExecutionInterceptorChain {

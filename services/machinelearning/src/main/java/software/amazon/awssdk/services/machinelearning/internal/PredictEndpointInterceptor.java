@@ -21,7 +21,7 @@ import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 import software.amazon.awssdk.services.machinelearning.model.PredictRequest;
 
 /**
@@ -32,7 +32,7 @@ import software.amazon.awssdk.services.machinelearning.model.PredictRequest;
 public class PredictEndpointInterceptor implements ExecutionInterceptor {
 
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
         Object originalRequest = execution.request();
         if (originalRequest instanceof PredictRequest) {

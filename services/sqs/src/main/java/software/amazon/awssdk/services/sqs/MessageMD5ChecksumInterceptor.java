@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.BeforeResponseCompletionContext;
+import software.amazon.awssdk.interceptor.context.AfterUnmarshallingContext;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
@@ -72,7 +72,7 @@ public class MessageMD5ChecksumInterceptor implements ExecutionInterceptor {
     private static final Log log = LogFactory.getLog(MessageMD5ChecksumInterceptor.class);
 
     @Override
-    public void afterUnmarshalling(BeforeResponseCompletionContext execution, ExecutionAttributes executionAttributes) {
+    public void afterUnmarshalling(AfterUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
         Object response = execution.response();
         Object originalRequest = execution.request();
         if (response != null) {

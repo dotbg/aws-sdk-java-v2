@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.interceptor;
+package software.amazon.awssdk.interceptor.context;
 
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.SdkResponse;
@@ -27,9 +27,8 @@ import software.amazon.awssdk.utils.builder.CopyableBuilder;
 import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 
 @SdkInternalApi
-public class DefaultInterceptorContext
-        implements BeforeRequestMarshallingContext, BeforeRequestTransmissionContext, BeforeResponseCompletionContext,
-                   BeforeResponseUnmarshallingContext,
+public final class DefaultInterceptorContext
+        implements AfterExecutionContext,
                    ToCopyableBuilder<DefaultInterceptorContext.Builder, DefaultInterceptorContext> {
     private SdkRequest request;
     private SdkHttpFullRequest httpRequest;
@@ -52,18 +51,22 @@ public class DefaultInterceptorContext
         return new Builder(this);
     }
 
+    @Override
     public SdkRequest request() {
         return request;
     }
 
+    @Override
     public SdkHttpFullRequest httpRequest() {
         return httpRequest;
     }
 
+    @Override
     public SdkHttpFullResponse httpResponse() {
         return httpResponse;
     }
 
+    @Override
     public SdkResponse response() {
         return response;
     }

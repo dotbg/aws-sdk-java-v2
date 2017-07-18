@@ -19,7 +19,7 @@ import software.amazon.awssdk.annotation.NotThreadSafe;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
-import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;

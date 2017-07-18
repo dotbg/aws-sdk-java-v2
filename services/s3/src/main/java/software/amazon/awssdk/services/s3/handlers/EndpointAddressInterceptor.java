@@ -26,7 +26,7 @@ import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.BeforeRequestTransmissionContext;
+import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 import software.amazon.awssdk.services.s3.BucketUtils;
 import software.amazon.awssdk.services.s3.S3AdvancedConfiguration;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
@@ -39,7 +39,7 @@ public class EndpointAddressInterceptor implements ExecutionInterceptor {
             ListBucketsRequest.class, CreateBucketRequest.class, DeleteBucketRequest.class);
 
     @Override
-    public SdkHttpFullRequest modifyHttpRequest(BeforeRequestTransmissionContext execution, ExecutionAttributes executionAttributes) {
+    public SdkHttpFullRequest modifyHttpRequest(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
         Object originalRequest = execution.request();
 

@@ -42,7 +42,7 @@ import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.http.async.SimpleRequestProvider;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
-import software.amazon.awssdk.interceptor.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
 
 /**
  * Delegate to the HTTP implementation to make an HTTP request and receive the response.
