@@ -223,9 +223,9 @@ public class Aws4Signer extends AbstractAwsSigner
     }
 
     @Override
-    public SdkHttpFullRequest presignRequest(BeforeTransmissionContext execution,
-                                             ExecutionAttributes executionAttributes,
-                                             Date userSpecifiedExpirationDate) {
+    public SdkHttpFullRequest presign(BeforeTransmissionContext execution,
+                                      ExecutionAttributes executionAttributes,
+                                      Date userSpecifiedExpirationDate) {
 
         // anonymous credentials, don't sign
         if (CredentialUtils.isAnonymous(executionAttributes.getAttribute(AWS_CREDENTIALS))) {

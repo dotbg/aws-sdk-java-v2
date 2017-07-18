@@ -41,7 +41,6 @@ import software.amazon.awssdk.runtime.auth.SignerProviderContext;
 import software.amazon.awssdk.runtime.endpoint.DefaultServiceEndpointBuilder;
 import software.amazon.awssdk.util.AwsHostNameUtils;
 import software.amazon.awssdk.util.Classes;
-import software.amazon.awssdk.util.RuntimeHttpUtils;
 import software.amazon.awssdk.util.StringUtils;
 
 /**
@@ -214,7 +213,7 @@ public abstract class AmazonWebServiceClient {
      * Returns the endpoint as a URI.
      */
     private URI toUri(String endpoint) throws IllegalArgumentException {
-        return RuntimeHttpUtils.toUri(endpoint, clientConfiguration);
+        return null;
     }
 
     /**

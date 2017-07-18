@@ -103,7 +103,8 @@ public interface ExecutionInterceptor {
 
     }
 
-    default SdkHttpFullResponse modifyHttpResponse(BeforeUnmarshallingContext execution, ExecutionAttributes executionAttributes) {
+    default SdkHttpFullResponse modifyHttpResponse(BeforeUnmarshallingContext execution,
+                                                   ExecutionAttributes executionAttributes) {
         return execution.httpResponse();
     }
 

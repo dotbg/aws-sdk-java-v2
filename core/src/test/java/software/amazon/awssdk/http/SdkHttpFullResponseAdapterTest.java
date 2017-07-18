@@ -187,7 +187,7 @@ public class SdkHttpFullResponseAdapterTest {
         }
 
         @Override
-        public SdkHttpFullRequest.Builder toBuilder() {
+        public SdkHttpFullResponse.Builder toBuilder() {
             throw new UnsupportedOperationException();
         }
 

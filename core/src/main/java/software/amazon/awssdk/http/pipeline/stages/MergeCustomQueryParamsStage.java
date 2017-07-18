@@ -31,7 +31,7 @@ public class MergeCustomQueryParamsStage implements MutableRequestToRequestPipel
     @Override
     public SdkHttpFullRequest.Builder execute(SdkHttpFullRequest.Builder request, RequestExecutionContext context)
             throws Exception {
-        return request.queryParameters(mergeParams(request, context));
+        return request.queryParameters(mergeParams(request.build(), context));
     }
 
     private Map<String, List<String>> mergeParams(SdkHttpFullRequest request, RequestExecutionContext context) {

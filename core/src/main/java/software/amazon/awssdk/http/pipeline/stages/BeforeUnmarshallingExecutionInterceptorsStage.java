@@ -16,15 +16,15 @@
 package software.amazon.awssdk.http.pipeline.stages;
 
 import software.amazon.awssdk.RequestExecutionContext;
-import software.amazon.awssdk.handlers.RequestHandler;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.utils.Pair;
 
 /**
- * Invoke the {@link RequestHandler#beforeUnmarshalling(software.amazon.awssdk.http.SdkHttpFullRequest, HttpResponse)} callback
- * to allow for pre-processing on the {@link HttpResponse} before it is handed off to the unmarshaller.
+ * Invoke the {@link ExecutionInterceptor#beforeUnmarshalling} callback to allow for pre-processing on the {@link HttpResponse}
+ * before it is handed off to the unmarshaller.
  */
 public class BeforeUnmarshallingExecutionInterceptorsStage
         implements RequestPipeline<Pair<SdkHttpFullRequest, HttpResponse>, HttpResponse> {

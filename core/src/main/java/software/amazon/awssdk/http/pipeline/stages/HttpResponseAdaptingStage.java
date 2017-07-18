@@ -32,7 +32,7 @@ import software.amazon.awssdk.utils.Pair;
 public class HttpResponseAdaptingStage
         implements RequestPipeline<Pair<SdkHttpFullRequest, SdkHttpFullResponse>, Pair<SdkHttpFullRequest, HttpResponse>> {
 
-    private final boolean calculateCrc32FromCompressedData;
+    private final Boolean calculateCrc32FromCompressedData;
 
     public HttpResponseAdaptingStage(HttpClientDependencies dependencies) {
         this.calculateCrc32FromCompressedData = dependencies.clientConfiguration()

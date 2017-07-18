@@ -48,7 +48,6 @@ public class SyncClientHandlerImpl extends ClientHandler {
         this.syncClientConfiguration = syncClientConfiguration;
         this.client = AmazonHttpClient.builder()
                                       .syncClientConfiguration(syncClientConfiguration)
-                                      .sdkHttpClient(syncClientConfiguration.httpClient())
                                       .build();
     }
 

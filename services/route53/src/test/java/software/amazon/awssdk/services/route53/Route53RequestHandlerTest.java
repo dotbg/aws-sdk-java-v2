@@ -18,9 +18,11 @@ package software.amazon.awssdk.services.route53;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import software.amazon.awssdk.Response;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
-import software.amazon.awssdk.handlers.RequestHandler;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
+import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
 import software.amazon.awssdk.services.route53.internal.Route53IdInterceptor;
 import software.amazon.awssdk.services.route53.model.CreateHostedZoneResponse;
 import software.amazon.awssdk.services.route53.model.CreateReusableDelegationSetResponse;
@@ -49,7 +51,7 @@ public class Route53RequestHandlerTest {
     @Test
     public void testDelegationSetPrefixRemoval() {
 
-        Route53IdInterceptor requestHandler = new Route53IdInterceptor();
+        Route53IdInterceptor interceptor = new Route53IdInterceptor();
 
         DelegationSet delegationSet = DelegationSet.builder().id(delegationSetId).build();
 
@@ -57,7 +59,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(requestHandler, createResult);
+        afterResponse(interceptor, createResult);
 
         assertEquals(createResult.delegationSet().id(), id);
 
@@ -65,7 +67,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(requestHandler, createResuableResult);
+        afterResponse(interceptor, createResuableResult);
 
         assertEquals(createResuableResult.delegationSet().id(), id);
 
@@ -73,7 +75,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(requestHandler, getZoneResult);
+        afterResponse(interceptor, getZoneResult);
 
         // This assert works, but only because of the other operations the are sequenced before this, that modify the id.
         assertEquals(getZoneResult.delegationSet().id(), id);
@@ -82,7 +84,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(requestHandler, getResuableResult);
+        afterResponse(interceptor, getResuableResult);
 
         assertEquals(getResuableResult.delegationSet().id(), id);
 
@@ -90,7 +92,7 @@ public class Route53RequestHandlerTest {
                 .delegationSets(delegationSet)
                 .build();
 
-        afterResponse(requestHandler, listResult);
+        afterResponse(interceptor, listResult);
 
         assertEquals(listResult.delegationSets().get(0).id(), id);
 
@@ -100,12 +102,15 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(requestHandler, createResult);
+        afterResponse(interceptor, createResult);
 
         assertEquals(createResult.delegationSet().id(), id);
     }
 
-    private void afterResponse(RequestHandler requestHandler, Object responseObject) {
-        requestHandler.afterResponse(null, new Response<>(responseObject, null));
+    private void afterResponse(ExecutionInterceptor interceptor, SdkResponse responseObject) {
+        interceptor.modifyResponse(DefaultInterceptorContext.builder()
+                                                            .response(responseObject)
+                                                            .build(),
+                                   new ExecutionAttributes());
     }
 }

@@ -43,7 +43,7 @@ public class RuntimeHttpUtils {
         String userDefinedSuffix = overrideConfig.advancedOption(AdvancedClientOption.USER_AGENT_SUFFIX);
         String awsExecutionEnvironment = AwsSystemSetting.AWS_EXECUTION_ENV.getStringValue().orElse(null);
 
-        StringBuilder userAgent = new StringBuilder(userDefinedPrefix.trim());
+        StringBuilder userAgent = new StringBuilder(software.amazon.awssdk.utils.StringUtils.trimToEmpty(userDefinedPrefix));
 
         if (!VersionInfoUtils.getUserAgent().equals(userDefinedPrefix)) {
             userAgent.append(COMMA).append(VersionInfoUtils.getUserAgent());
@@ -120,7 +120,7 @@ public class RuntimeHttpUtils {
         // Some http client libraries (e.g. Apache HttpClient) cannot handle
         // consecutive "/"s between URL authority and path components.
         // So we escape "////..." into "/%2F%2F%2F...", in the same way as how
-        // we treat consecutive "/"s in AmazonS3Client#presignRequest(...)
+        // we treat consecutive "/"s in AmazonS3Client#presign(...)
 
         String urlPath = "/" + resourcePath;
         urlPath = urlPath.replaceAll("(?<=/)/", "%2F");
@@ -176,7 +176,7 @@ public class RuntimeHttpUtils {
         // Some http client libraries (e.g. Apache HttpClient) cannot handle
         // consecutive "/"s between URL authority and path components.
         // So we escape "////..." into "/%2F%2F%2F...", in the same way as how
-        // we treat consecutive "/"s in AmazonS3Client#presignRequest(...)
+        // we treat consecutive "/"s in AmazonS3Client#presign(...)
 
         String urlPath = "/" + resourcePath;
         urlPath = urlPath.replaceAll("(?<=/)/", "%2F");

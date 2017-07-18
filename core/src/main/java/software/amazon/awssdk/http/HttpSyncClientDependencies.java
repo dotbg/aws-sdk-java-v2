@@ -21,12 +21,10 @@ import software.amazon.awssdk.utils.Validate;
 
 public class HttpSyncClientDependencies extends HttpClientDependencies {
     private final SyncClientConfiguration syncClientConfiguration;
-    private final SdkHttpClient sdkHttpClient;
 
     private HttpSyncClientDependencies(Builder builder) {
         super(builder.syncClientConfiguration, builder);
-        this.syncClientConfiguration = Validate.paramNotNull(builder.syncClientConfiguration, "asyncClientConfiguration");
-        this.sdkHttpClient = Validate.paramNotNull(builder.sdkHttpClient, "sdkAsyncHttpClient");
+        this.syncClientConfiguration = Validate.paramNotNull(builder.syncClientConfiguration, "syncClientConfiguration");
     }
 
     /**
@@ -40,27 +38,17 @@ public class HttpSyncClientDependencies extends HttpClientDependencies {
         return syncClientConfiguration;
     }
 
-    public SdkHttpClient sdkHttpClient() {
-        return sdkHttpClient;
-    }
-
     @Override
     public void close() throws Exception {
         super.close();
-        IoUtils.closeQuietly(sdkHttpClient, null);
+        IoUtils.closeQuietly(syncClientConfiguration.httpClient(), null);
     }
 
     public static final class Builder extends HttpClientDependencies.Builder<Builder> {
         private SyncClientConfiguration syncClientConfiguration;
-        private SdkHttpClient sdkHttpClient;
 
         public Builder syncClientConfiguration(SyncClientConfiguration syncClientConfiguration) {
             this.syncClientConfiguration = syncClientConfiguration;
-            return this;
-        }
-
-        public Builder sdkHttpClient(SdkHttpClient sdkHttpClient) {
-            this.sdkHttpClient = sdkHttpClient;
             return this;
         }
 

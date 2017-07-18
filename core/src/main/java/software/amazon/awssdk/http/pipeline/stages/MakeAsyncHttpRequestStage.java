@@ -61,7 +61,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
         HttpAsyncClientDependencies asyncDependencies = (HttpAsyncClientDependencies) dependencies;
         this.responseHandler = responseHandler;
         this.errorResponseHandler = errorResponseHandler;
-        this.sdkAsyncHttpClient = asyncDependencies.sdkAsyncHttpClient();
+        this.sdkAsyncHttpClient = asyncDependencies.asyncClientConfiguration().asyncHttpClient();
     }
 
     /**

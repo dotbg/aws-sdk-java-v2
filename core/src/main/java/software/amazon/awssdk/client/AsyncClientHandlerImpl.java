@@ -40,6 +40,7 @@ import software.amazon.awssdk.http.SdkHttpResponseAdapter;
 import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.http.async.SyncResponseHandlerAdapter;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 import software.amazon.awssdk.util.CredentialUtils;
 import software.amazon.awssdk.util.Throwables;
@@ -60,7 +61,6 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
         this.asyncClientConfiguration = asyncClientConfiguration;
         this.client = AmazonAsyncHttpClient.builder()
                                            .asyncClientConfiguration(asyncClientConfiguration)
-                                           .sdkAsyncHttpClient(asyncClientConfiguration.asyncHttpClient())
                                            .build();
     }
 
@@ -105,10 +105,12 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
         Function<SdkHttpFullResponse, HttpResponse> responseAdapter
                 = r -> SdkHttpResponseAdapter.adapt(calculateCrc32FromCompressedData, marshalled, r);
 
-        SdkHttpResponseHandler<OutputT> responseHandler = resolveResponseHandler(executionParams, responseAdapter);
+        SdkHttpResponseHandler<OutputT> responseHandler = resolveResponseHandler(executionParams, responseAdapter,
+                                                                                 executionContext.executionAttributes());
 
         SdkHttpResponseHandler<? extends SdkBaseException> errorHandler =
-                resolveErrorResponseHandler(executionParams, responseAdapter);
+                resolveErrorResponseHandler(executionParams, responseAdapter,
+                                            executionContext.executionAttributes());
 
         return invoke(marshalled, requestProvider, executionParams.getRequestConfig(), executionContext,
                       responseHandler, errorHandler)
@@ -165,8 +167,9 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
      */
     private SdkHttpResponseHandler<? extends SdkBaseException> resolveErrorResponseHandler(
             ClientExecutionParams<?, ?> executionParams,
-            Function<SdkHttpFullResponse, HttpResponse> responseAdapter) {
-        return new SyncResponseHandlerAdapter<>(executionParams.getErrorResponseHandler(), responseAdapter);
+            Function<SdkHttpFullResponse, HttpResponse> responseAdapter,
+            ExecutionAttributes executionAttributes) {
+        return new SyncResponseHandlerAdapter<>(executionParams.getErrorResponseHandler(), responseAdapter, executionAttributes);
     }
 
     /**
@@ -179,9 +182,10 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
      */
     private <OutputT> SdkHttpResponseHandler<OutputT> resolveResponseHandler(
             ClientExecutionParams<?, OutputT> executionParams,
-            Function<SdkHttpFullResponse, HttpResponse> responseAdapter) {
+            Function<SdkHttpFullResponse, HttpResponse> responseAdapter,
+            ExecutionAttributes executionAttributes) {
         return executionParams.getResponseHandler() != null ?
-                new SyncResponseHandlerAdapter<>(executionParams.getResponseHandler(), responseAdapter) :
+                new SyncResponseHandlerAdapter<>(executionParams.getResponseHandler(), responseAdapter, executionAttributes) :
                 executionParams.getAsyncResponseHandler();
     }
 

@@ -29,8 +29,7 @@ import static software.amazon.awssdk.http.AmazonHttpClient.HEADER_SDK_TRANSACTIO
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import org.junit.Test;
 import software.amazon.awssdk.AmazonServiceException;
-import software.amazon.awssdk.LegacyClientConfiguration;
-import software.amazon.awssdk.http.apache.ApacheSdkHttpClientFactory;
+import utils.HttpTestUtils;
 import utils.http.WireMockTestBase;
 
 public class SdkTransactionIdInHeaderTest extends WireMockTestBase {
@@ -59,11 +58,7 @@ public class SdkTransactionIdInHeaderTest extends WireMockTestBase {
     }
 
     private void executeRequest() throws Exception {
-        AmazonHttpClient httpClient =
-                AmazonHttpClient.builder()
-                                .sdkHttpClient(ApacheSdkHttpClientFactory.builder().build().createHttpClient())
-                                .clientConfiguration(new LegacyClientConfiguration())
-                                .build();
+        AmazonHttpClient httpClient = HttpTestUtils.testAmazonHttpClient();
         try {
             httpClient.requestExecutionBuilder()
                       .request(newGetRequest(RESOURCE_PATH))

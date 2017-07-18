@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import software.amazon.awssdk.Request;
-import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 
 /**
  * Adapts a {@link Request} to the new {@link SdkHttpFullRequest} interface.

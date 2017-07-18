@@ -17,7 +17,6 @@ package software.amazon.awssdk.http.pipeline.stages;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static software.amazon.awssdk.utils.FunctionalUtils.invokeSafely;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -43,7 +42,7 @@ public class MoveParametersToBodyStageTest {
                 .httpMethod(SdkHttpMethod.POST)
                 .queryParameter("key", singletonList("value"));
 
-        SdkHttpFullRequest.Builder output = sut.execute(mutableRequest, requestContext(mutableRequest));
+        SdkHttpFullRequest output = sut.execute(mutableRequest, requestContext(mutableRequest)).build();
 
         assertThat(output.getParameters()).hasSize(0);
         assertThat(output.getHeaders())
@@ -68,7 +67,7 @@ public class MoveParametersToBodyStageTest {
                 .httpMethod(SdkHttpMethod.POST)
                 .queryParameter("key", singletonList("value"));
 
-        SdkHttpFullRequest.Builder output = sut.execute(mutableRequest, requestContext(mutableRequest));
+        SdkHttpFullRequest output = sut.execute(mutableRequest, requestContext(mutableRequest)).build();
 
         assertThat(output.getParameters()).hasSize(1);
         assertThat(output.getHeaders()).hasSize(0);
@@ -82,7 +81,7 @@ public class MoveParametersToBodyStageTest {
                 .content(null)
                 .httpMethod(SdkHttpMethod.POST);
 
-        SdkHttpFullRequest.Builder output = sut.execute(mutableRequest, requestContext(mutableRequest));
+        SdkHttpFullRequest output = sut.execute(mutableRequest, requestContext(mutableRequest)).build();
 
         assertThat(output.getParameters()).hasSize(0);
         assertThat(output.getHeaders()).hasSize(0);
@@ -96,7 +95,7 @@ public class MoveParametersToBodyStageTest {
                 .httpMethod(method)
                 .queryParameter("key", singletonList("value"));
 
-        SdkHttpFullRequest.Builder output = invokeSafely(() -> sut.execute(mutableRequest, requestContext(mutableRequest)));
+        SdkHttpFullRequest output = sut.execute(mutableRequest, requestContext(mutableRequest)).build();
 
         assertThat(output.getParameters()).hasSize(1);
         assertThat(output.getHeaders()).hasSize(0);

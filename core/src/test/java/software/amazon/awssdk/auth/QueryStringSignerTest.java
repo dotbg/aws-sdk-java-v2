@@ -55,7 +55,7 @@ public class QueryStringSignerTest {
                 .resourcePath("foo/bar")
                 .build();
 
-        request = signer.sign(request, credentials);
+        request = SignerTestUtils.signRequest(signer, request, credentials);
 
         assertSignature(EXPECTED_SIGNATURE, request.getParameters());
     }
@@ -70,7 +70,7 @@ public class QueryStringSignerTest {
                 .resourcePath("/bar")
                 .build();
 
-        request = signer.sign(request, credentials);
+        request = SignerTestUtils.signRequest(signer, request, credentials);
 
         assertSignature(EXPECTED_SIGNATURE, request.getParameters());
     }
@@ -85,7 +85,7 @@ public class QueryStringSignerTest {
                 .resourcePath("bar")
                 .build();
 
-        request = signer.sign(request, credentials);
+        request = SignerTestUtils.signRequest(signer, request, credentials);
 
         assertSignature(EXPECTED_SIGNATURE, request.getParameters());
     }
@@ -100,7 +100,7 @@ public class QueryStringSignerTest {
                 .resourcePath("bar")
                 .build();
 
-        request = signer.sign(request, new AnonymousCredentialsProvider().getCredentials());
+        request = SignerTestUtils.signRequest(signer, request, new AnonymousCredentialsProvider().getCredentials());
 
         assertNull(request.getParameters().get("Signature"));
     }

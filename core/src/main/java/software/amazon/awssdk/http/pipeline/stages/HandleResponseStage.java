@@ -72,7 +72,7 @@ public class HandleResponseStage<OutputT> implements RequestPipeline<HttpRespons
             OutputT response = callExecutionInterceptors(handleSuccessResponse(httpResponse, context), context);
             return Response.fromSuccess(response, httpResponse);
         } else {
-            return Response.fromFailure(handleErrorResponse(httpResponse), httpResponse);
+            return Response.fromFailure(handleErrorResponse(httpResponse, context), httpResponse);
         }
     }
 
@@ -115,7 +115,7 @@ public class HandleResponseStage<OutputT> implements RequestPipeline<HttpRespons
             context.awsRequestMetrics().startEvent(AwsRequestMetrics.Field.ResponseProcessingTime);
             publishProgress(listener, ProgressEventType.HTTP_RESPONSE_STARTED_EVENT);
             try {
-                awsResponse = successResponseHandler.handle(httpResponse);
+                awsResponse = successResponseHandler.handle(httpResponse, context.executionAttributes());
             } finally {
                 context.awsRequestMetrics().endEvent(AwsRequestMetrics.Field.ResponseProcessingTime);
             }
@@ -138,10 +138,11 @@ public class HandleResponseStage<OutputT> implements RequestPipeline<HttpRespons
      *
      * @throws IOException If any problems are encountering reading the error response.
      */
-    private SdkBaseException handleErrorResponse(HttpResponse httpResponse)
+    private SdkBaseException handleErrorResponse(HttpResponse httpResponse,
+                                                 RequestExecutionContext context)
             throws IOException, InterruptedException {
         try {
-            SdkBaseException exception = errorResponseHandler.handle(httpResponse);
+            SdkBaseException exception = errorResponseHandler.handle(httpResponse, context.executionAttributes());
             exception.fillInStackTrace();
             if (AmazonHttpClient.REQUEST_LOG.isDebugEnabled()) {
                 AmazonHttpClient.REQUEST_LOG.debug("Received error response: " + exception);

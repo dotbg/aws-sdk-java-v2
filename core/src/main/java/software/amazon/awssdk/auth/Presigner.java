@@ -33,7 +33,7 @@ public interface Presigner {
      * @param signingRequest The data required for performing the signing
      * @param expiration    The time when this presigned URL will expire.
      */
-    SdkHttpFullRequest presignRequest(BeforeTransmissionContext execution,
-                                      ExecutionAttributes executionAttributes,
-                                      Date expiration);
+    SdkHttpFullRequest presign(BeforeTransmissionContext execution,
+                               ExecutionAttributes executionAttributes,
+                               Date expiration);
 }

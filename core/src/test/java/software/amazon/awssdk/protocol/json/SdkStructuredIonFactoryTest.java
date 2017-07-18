@@ -30,6 +30,7 @@ import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.AmazonServiceException;
 import software.amazon.awssdk.http.DefaultSdkHttpFullRequest;
 import software.amazon.awssdk.http.HttpResponse;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.internal.http.response.JsonErrorResponseHandler;
 import software.amazon.awssdk.runtime.transform.JsonErrorUnmarshaller;
 import software.amazon.ion.IonStruct;
@@ -137,7 +138,7 @@ public class SdkStructuredIonFactoryTest {
 
         JsonErrorResponseHandler handler = SdkStructuredIonFactory.SDK_ION_BINARY_FACTORY
                 .createErrorResponseHandler(unmarshallers, NO_CUSTOM_ERROR_CODE_FIELD_NAME);
-        return handler.handle(error);
+        return handler.handle(error, new ExecutionAttributes());
     }
 
     private static class InvalidParameterException extends AmazonServiceException {

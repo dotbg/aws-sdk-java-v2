@@ -42,7 +42,7 @@ public class MakeHttpRequestStage
     public MakeHttpRequestStage(HttpClientDependencies dependencies) {
         // TODO: Ew
         HttpSyncClientDependencies syncDependencies = (HttpSyncClientDependencies) dependencies;
-        this.sdkHttpClient = syncDependencies.sdkHttpClient();
+        this.sdkHttpClient = syncDependencies.syncClientConfiguration().httpClient();
     }
 
     /**

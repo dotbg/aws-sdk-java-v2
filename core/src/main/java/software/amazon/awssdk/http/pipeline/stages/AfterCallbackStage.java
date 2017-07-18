@@ -20,15 +20,14 @@ import static software.amazon.awssdk.event.SdkProgressPublisher.publishProgress;
 import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.Response;
 import software.amazon.awssdk.event.ProgressEventType;
-import software.amazon.awssdk.handlers.RequestHandler;
+import software.amazon.awssdk.event.ProgressListener;
+import software.amazon.awssdk.event.SdkProgressPublisher;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
 import software.amazon.awssdk.http.pipeline.RequestToResponsePipeline;
 
 /**
- * Calls the {@link RequestHandler#afterResponse(SdkHttpFullRequest, Response)} or
- * {@link RequestHandler#afterError(SdkHttpFullRequest, Response, Exception)} callbacks, depending on whether the request
- * succeeded or failed.
+ * Calls {@link SdkProgressPublisher#publishProgress(ProgressListener, ProgressEventType)} if the execution fails.
  */
 public class AfterCallbackStage<OutputT> implements RequestToResponsePipeline<OutputT> {
 

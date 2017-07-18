@@ -19,14 +19,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.Protocol;
+import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.auth.Aws4Signer;
-import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullRequestAdapter;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
+import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.EC2Client;
 import software.amazon.awssdk.services.ec2.model.CopySnapshotRequest;
@@ -34,7 +35,7 @@ import software.amazon.awssdk.util.AwsHostNameUtils;
 import software.amazon.awssdk.util.SdkHttpUtils;
 
 /**
- * RequestHandler that generates a pre-signed URL for copying encrypted snapshots
+ * ExecutionInterceptor that generates a pre-signed URL for copying encrypted snapshots
  * TODO: Is this actually right? What if a different interceptor modifies the message? Should this be treated as a signer?
  */
 public class GeneratePreSignUrlInterceptor implements ExecutionInterceptor {
@@ -42,7 +43,7 @@ public class GeneratePreSignUrlInterceptor implements ExecutionInterceptor {
     @Override
     public SdkHttpFullRequest modifyHttpRequest(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes) {
         SdkHttpFullRequest request = execution.httpRequest();
-        Object originalRequest = execution.request();
+        SdkRequest originalRequest = execution.request();
 
         if (originalRequest instanceof CopySnapshotRequest) {
 
@@ -85,10 +86,13 @@ public class GeneratePreSignUrlInterceptor implements ExecutionInterceptor {
             Aws4Signer signer = new Aws4Signer();
             signer.setServiceName(serviceName);
 
+            DefaultInterceptorContext newExecutionContext = DefaultInterceptorContext.builder()
+                                                                                     .request(originalRequest)
+                                                                                     .httpRequest(requestForPresigning)
+                                                                                     .build();
+
             final SdkHttpFullRequest presignedRequest =
-                    signer.presignRequest(requestForPresigning,
-                                          executionAttributes.getAttribute(AwsExecutionAttributes.AWS_CREDENTIALS),
-                                          null);
+                    signer.presign(newExecutionContext, executionAttributes, null);
 
             return request.toBuilder()
                           .queryParameter("DestinationRegion", destinationRegion)

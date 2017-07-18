@@ -15,10 +15,11 @@
 
 package software.amazon.awssdk.global.handlers;
 
-import software.amazon.awssdk.AmazonWebServiceRequest;
-import software.amazon.awssdk.handlers.RequestHandler;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
+import software.amazon.awssdk.interceptor.context.BeforeMarshallingContext;
 
-public class TestGlobalRequestHandler extends RequestHandler {
+public class TestGlobalExecutionInterceptor implements ExecutionInterceptor {
 
     private static boolean wasCalled = false;
 
@@ -31,8 +32,7 @@ public class TestGlobalRequestHandler extends RequestHandler {
     }
 
     @Override
-    public AmazonWebServiceRequest beforeMarshalling(AmazonWebServiceRequest request) {
+    public void beforeMarshalling(BeforeMarshallingContext execution, ExecutionAttributes executionAttributes) {
         wasCalled = true;
-        return super.beforeMarshalling(request);
     }
 }

@@ -120,7 +120,7 @@ abstract class PresignInterceptor<T extends AmazonWebServiceRequest> implements 
 
     private SdkHttpFullRequest presignRequest(SdkHttpFullRequest request, AwsCredentials credentials, String signingRegion) {
         Aws4Signer signer = createNewSignerWithRegion(signingRegion);
-        return signer.presignRequest(request, credentials, null);
+        return signer.presign(request, credentials, null);
     }
 
     private Aws4Signer createNewSignerWithRegion(String signingRegion) {

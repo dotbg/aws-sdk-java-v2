@@ -42,7 +42,7 @@ public class ApiGatewayResponseHandlerTest {
     @Before
     public void setup() throws Exception {
         responseHandler = new ApiGatewayResponseHandler<>(mockResponseHandler);
-        when(mockResponseHandler.handle(any())).thenReturn(new MockResult());
+        when(mockResponseHandler.handle(any(), )).thenReturn(new MockResult());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class ApiGatewayResponseHandlerTest {
                 .withHeader(SdkResponseMetadata.HEADER_REQUEST_ID, "1234")
                 .build();
 
-        MockResult unmarshalled = responseHandler.handle(httpResponse);
+        MockResult unmarshalled = responseHandler.handle(httpResponse, );
 
         assertEquals("1234", unmarshalled.sdkResponseMetadata().requestId());
     }
@@ -63,7 +63,7 @@ public class ApiGatewayResponseHandlerTest {
         HttpResponse httpResponse = new HttpResponseBuilder()
                 .build();
 
-        MockResult unmarshalled = responseHandler.handle(httpResponse);
+        MockResult unmarshalled = responseHandler.handle(httpResponse, );
 
         assertNull(unmarshalled.sdkResponseMetadata().requestId());
     }
@@ -76,7 +76,7 @@ public class ApiGatewayResponseHandlerTest {
                 .withHeader("baz", "c")
                 .build();
 
-        final SdkResponseMetadata sdkResponseMetadata = responseHandler.handle(httpResponse)
+        final SdkResponseMetadata sdkResponseMetadata = responseHandler.handle(httpResponse, )
                 .sdkResponseMetadata();
 
 
@@ -91,7 +91,7 @@ public class ApiGatewayResponseHandlerTest {
                 .withStatusCode(201)
                 .build();
 
-        MockResult unmarshalled = responseHandler.handle(httpResponse);
+        MockResult unmarshalled = responseHandler.handle(httpResponse, );
 
         assertEquals(201, unmarshalled.sdkResponseMetadata().httpStatusCode());
     }

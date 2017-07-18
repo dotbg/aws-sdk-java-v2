@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +44,7 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
 
     private DefaultSdkHttpFullRequest(Builder builder) {
         this.headers = CollectionUtils.deepUnmodifiableMap(builder.headers, () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-        this.queryParameters = CollectionUtils.deepUnmodifiableMap(builder.queryParameters, LinkedHashMap::new);
+        this.queryParameters = CollectionUtils.deepUnmodifiableMap(builder.queryParameters, () -> new LinkedHashMap<>());
         this.resourcePath = builder.resourcePath;
         this.endpoint = builder.endpoint;
         this.httpMethod = builder.httpMethod;
@@ -57,7 +58,7 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
 
     @Override
     public Collection<String> getValuesForHeader(String header) {
-        return headers.get(header);
+        return headers.getOrDefault(header, Collections.emptyList());
     }
 
     @Override
@@ -131,21 +132,11 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
             return this;
         }
 
-//        @Override
-//        public Map<String, List<String>> getHeaders() {
-//            return deepUnmodifiableMap(headers);
-//        }
-
         @Override
         public DefaultSdkHttpFullRequest.Builder resourcePath(String resourcePath) {
             this.resourcePath = resourcePath;
             return this;
         }
-
-//        @Override
-//        public String getResourcePath() {
-//            return resourcePath;
-//        }
 
         @Override
         public DefaultSdkHttpFullRequest.Builder queryParameter(String paramName, List<String> paramValues) {
@@ -155,7 +146,7 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
 
         @Override
         public DefaultSdkHttpFullRequest.Builder queryParameters(Map<String, List<String>> queryParameters) {
-            this.queryParameters = CollectionUtils.deepCopyMap(queryParameters, LinkedHashMap::new);
+            this.queryParameters = CollectionUtils.deepCopyMap(queryParameters, () -> new LinkedHashMap<>());
             return this;
         }
 
@@ -171,21 +162,11 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
             return this;
         }
 
-//        @Override
-//        public Map<String, List<String>> getParameters() {
-//            return deepUnmodifiableMap(queryParameters, LinkedHashMap::new);
-//        }
-
         @Override
         public DefaultSdkHttpFullRequest.Builder endpoint(URI endpoint) {
             this.endpoint = endpoint;
             return this;
         }
-
-//        @Override
-//        public URI getEndpoint() {
-//            return endpoint;
-//        }
 
         @Override
         public DefaultSdkHttpFullRequest.Builder httpMethod(SdkHttpMethod httpMethod) {
@@ -193,21 +174,11 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
             return this;
         }
 
-//        @Override
-//        public SdkHttpMethod getHttpMethod() {
-//            return httpMethod;
-//        }
-
         @Override
         public DefaultSdkHttpFullRequest.Builder content(InputStream content) {
             this.content = content;
             return this;
         }
-
-//        @Override
-//        public InputStream getContent() {
-//            return content;
-//        }
 
         /**
          * @return An immutable {@link DefaultSdkHttpFullRequest} object.

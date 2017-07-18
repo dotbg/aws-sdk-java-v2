@@ -17,7 +17,6 @@ package software.amazon.awssdk.http;
 
 import static software.amazon.awssdk.utils.Validate.paramNotNull;
 
-import java.util.concurrent.ScheduledExecutorService;
 import software.amazon.awssdk.SdkGlobalTime;
 import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionTimer;

@@ -16,17 +16,14 @@
 package software.amazon.awssdk.http;
 
 import software.amazon.awssdk.config.AsyncClientConfiguration;
-import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.utils.IoUtils;
 
 public class HttpAsyncClientDependencies extends HttpClientDependencies {
     private final AsyncClientConfiguration asyncClientConfiguration;
-    private final SdkAsyncHttpClient sdkAsyncHttpClient;
 
     private HttpAsyncClientDependencies(Builder builder) {
         super(builder.asyncClientConfiguration, builder);
         this.asyncClientConfiguration = builder.asyncClientConfiguration;
-        this.sdkAsyncHttpClient = builder.sdkAsyncHttpClient;
     }
 
     /**
@@ -40,28 +37,18 @@ public class HttpAsyncClientDependencies extends HttpClientDependencies {
         return asyncClientConfiguration;
     }
 
-    public SdkAsyncHttpClient sdkAsyncHttpClient() {
-        return sdkAsyncHttpClient;
-    }
-
     @Override
     public void close() throws Exception {
         super.close();
-        IoUtils.closeQuietly(sdkAsyncHttpClient, null);
+        IoUtils.closeQuietly(asyncClientConfiguration.asyncHttpClient(), null);
         asyncClientConfiguration.asyncExecutorService().shutdown();
     }
 
     public static final class Builder extends HttpClientDependencies.Builder<Builder> {
         private AsyncClientConfiguration asyncClientConfiguration;
-        private SdkAsyncHttpClient sdkAsyncHttpClient;
 
         public Builder asyncClientConfiguration(AsyncClientConfiguration asyncClientConfiguration) {
             this.asyncClientConfiguration = asyncClientConfiguration;
-            return this;
-        }
-
-        public Builder sdkAsyncHttpClient(SdkAsyncHttpClient sdkAsyncHttpClient) {
-            this.sdkAsyncHttpClient = sdkAsyncHttpClient;
             return this;
         }
 

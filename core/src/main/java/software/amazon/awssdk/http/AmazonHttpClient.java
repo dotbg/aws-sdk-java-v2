@@ -54,6 +54,7 @@ import software.amazon.awssdk.http.pipeline.stages.RetryableStage;
 import software.amazon.awssdk.http.pipeline.stages.SigningStage;
 import software.amazon.awssdk.http.pipeline.stages.TimerExceptionHandlingStage;
 import software.amazon.awssdk.http.pipeline.stages.UnwrapResponseContainer;
+import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.response.AwsErrorResponseHandler;
@@ -114,7 +115,6 @@ public class AmazonHttpClient implements AutoCloseable {
                                                                 .clientExecutionTimer(new ClientExecutionTimer())
                                                                 .syncClientConfiguration(builder.syncClientConfiguration)
                                                                 .capacityManager(createCapacityManager())
-                                                                .sdkHttpClient(builder.sdkHttpClient)
                                                                 .build();
         this.requestMetricCollector = builder.syncClientConfiguration.overrideConfiguration().requestMetricCollector();
     }
@@ -312,18 +312,12 @@ public class AmazonHttpClient implements AutoCloseable {
 
     public static class Builder {
         private SyncClientConfiguration syncClientConfiguration;
-        private SdkHttpClient sdkHttpClient;
 
         private Builder() {
         }
 
         public Builder syncClientConfiguration(SyncClientConfiguration syncClientConfiguration) {
             this.syncClientConfiguration = syncClientConfiguration;
-            return this;
-        }
-
-        public Builder sdkHttpClient(SdkHttpClient sdkHttpClient) {
-            this.sdkHttpClient = sdkHttpClient;
             return this;
         }
 
@@ -334,7 +328,7 @@ public class AmazonHttpClient implements AutoCloseable {
 
     private static class NoOpResponseHandler<T> implements HttpResponseHandler<T> {
         @Override
-        public T handle(HttpResponse response) throws Exception {
+        public T handle(HttpResponse response, ExecutionAttributes executionAttributes) throws Exception {
             return null;
         }
 
@@ -349,9 +343,7 @@ public class AmazonHttpClient implements AutoCloseable {
         private SdkHttpFullRequest request;
         private RequestConfig requestConfig;
         private HttpResponseHandler<? extends SdkBaseException> errorResponseHandler;
-        private ExecutionContext executionContext = ExecutionContext.builder()
-                                                                    .signerProvider(new NoOpSignerProvider())
-                                                                    .build();
+        private ExecutionContext executionContext;
 
         @Override
         public RequestExecutionBuilder request(Request<?> request) {

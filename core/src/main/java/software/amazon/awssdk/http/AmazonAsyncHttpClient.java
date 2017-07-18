@@ -27,7 +27,6 @@ import software.amazon.awssdk.SdkClientException;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
 import software.amazon.awssdk.config.AsyncClientConfiguration;
-import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
@@ -70,7 +69,6 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
                                                                  .clientExecutionTimer(new ClientExecutionTimer())
                                                                  .asyncClientConfiguration(builder.asyncClientConfiguration)
                                                                  .capacityManager(createCapacityManager())
-                                                                 .sdkAsyncHttpClient(builder.sdkAsyncHttpClient)
                                                                  .build();
         this.requestMetricCollector = builder.asyncClientConfiguration.overrideConfiguration().requestMetricCollector();
     }
@@ -179,18 +177,12 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
 
     public static class Builder {
         private AsyncClientConfiguration asyncClientConfiguration;
-        private SdkAsyncHttpClient sdkAsyncHttpClient;
 
         private Builder() {
         }
 
         public Builder asyncClientConfiguration(AsyncClientConfiguration asyncClientConfiguration) {
             this.asyncClientConfiguration = asyncClientConfiguration;
-            return this;
-        }
-
-        public Builder sdkAsyncHttpClient(SdkAsyncHttpClient sdkAsyncHttpClient) {
-            this.sdkAsyncHttpClient = sdkAsyncHttpClient;
             return this;
         }
 

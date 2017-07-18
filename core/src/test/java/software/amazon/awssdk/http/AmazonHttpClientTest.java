@@ -31,9 +31,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.DefaultRequest;
-import software.amazon.awssdk.LegacyClientConfiguration;
 import software.amazon.awssdk.Request;
+import software.amazon.awssdk.config.AdvancedClientOption;
+import software.amazon.awssdk.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.config.MutableClientConfiguration;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
+import utils.HttpTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmazonHttpClientTest {
@@ -48,10 +51,7 @@ public class AmazonHttpClientTest {
 
     @Before
     public void setUp() throws Exception {
-        client = AmazonHttpClient.builder()
-                .clientConfiguration(new LegacyClientConfiguration())
-                .sdkHttpClient(sdkHttpClient)
-                .build();
+        client = HttpTestUtils.testClientBuilder().httpClient(sdkHttpClient).build();
         when(sdkHttpClient.prepareRequest(any(), any())).thenReturn(abortableCallable);
         stubSuccessfulResponse();
     }
@@ -88,7 +88,7 @@ public class AmazonHttpClientTest {
 
         HttpResponseHandler<?> mockHandler = mock(HttpResponseHandler.class);
         when(mockHandler.needsConnectionLeftOpen()).thenReturn(false);
-        when(mockHandler.handle(any())).thenThrow(exception);
+        when(mockHandler.handle(any(), any())).thenThrow(exception);
 
         ExecutionContext context = ExecutionContext.builder()
                                                    .signerProvider(new NoOpSignerProvider())
@@ -106,7 +106,7 @@ public class AmazonHttpClientTest {
         }
 
         // Verify that we called execute 4 times.
-        verify(mockHandler, times(4)).handle(any());
+        verify(mockHandler, times(4)).handle(any(), any());
     }
 
 
@@ -117,13 +117,16 @@ public class AmazonHttpClientTest {
         Request<?> request = new DefaultRequest<>("fooservice");
 
         HttpResponseHandler<?> handler = mock(HttpResponseHandler.class);
-        LegacyClientConfiguration config = new LegacyClientConfiguration()
-                .withUserAgentPrefix(prefix)
-                .withUserAgentSuffix(suffix);
+        ClientOverrideConfiguration overrideConfig =
+                ClientOverrideConfiguration.builder()
+                                           .advancedOption(AdvancedClientOption.USER_AGENT_PREFIX, prefix)
+                                           .advancedOption(AdvancedClientOption.USER_AGENT_SUFFIX, suffix)
+                                           .build();
+        MutableClientConfiguration config = new MutableClientConfiguration().overrideConfiguration(overrideConfig)
+                                                                            .httpClient(sdkHttpClient);
 
         AmazonHttpClient client = AmazonHttpClient.builder()
-                .clientConfiguration(config)
-                .sdkHttpClient(sdkHttpClient)
+                .syncClientConfiguration(config)
                 .build();
 
         client.requestExecutionBuilder()
