@@ -26,6 +26,7 @@ import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 import software.amazon.awssdk.retry.PredefinedRetryPolicies;
+import software.amazon.awssdk.retry.RetryPolicyAdapter;
 import software.amazon.awssdk.util.VersionInfoUtils;
 
 /**
@@ -47,7 +48,8 @@ public final class GlobalClientConfigurationDefaults extends ClientConfiguration
                                applyDefault(configuration.advancedOption(USER_AGENT_PREFIX), VersionInfoUtils::getUserAgent));
         builder.advancedOption(USER_AGENT_SUFFIX, applyDefault(configuration.advancedOption(USER_AGENT_SUFFIX), () -> ""));
         builder.requestMetricCollector(applyDefault(configuration.requestMetricCollector(), () -> RequestMetricCollector.NONE));
-        builder.retryPolicy(applyDefault(configuration.retryPolicy(), () -> PredefinedRetryPolicies.DEFAULT));
+        builder.retryPolicy(applyDefault(configuration.retryPolicy(), () ->
+                new RetryPolicyAdapter(PredefinedRetryPolicies.DEFAULT)));
     }
 
     @Override

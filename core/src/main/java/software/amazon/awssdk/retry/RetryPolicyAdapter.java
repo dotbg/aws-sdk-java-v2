@@ -19,6 +19,7 @@ import static software.amazon.awssdk.util.ValidationUtils.assertNotNull;
 
 import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.AmazonWebServiceRequest;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.retry.v2.RetryPolicyContext;
 
@@ -27,6 +28,7 @@ import software.amazon.awssdk.retry.v2.RetryPolicyContext;
  * intended for internal use by the SDK.
  */
 @SdkInternalApi
+@ReviewBeforeRelease("Should be removed in retry policy refactor.")
 public class RetryPolicyAdapter implements software.amazon.awssdk.retry.v2.RetryPolicy {
 
     private final RetryPolicy legacyRetryPolicy;

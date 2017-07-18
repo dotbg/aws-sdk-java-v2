@@ -84,8 +84,9 @@ public class MakeAsyncHttpRequestStage<OutputT>
 
         SdkHttpResponseHandler<Response<OutputT>> handler = new ResponseHandler(request, future, listener, context);
 
-        SdkHttpRequestProvider requestProvider = context.requestProvider() == null ? new SimpleRequestProvider(request)
-                : context.requestProvider();
+        SdkHttpRequestProvider requestProvider = context.requestProvider() == null
+                                                 ? new SimpleRequestProvider(request, context.executionAttributes())
+                                                 : context.requestProvider();
         // Set content length if it hasn't been set already.
         SdkHttpFullRequest requestWithContentLength = getRequestWithContentLength(request, requestProvider);
 
