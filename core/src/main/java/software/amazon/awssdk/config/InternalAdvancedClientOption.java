@@ -24,7 +24,7 @@ import software.amazon.awssdk.annotation.SdkInternalApi;
 @SdkInternalApi
 public class InternalAdvancedClientOption<T> extends AdvancedClientOption<T> {
     /**
-     * Whether to calculate the CRC 32 checksum of a message based on the uncompressed data. My default, this is false.
+     * Whether to calculate the CRC 32 checksum of a message based on the uncompressed data. By default, this is false.
      */
     public static InternalAdvancedClientOption<Boolean> CRC32_FROM_COMPRESSED_DATA_ENABLED =
             new InternalAdvancedClientOption<>(Boolean.class);

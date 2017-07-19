@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 import software.amazon.awssdk.retry.v2.RetryPolicy;

@@ -67,7 +67,7 @@ public class AwsS3V4Signer extends Aws4Signer {
                                          Aws4SignerRequestParams signerRequestParams) {
         if (useChunkEncoding(signerRequestParams)) {
             AwsChunkedEncodingInputStream chunkEncodededStream = new AwsChunkedEncodingInputStream(
-                    signerRequestParams.getMarshalledRequestContext().httpRequest().getContent(), signingKey,
+                    signerRequestParams.getBeforeTransmissionContext().httpRequest().getContent(), signingKey,
                     signerRequestParams.getFormattedSigningDateTime(),
                     signerRequestParams.getScope(),
                     BinaryUtils.toHex(signature), this);
@@ -94,7 +94,7 @@ public class AwsS3V4Signer extends Aws4Signer {
         // notified to pick up the header value returned by this method.
         mutableRequest.header(X_AMZ_CONTENT_SHA256, "required");
 
-        SdkHttpFullRequest requestToSign = signerRequestParams.getMarshalledRequestContext().httpRequest();
+        SdkHttpFullRequest requestToSign = signerRequestParams.getBeforeTransmissionContext().httpRequest();
 
         if (isPayloadSigningEnabled(requestToSign)) {
             if (useChunkEncoding(signerRequestParams)) {
@@ -138,7 +138,7 @@ public class AwsS3V4Signer extends Aws4Signer {
     private boolean useChunkEncoding(Aws4SignerRequestParams signerRequestParams) {
         // If chunked encoding is explicitly disabled through client options return right here.
         // Chunked encoding only makes sense to do when the payload is signed
-        BeforeTransmissionContext execution = signerRequestParams.getMarshalledRequestContext();
+        BeforeTransmissionContext execution = signerRequestParams.getBeforeTransmissionContext();
         if (!isPayloadSigningEnabled(execution.httpRequest()) ||
             isChunkedEncodingDisabled()) {
             return false;
@@ -175,7 +175,7 @@ public class AwsS3V4Signer extends Aws4Signer {
      * mark-supported.
      */
     private static long getContentLength(Aws4SignerRequestParams signerParams) throws IOException {
-        final InputStream content = signerParams.getMarshalledRequestContext().httpRequest().getContent();
+        final InputStream content = signerParams.getBeforeTransmissionContext().httpRequest().getContent();
         validState(content.markSupported(), "Request input stream must have been made mark-and-resettable");
 
         long contentLength = 0;

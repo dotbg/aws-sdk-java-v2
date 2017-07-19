@@ -21,12 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import software.amazon.awssdk.Request;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 
 /**
  * Adapts a {@link Request} to the new {@link SdkHttpFullRequest} interface.
- *
- * TODO this should eventually be removed and SdkHttpFullRequest should completely replace Request
  */
+@ReviewBeforeRelease("This should eventually be removed and SdkHttpFullRequest should completely replace Request")
 public class SdkHttpFullRequestAdapter {
 
     public static SdkHttpFullRequest toHttpFullRequest(Request<?> request) {

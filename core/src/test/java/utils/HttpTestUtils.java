@@ -17,6 +17,7 @@ package utils;
 
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.config.MutableClientConfiguration;
+import software.amazon.awssdk.config.defaults.GlobalClientConfigurationDefaults;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.SdkHttpConfigurationOption;
@@ -66,6 +67,8 @@ public class HttpTestUtils {
             MutableClientConfiguration clientConfig = new MutableClientConfiguration()
                     .httpClient(sdkHttpClient)
                     .overrideConfiguration(overrideConfiguration);
+
+            new GlobalClientConfigurationDefaults().applySyncDefaults(clientConfig);
 
             return AmazonHttpClient.builder().syncClientConfiguration(clientConfig).build();
         }

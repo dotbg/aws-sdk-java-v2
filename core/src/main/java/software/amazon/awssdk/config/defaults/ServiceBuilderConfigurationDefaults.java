@@ -53,12 +53,16 @@ public class ServiceBuilderConfigurationDefaults extends ClientConfigurationDefa
     protected void applyOverrideDefaults(ClientOverrideConfiguration.Builder builder) {
         ClientOverrideConfiguration config = builder.build();
 
-        builder.advancedOption(SIGNER_PROVIDER,
-                               applyDefault(config.advancedOption(SIGNER_PROVIDER), defaultSignerProvider));
+        if (defaultSignerProvider != null) {
+            builder.advancedOption(SIGNER_PROVIDER,
+                                   applyDefault(config.advancedOption(SIGNER_PROVIDER), defaultSignerProvider));
+        }
 
-        Boolean currentValue = config.advancedOption(CRC32_FROM_COMPRESSED_DATA_ENABLED);
-        builder.advancedOption(CRC32_FROM_COMPRESSED_DATA_ENABLED,
-                               applyDefault(currentValue, () -> crc32FromCompressedDataEnabled));
+        if (crc32FromCompressedDataEnabled != null) {
+            Boolean currentValue = config.advancedOption(CRC32_FROM_COMPRESSED_DATA_ENABLED);
+            builder.advancedOption(CRC32_FROM_COMPRESSED_DATA_ENABLED,
+                                   applyDefault(currentValue, () -> crc32FromCompressedDataEnabled));
+        }
 
         ClasspathInterceptorChainFactory chainFactory = new ClasspathInterceptorChainFactory();
         requestHandlerPaths.forEach(path -> chainFactory.getInterceptors(path).forEach(builder::addExecutionInterceptor));

@@ -128,7 +128,7 @@ public final class Aws4SignerRequestParams {
     /**
      * Returns the immutable state of the execution.
      */
-    public BeforeTransmissionContext getMarshalledRequestContext() {
+    public BeforeTransmissionContext getBeforeTransmissionContext() {
         return execution;
     }
 

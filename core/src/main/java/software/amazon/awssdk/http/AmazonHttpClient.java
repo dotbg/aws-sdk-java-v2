@@ -25,6 +25,7 @@ import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.Response;
 import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.SdkClientException;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.annotation.SdkTestInternalApi;
@@ -56,7 +57,6 @@ import software.amazon.awssdk.http.pipeline.stages.TimerExceptionHandlingStage;
 import software.amazon.awssdk.http.pipeline.stages.UnwrapResponseContainer;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
-import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.response.AwsErrorResponseHandler;
 import software.amazon.awssdk.internal.http.response.AwsResponseHandlerAdapter;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionTimer;
@@ -255,7 +255,7 @@ public class AmazonHttpClient implements AutoCloseable {
          *
          * @param request Request object
          * @return This builder for method chaining.
-         * @deprecated by {@link #request(SdkHttpFullRequest)}.
+         * @deprecated Specify the HTTP request in the {@link ExecutionContext}.
          */
         @Deprecated
         RequestExecutionBuilder request(Request<?> request);
@@ -265,7 +265,9 @@ public class AmazonHttpClient implements AutoCloseable {
          *
          * @param request Request object
          * @return This builder for method chaining.
+         * @deprecated Specify the HTTP request in the {@link ExecutionContext}.
          */
+        @Deprecated
         RequestExecutionBuilder request(SdkHttpFullRequest request);
 
         /**
@@ -352,6 +354,7 @@ public class AmazonHttpClient implements AutoCloseable {
         }
 
         @Override
+        @ReviewBeforeRelease("This is duplicating information in the interceptor context. Can they be consolidated?")
         public RequestExecutionBuilder request(SdkHttpFullRequest request) {
             this.request = request;
             return this;
@@ -365,8 +368,7 @@ public class AmazonHttpClient implements AutoCloseable {
         }
 
         @Override
-        public RequestExecutionBuilder executionContext(
-                ExecutionContext executionContext) {
+        public RequestExecutionBuilder executionContext(ExecutionContext executionContext) {
             this.executionContext = executionContext;
             return this;
         }
@@ -379,6 +381,12 @@ public class AmazonHttpClient implements AutoCloseable {
 
         @Override
         public <OutputT> OutputT execute(HttpResponseHandler<OutputT> responseHandler) {
+            // TODO: Remove this when we remove the ability to specify the request here?
+            if (request != null) {
+                this.executionContext = executionContext.modify(b -> b.interceptorContext(
+                        executionContext.interceptorContext().modify(ib -> ib.httpRequest(request))));
+            }
+
             try {
                 return RequestPipelineBuilder
                         // Start of mutating request

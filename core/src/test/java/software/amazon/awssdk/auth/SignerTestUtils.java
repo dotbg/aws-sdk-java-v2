@@ -16,6 +16,7 @@
 package software.amazon.awssdk.auth;
 
 import java.util.Date;
+import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
@@ -25,14 +26,14 @@ public class SignerTestUtils {
     public static SdkHttpFullRequest signRequest(Signer signer,
                                                  SdkHttpFullRequest request,
                                                  AwsCredentials credentials) {
-        return signer.sign(DefaultInterceptorContext.builder().httpRequest(request).build(),
+        return signer.sign(DefaultInterceptorContext.builder().request(new SdkRequest()).httpRequest(request).build(),
                            new ExecutionAttributes().putAttribute(AwsExecutionAttributes.AWS_CREDENTIALS, credentials));
     }
     public static SdkHttpFullRequest presignRequest(Presigner presigner,
                                                     SdkHttpFullRequest request,
                                                     AwsCredentials credentials,
                                                     Date expiration) {
-        return presigner.presign(DefaultInterceptorContext.builder().httpRequest(request).build(),
+        return presigner.presign(DefaultInterceptorContext.builder().request(new SdkRequest()).httpRequest(request).build(),
                                  new ExecutionAttributes().putAttribute(AwsExecutionAttributes.AWS_CREDENTIALS, credentials),
                                  expiration);
     }
