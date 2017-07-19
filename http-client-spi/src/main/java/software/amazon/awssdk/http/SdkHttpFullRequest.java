@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.utils.builder.CopyableBuilder;
 import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 
@@ -47,8 +48,9 @@ public interface SdkHttpFullRequest
     /**
      * Builder interface for {@link SdkHttpFullRequest}.
      */
-    interface Builder extends CopyableBuilder<Builder, SdkHttpFullRequest> {
-
+    @ReviewBeforeRelease("Extending SdkHttpRequest is dangerous, because this is mutable, but it's expected that "
+                         + "requests aren't.")
+    interface Builder extends CopyableBuilder<Builder, SdkHttpFullRequest>, SdkHttpFullRequest {
         /**
          * Adds the header to the builder.
          *
@@ -175,6 +177,17 @@ public interface SdkHttpFullRequest
          * @return This builder for method chaining.
          */
         Builder content(InputStream content);
+
+        /**
+         * Returns the optional stream containing the payload data to include for
+         * this request.
+         * <br/>
+         * Not all requests will contain payload data.
+         *
+         * @return The optional stream containing the payload data to include for this request or null if there is no payload.
+         */
+        InputStream getContent();
+
     }
 
 }

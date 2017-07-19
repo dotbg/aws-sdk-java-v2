@@ -15,6 +15,8 @@
 
 package software.amazon.awssdk.http;
 
+import static software.amazon.awssdk.utils.CollectionUtils.deepUnmodifiableMap;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -43,8 +45,8 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
     private final InputStream content;
 
     private DefaultSdkHttpFullRequest(Builder builder) {
-        this.headers = CollectionUtils.deepUnmodifiableMap(builder.headers, () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-        this.queryParameters = CollectionUtils.deepUnmodifiableMap(builder.queryParameters, () -> new LinkedHashMap<>());
+        this.headers = deepUnmodifiableMap(builder.headers, () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+        this.queryParameters = deepUnmodifiableMap(builder.queryParameters, () -> new LinkedHashMap<>());
         this.resourcePath = builder.resourcePath;
         this.endpoint = builder.endpoint;
         this.httpMethod = builder.httpMethod;
@@ -133,9 +135,19 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         }
 
         @Override
+        public Map<String, List<String>> getHeaders() {
+            return CollectionUtils.deepUnmodifiableMap(this.headers);
+        }
+
+        @Override
         public DefaultSdkHttpFullRequest.Builder resourcePath(String resourcePath) {
             this.resourcePath = resourcePath;
             return this;
+        }
+
+        @Override
+        public String getResourcePath() {
+            return this.resourcePath;
         }
 
         @Override
@@ -163,9 +175,19 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         }
 
         @Override
+        public Map<String, List<String>> getParameters() {
+            return CollectionUtils.deepUnmodifiableMap(this.queryParameters);
+        }
+
+        @Override
         public DefaultSdkHttpFullRequest.Builder endpoint(URI endpoint) {
             this.endpoint = endpoint;
             return this;
+        }
+
+        @Override
+        public URI getEndpoint() {
+            return this.endpoint;
         }
 
         @Override
@@ -175,9 +197,19 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         }
 
         @Override
+        public SdkHttpMethod getHttpMethod() {
+            return this.httpMethod;
+        }
+
+        @Override
         public DefaultSdkHttpFullRequest.Builder content(InputStream content) {
             this.content = content;
             return this;
+        }
+
+        @Override
+        public InputStream getContent() {
+            return this.content;
         }
 
         /**
@@ -186,6 +218,12 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         @Override
         public DefaultSdkHttpFullRequest build() {
             return new DefaultSdkHttpFullRequest(this);
+        }
+
+        @Override
+        @ReviewBeforeRelease("This is why we shouldn't extend the request in the builder.")
+        public Builder toBuilder() {
+            throw new UnsupportedOperationException();
         }
     }
 

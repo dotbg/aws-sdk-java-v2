@@ -18,21 +18,17 @@ package software.amazon.awssdk.auth.internal;
 import static software.amazon.awssdk.handlers.AwsExecutionAttributes.TIME_OFFSET;
 
 import java.util.Date;
+import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 import software.amazon.awssdk.util.AwsHostNameUtils;
 
 /**
  * Parameters that are used for computing a AWS 4 signature for a request.
  */
 public final class Aws4SignerRequestParams {
-    /**
-     * The current immutable state of the execution.
-     */
-    private final BeforeTransmissionContext execution;
-
     /**
      * Mutable attributes attached to the current execution.
      */
@@ -75,26 +71,38 @@ public final class Aws4SignerRequestParams {
     private final String signingAlgorithm;
 
     /**
+     * The original modeled request given to the SDK.
+     */
+    private final SdkRequest originalRequest;
+
+    /**
+     * The HTTP request to be signed.
+     */
+    private final SdkHttpFullRequest httpRequest;
+
+    /**
      * Generates an instance of AWS4signerRequestParams that holds the
      * parameters used for computing a AWS 4 signature for a request.
      *
      * TODO: This is a lot of parameters. Clean up with signing refactor? There is also a lot of other things passed around with
      * this object elsewhere. More should be moved here, or this shouldn't be used.
      */
-    public Aws4SignerRequestParams(BeforeTransmissionContext execution, ExecutionAttributes executionAttributes,
+    public Aws4SignerRequestParams(SdkRequest originalRequest, SdkHttpFullRequest httpRequest,
+                                   ExecutionAttributes executionAttributes,
                                    Date signingDateOverride, String regionNameOverride,
                                    String serviceName, String signingAlgorithm) {
         if (signingAlgorithm == null) {
             throw new IllegalArgumentException("Signing Algorithm cannot be null");
         }
-        this.execution = execution;
+        this.originalRequest = originalRequest;
+        this.httpRequest = httpRequest;
         this.executionAttributes = executionAttributes;
         this.signingDateTimeMilli = signingDateOverride != null ? signingDateOverride
                 .getTime() : getSigningDate(executionAttributes.getAttribute(TIME_OFFSET));
         this.formattedSigningDate = Aws4SignerUtils
                 .formatDateStamp(signingDateTimeMilli);
         this.serviceName = serviceName;
-        this.regionName = parseRegion(execution.httpRequest(), regionNameOverride);
+        this.regionName = parseRegion(httpRequest, regionNameOverride);
         this.scope = generateScope(formattedSigningDate, this.serviceName, regionName);
         this.formattedSigningDateTime = Aws4SignerUtils.formatTimestamp(signingDateTimeMilli);
         this.signingAlgorithm = signingAlgorithm;
@@ -126,10 +134,17 @@ public final class Aws4SignerRequestParams {
     }
 
     /**
-     * Returns the immutable state of the execution.
+     * Returns the original modeled request given to the SDK.
      */
-    public BeforeTransmissionContext getBeforeTransmissionContext() {
-        return execution;
+    public SdkRequest originalRequest() {
+        return originalRequest;
+    }
+
+    /**
+     * Returns the HTTP request to be signed.
+     */
+    public SdkHttpFullRequest httpRequest() {
+        return httpRequest;
     }
 
     /**

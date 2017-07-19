@@ -69,7 +69,7 @@ public class QueryStringSigner extends AbstractAwsSigner {
         }
 
         mutableRequest.queryParameter("SignatureMethod", SigningAlgorithm.HmacSHA256.toString());
-        String stringToSign = calculateStringToSignV2(execution.httpRequest());
+        String stringToSign = calculateStringToSignV2(mutableRequest);
 
         String signatureValue = signAndBase64Encode(stringToSign,
                                                     sanitizedCredentials.secretAccessKey(),

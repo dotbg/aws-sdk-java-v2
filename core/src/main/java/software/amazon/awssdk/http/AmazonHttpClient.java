@@ -382,8 +382,8 @@ public class AmazonHttpClient implements AutoCloseable {
         @Override
         public <OutputT> OutputT execute(HttpResponseHandler<OutputT> responseHandler) {
             // TODO: Remove this when we remove the ability to specify the request here?
-            if (request != null) {
-                this.executionContext = executionContext.modify(b -> b.interceptorContext(
+            if (request != null && executionContext != null) {
+                executionContext = executionContext.modify(b -> b.interceptorContext(
                         executionContext.interceptorContext().modify(ib -> ib.httpRequest(request))));
             }
 

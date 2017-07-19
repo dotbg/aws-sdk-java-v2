@@ -27,7 +27,6 @@ import software.amazon.awssdk.auth.Aws4Signer;
 import software.amazon.awssdk.auth.internal.Aws4SignerRequestParams;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpRequest;
-import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
 import software.amazon.awssdk.services.s3.auth.AwsChunkedEncodingInputStream;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
@@ -67,7 +66,7 @@ public class AwsS3V4Signer extends Aws4Signer {
                                          Aws4SignerRequestParams signerRequestParams) {
         if (useChunkEncoding(signerRequestParams)) {
             AwsChunkedEncodingInputStream chunkEncodededStream = new AwsChunkedEncodingInputStream(
-                    signerRequestParams.getBeforeTransmissionContext().httpRequest().getContent(), signingKey,
+                    signerRequestParams.httpRequest().getContent(), signingKey,
                     signerRequestParams.getFormattedSigningDateTime(),
                     signerRequestParams.getScope(),
                     BinaryUtils.toHex(signature), this);
@@ -94,7 +93,7 @@ public class AwsS3V4Signer extends Aws4Signer {
         // notified to pick up the header value returned by this method.
         mutableRequest.header(X_AMZ_CONTENT_SHA256, "required");
 
-        SdkHttpFullRequest requestToSign = signerRequestParams.getBeforeTransmissionContext().httpRequest();
+        SdkHttpFullRequest requestToSign = signerRequestParams.httpRequest();
 
         if (isPayloadSigningEnabled(requestToSign)) {
             if (useChunkEncoding(signerRequestParams)) {
@@ -138,13 +137,13 @@ public class AwsS3V4Signer extends Aws4Signer {
     private boolean useChunkEncoding(Aws4SignerRequestParams signerRequestParams) {
         // If chunked encoding is explicitly disabled through client options return right here.
         // Chunked encoding only makes sense to do when the payload is signed
-        BeforeTransmissionContext execution = signerRequestParams.getBeforeTransmissionContext();
-        if (!isPayloadSigningEnabled(execution.httpRequest()) ||
+        if (!isPayloadSigningEnabled(signerRequestParams.httpRequest()) ||
             isChunkedEncodingDisabled()) {
             return false;
         }
 
-        return execution.request() instanceof PutObjectRequest || execution.request() instanceof UploadPartRequest;
+        return signerRequestParams.originalRequest() instanceof PutObjectRequest ||
+               signerRequestParams.originalRequest() instanceof UploadPartRequest;
     }
 
     /**
@@ -175,7 +174,7 @@ public class AwsS3V4Signer extends Aws4Signer {
      * mark-supported.
      */
     private static long getContentLength(Aws4SignerRequestParams signerParams) throws IOException {
-        final InputStream content = signerParams.getBeforeTransmissionContext().httpRequest().getContent();
+        final InputStream content = signerParams.httpRequest().getContent();
         validState(content.markSupported(), "Request input stream must have been made mark-and-resettable");
 
         long contentLength = 0;
