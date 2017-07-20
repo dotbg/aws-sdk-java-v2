@@ -134,11 +134,12 @@ abstract class BaseClientHandler {
                                                             executionContext.executionAttributes());
     }
 
-    protected void runModifyRequestInterceptors(ExecutionContext executionContext) {
+    protected <T> T runModifyRequestInterceptors(ExecutionContext executionContext) {
         DefaultInterceptorContext interceptorContext =
                 executionContext.interceptorChain().modifyRequest(executionContext.interceptorContext(),
                                                                   executionContext.executionAttributes());
         executionContext.interceptorContext(interceptorContext);
+        return (T) interceptorContext.request();
     }
 
     protected void runBeforeMarshallingInterceptors(ExecutionContext executionContext) {
@@ -156,11 +157,12 @@ abstract class BaseClientHandler {
                                                              executionContext.executionAttributes());
     }
 
-    protected void runModifyHttpRequestInterceptors(ExecutionContext executionContext) {
+    protected SdkHttpFullRequest runModifyHttpRequestInterceptors(ExecutionContext executionContext) {
         DefaultInterceptorContext interceptorContext =
                 executionContext.interceptorChain().modifyHttpRequest(executionContext.interceptorContext(),
                                                                       executionContext.executionAttributes());
         executionContext.interceptorContext(interceptorContext);
+        return interceptorContext.httpRequest();
     }
 
     protected void runAfterExecutionInterceptors(ExecutionContext executionContext) {

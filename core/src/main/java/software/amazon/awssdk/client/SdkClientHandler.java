@@ -16,6 +16,8 @@
 package software.amazon.awssdk.client;
 
 import software.amazon.awssdk.AmazonWebServiceRequest;
+import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.ThreadSafe;
@@ -40,7 +42,7 @@ public class SdkClientHandler extends ClientHandler {
     }
 
     @Override
-    public <InputT, OutputT> OutputT execute(
+    public <InputT extends SdkRequest, OutputT extends SdkResponse> OutputT execute(
             ClientExecutionParams<InputT, OutputT> executionParams) {
         return delegateHandler.execute(
                 addRequestConfig(executionParams)
@@ -55,7 +57,7 @@ public class SdkClientHandler extends ClientHandler {
         delegateHandler.close();
     }
 
-    private <InputT, OutputT> ClientExecutionParams<InputT, OutputT> addRequestConfig(
+    private <InputT extends SdkRequest, OutputT extends SdkResponse> ClientExecutionParams<InputT, OutputT> addRequestConfig(
             ClientExecutionParams<InputT, OutputT> params) {
         return params.withRequestConfig(new AmazonWebServiceRequestAdapter((AmazonWebServiceRequest) params.getInput()));
     }

@@ -22,6 +22,8 @@ import org.reactivestreams.Subscriber;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.SdkBaseException;
+import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
@@ -65,11 +67,12 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
     }
 
     @Override
-    public <InputT, OutputT> CompletableFuture<OutputT> execute(ClientExecutionParams<InputT, OutputT> executionParams) {
-        final InputT inputT = executionParams.getInput();
+    public <InputT extends SdkRequest, OutputT extends SdkResponse> CompletableFuture<OutputT> execute(
+            ClientExecutionParams<InputT, OutputT> executionParams) {
+        // TODO: Simplify signature?
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
         runBeforeExecutionInterceptors(executionContext);
-        runModifyRequestInterceptors(executionContext);
+        InputT inputT = runModifyRequestInterceptors(executionContext);
 
         AwsRequestMetrics awsRequestMetrics = executionContext.awsRequestMetrics();
         awsRequestMetrics.startEvent(AwsRequestMetrics.Field.ClientExecuteTime);
@@ -91,10 +94,9 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
             awsRequestMetrics.endEvent(AwsRequestMetrics.Field.RequestMarshallTime);
         }
 
-        SdkHttpFullRequest marshalled = SdkHttpFullRequestAdapter.toHttpFullRequest(request);
-        addHttpRequest(executionContext, marshalled);
+        addHttpRequest(executionContext, SdkHttpFullRequestAdapter.toHttpFullRequest(request));
         runAfterMarshallingInterceptors(executionContext);
-        runModifyHttpRequestInterceptors(executionContext);
+        SdkHttpFullRequest marshalled = runModifyHttpRequestInterceptors(executionContext);
 
         SdkHttpRequestProvider requestProvider = executionParams.getAsyncRequestProvider() != null ?
                 adaptAsyncRequestProvider(executionParams.getAsyncRequestProvider()) : null;
@@ -181,7 +183,7 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
      * to buffer all contents into memory then call out to the sync response handler ({@link
      * software.amazon.awssdk.http.HttpResponseHandler}).
      */
-    private <OutputT> SdkHttpResponseHandler<OutputT> resolveResponseHandler(
+    private <OutputT extends SdkResponse> SdkHttpResponseHandler<OutputT> resolveResponseHandler(
             ClientExecutionParams<?, OutputT> executionParams,
             Function<SdkHttpFullResponse, HttpResponse> responseAdapter,
             ExecutionAttributes executionAttributes) {

@@ -18,6 +18,8 @@ package software.amazon.awssdk.client;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.SdkBaseException;
+import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
@@ -52,11 +54,12 @@ public class SyncClientHandlerImpl extends ClientHandler {
     }
 
     @Override
-    public <InputT, OutputT> OutputT execute(ClientExecutionParams<InputT, OutputT> executionParams) {
-        final InputT inputT = executionParams.getInput();
+    public <InputT extends SdkRequest, OutputT extends SdkResponse> OutputT execute(
+            ClientExecutionParams<InputT, OutputT> executionParams) {
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
         runBeforeExecutionInterceptors(executionContext);
-        runModifyRequestInterceptors(executionContext);
+        InputT inputT = runModifyRequestInterceptors(executionContext);
+
         AwsRequestMetrics awsRequestMetrics = executionContext.awsRequestMetrics();
         awsRequestMetrics.startEvent(AwsRequestMetrics.Field.ClientExecuteTime);
         Request<InputT> request = null;
@@ -80,7 +83,7 @@ public class SyncClientHandlerImpl extends ClientHandler {
             SdkHttpFullRequest marshalled = SdkHttpFullRequestAdapter.toHttpFullRequest(request);
             addHttpRequest(executionContext, marshalled);
             runAfterMarshallingInterceptors(executionContext);
-            runModifyHttpRequestInterceptors(executionContext);
+            marshalled = runModifyHttpRequestInterceptors(executionContext);
 
             response = invoke(marshalled,
                               executionParams.getRequestConfig(),

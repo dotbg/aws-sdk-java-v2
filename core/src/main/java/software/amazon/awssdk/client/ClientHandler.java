@@ -15,6 +15,8 @@
 
 package software.amazon.awssdk.client;
 
+import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.config.ClientConfiguration;
@@ -39,5 +41,6 @@ public abstract class ClientHandler extends BaseClientHandler implements AutoClo
      * @param <OutputT>        Output POJO type
      * @return Unmarshalled output POJO type.
      */
-    public abstract <InputT, OutputT> OutputT execute(ClientExecutionParams<InputT, OutputT> executionParams);
+    public abstract <InputT extends SdkRequest, OutputT extends SdkResponse> OutputT execute(
+            ClientExecutionParams<InputT, OutputT> executionParams);
 }

@@ -16,6 +16,8 @@
 package software.amazon.awssdk.client;
 
 import java.util.concurrent.CompletableFuture;
+import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.config.ClientConfiguration;
@@ -40,5 +42,6 @@ public abstract class AsyncClientHandler extends BaseClientHandler implements Au
      * @param <OutputT>       Output POJO type
      * @return Unmarshalled output POJO type.
      */
-    public abstract <InputT, OutputT> CompletableFuture<OutputT> execute(ClientExecutionParams<InputT, OutputT> executionParams);
+    public abstract <InputT extends SdkRequest, OutputT extends SdkResponse> CompletableFuture<OutputT> execute(
+            ClientExecutionParams<InputT, OutputT> executionParams);
 }
