@@ -23,7 +23,6 @@ import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.SdkRequest;
-import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
@@ -67,7 +66,7 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
     }
 
     @Override
-    public <InputT extends SdkRequest, OutputT extends SdkResponse> CompletableFuture<OutputT> execute(
+    public <InputT extends SdkRequest, OutputT> CompletableFuture<OutputT> execute(
             ClientExecutionParams<InputT, OutputT> executionParams) {
         // TODO: Simplify signature?
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
@@ -183,7 +182,7 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
      * to buffer all contents into memory then call out to the sync response handler ({@link
      * software.amazon.awssdk.http.HttpResponseHandler}).
      */
-    private <OutputT extends SdkResponse> SdkHttpResponseHandler<OutputT> resolveResponseHandler(
+    private <OutputT> SdkHttpResponseHandler<OutputT> resolveResponseHandler(
             ClientExecutionParams<?, OutputT> executionParams,
             Function<SdkHttpFullResponse, HttpResponse> responseAdapter,
             ExecutionAttributes executionAttributes) {

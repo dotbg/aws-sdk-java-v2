@@ -19,7 +19,6 @@ import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.SdkRequest;
-import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
@@ -54,7 +53,7 @@ public class SyncClientHandlerImpl extends ClientHandler {
     }
 
     @Override
-    public <InputT extends SdkRequest, OutputT extends SdkResponse> OutputT execute(
+    public <InputT extends SdkRequest, OutputT> OutputT execute(
             ClientExecutionParams<InputT, OutputT> executionParams) {
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
         runBeforeExecutionInterceptors(executionContext);

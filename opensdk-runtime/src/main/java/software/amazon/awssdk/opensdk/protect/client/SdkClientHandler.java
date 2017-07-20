@@ -15,6 +15,7 @@
 
 package software.amazon.awssdk.opensdk.protect.client;
 
+import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.ThreadSafe;
@@ -22,7 +23,6 @@ import software.amazon.awssdk.client.ClientExecutionParams;
 import software.amazon.awssdk.client.ClientHandler;
 import software.amazon.awssdk.client.SyncClientHandlerImpl;
 import software.amazon.awssdk.config.SyncClientConfiguration;
-import software.amazon.awssdk.opensdk.BaseRequest;
 
 /**
  * Client handler for Open SDK generated clients. Handles exception translation and delegates to the default implementation of
@@ -41,7 +41,7 @@ public class SdkClientHandler extends ClientHandler {
     }
 
     @Override
-    public <InputT, OutputT> OutputT execute(
+    public <InputT extends SdkRequest, OutputT> OutputT execute(
             ClientExecutionParams<InputT, OutputT> executionParams) {
         return delegateHandler.execute(addRequestConfig(executionParams));
     }
@@ -51,9 +51,10 @@ public class SdkClientHandler extends ClientHandler {
         delegateHandler.close();
     }
 
-    private <InputT, OutputT>
+    private <InputT extends SdkRequest, OutputT>
         ClientExecutionParams<InputT, OutputT> addRequestConfig(ClientExecutionParams<InputT, OutputT> params) {
-        return params.withRequestConfig(new RequestConfigAdapter((BaseRequest) params.getInput()));
+        // TODO: Request configuration when we do API gateway generated clients
+        return params.withRequestConfig(null);
     }
 
 }

@@ -248,7 +248,6 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
                                       .first(SigningStage::new)
                                       .then(BeforeTransmissionExecutionInterceptorsStage::new)
                                       .then(d -> new MakeAsyncHttpRequestStage<>(responseHandler, errorResponseHandler, d))
-                                      // TODO BeforeUnmarshallingStage
                                       .wrap(AsyncRetryableStage::new)
                                       ::build)
                         .then(async(() -> new UnwrapResponseContainer<>()))

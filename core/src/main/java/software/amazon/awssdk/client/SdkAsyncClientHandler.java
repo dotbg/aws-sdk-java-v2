@@ -18,7 +18,6 @@ package software.amazon.awssdk.client;
 import java.util.concurrent.CompletableFuture;
 import software.amazon.awssdk.AmazonWebServiceRequest;
 import software.amazon.awssdk.SdkRequest;
-import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
 import software.amazon.awssdk.annotation.ThreadSafe;
@@ -43,7 +42,7 @@ public class SdkAsyncClientHandler extends AsyncClientHandler {
     }
 
     @Override
-    public <InputT extends SdkRequest, OutputT extends SdkResponse> CompletableFuture<OutputT> execute(
+    public <InputT extends SdkRequest, OutputT> CompletableFuture<OutputT> execute(
             ClientExecutionParams<InputT, OutputT> executionParams) {
         return delegateHandler.execute(
                 addRequestConfig(executionParams)
@@ -58,7 +57,7 @@ public class SdkAsyncClientHandler extends AsyncClientHandler {
         delegateHandler.close();
     }
 
-    private <InputT extends SdkRequest, OutputT extends SdkResponse> ClientExecutionParams<InputT, OutputT> addRequestConfig(
+    private <InputT extends SdkRequest, OutputT> ClientExecutionParams<InputT, OutputT> addRequestConfig(
             ClientExecutionParams<InputT, OutputT> params) {
         return params.withRequestConfig(new AmazonWebServiceRequestAdapter((AmazonWebServiceRequest) params.getInput()));
     }

@@ -103,7 +103,7 @@ public class BaseClientBuilderClass implements ClassSpec {
 
     private MethodSpec serviceDefaultsMethod() {
         String requestHandlerDirectory = Utils.packageToDirectory(model.getMetadata().getFullClientPackageName());
-        String requestHandlerPath = String.format("/%s/request.handler2s", requestHandlerDirectory);
+        String requestHandlerPath = String.format("/%s/execution.interceptors", requestHandlerDirectory);
 
         boolean crc32FromCompressedDataEnabled = model.getCustomizationConfig().isCalculateCrc32FromCompressedData();
 
