@@ -57,7 +57,6 @@ public final class AsyncClientClass extends AsyncClientInterface {
                                         .addSuperinterface(interfaceClass)
                                         .addJavadoc("Internal implementation of {@link $1T}.\n\n@see $1T#builder()",
                                                     interfaceClass)
-                                        .addMethod(constructor())
                                         .addMethods(operations())
                                         .addMethod(closeMethod())
                                         .addMethods(protocolSpec.additionalMethods())
@@ -75,7 +74,6 @@ public final class AsyncClientClass extends AsyncClientInterface {
     }
 
     private MethodSpec constructor() {
-
         return MethodSpec.constructorBuilder()
                          .addModifiers(Modifier.PROTECTED)
                          .addParameter(AsyncClientConfiguration.class, "clientConfiguration")

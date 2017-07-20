@@ -70,6 +70,6 @@ public abstract class RequestConfig {
      * be used for replaying requests in the case of retries. All other cases should use the request as it was modified by the
      * interceptors.
      */
-    public abstract Object getOriginalRequest();
+    public abstract SdkRequest getOriginalRequest();
 
 }

@@ -16,19 +16,16 @@
 package software.amazon.awssdk.http.pipeline.stages;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.MutableRequestToRequestPipeline;
-import software.amazon.awssdk.utils.CollectionUtils;
 
 /**
  * Merge customer supplied headers into the marshalled request.

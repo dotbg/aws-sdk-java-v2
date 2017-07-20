@@ -15,7 +15,6 @@
 
 package software.amazon.awssdk.config.defaults;
 
-import static software.amazon.awssdk.config.AdvancedClientOption.SIGNER_PROVIDER;
 import static software.amazon.awssdk.config.AdvancedClientOption.USER_AGENT_PREFIX;
 import static software.amazon.awssdk.config.AdvancedClientOption.USER_AGENT_SUFFIX;
 import static software.amazon.awssdk.config.InternalAdvancedClientOption.CRC32_FROM_COMPRESSED_DATA_ENABLED;
@@ -26,7 +25,6 @@ import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 import software.amazon.awssdk.retry.PredefinedRetryPolicies;
 import software.amazon.awssdk.retry.RetryPolicyAdapter;

@@ -28,7 +28,7 @@ abstract class DefaultJsonBaseClientBuilder<B extends JsonBaseClientBuilder<B, C
     protected final ClientConfigurationDefaults serviceDefaults() {
         return ServiceBuilderConfigurationDefaults.builder().defaultSignerProvider(this::defaultSignerProvider)
                 .addRequestHandlerPath("/software/amazon/awssdk/services/json/request.handler2s")
-                .defaultEndpoint(this::defaultEndpoint).build();
+                .defaultEndpoint(this::defaultEndpoint).crc32FromCompressedDataEnabled(false).build();
     }
 
     private SignerProvider defaultSignerProvider() {

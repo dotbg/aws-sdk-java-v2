@@ -18,6 +18,7 @@ package software.amazon.awssdk.client;
 import software.amazon.awssdk.Request;
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
+import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.config.AdvancedClientOption;
 import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
@@ -47,16 +48,23 @@ abstract class BaseClientHandler {
         AwsRequestMetrics requestMetrics = isRequestMetricsEnabled(requestConfig) ? new AwsRequestMetricsFullSupport()
                                                                                   : new AwsRequestMetrics();
 
+        AwsCredentialsProvider credentialsProvider = requestConfig.getCredentialsProvider() != null
+                                                     ? requestConfig.getCredentialsProvider()
+                                                     : clientConfiguration.credentialsProvider();
+
         ClientOverrideConfiguration overrideConfiguration = clientConfiguration.overrideConfiguration();
         ExecutionAttributes executionAttributes =
                 new ExecutionAttributes().putAttribute(AwsExecutionAttributes.SERVICE_ADVANCED_CONFIG,
                                                        serviceAdvancedConfiguration)
                                          .putAttribute(AwsExecutionAttributes.AWS_CREDENTIALS,
-                                                       requestConfig.getCredentialsProvider().getCredentials())
+                                                       credentialsProvider.getCredentials())
                                          .putAttribute(AwsExecutionAttributes.REQUEST_CONFIG, requestConfig);
 
         return ExecutionContext.builder()
                                .interceptorChain(new ExecutionInterceptorChain(overrideConfiguration.executionInterceptors()))
+                               .interceptorContext(DefaultInterceptorContext.builder()
+                                                                            .request(requestConfig.getOriginalRequest())
+                                                                            .build())
                                .executionAttributes(executionAttributes)
                                .awsRequestMetrics(requestMetrics)
                                .signerProvider(overrideConfiguration.advancedOption(AdvancedClientOption.SIGNER_PROVIDER))

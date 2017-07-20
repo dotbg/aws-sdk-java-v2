@@ -120,7 +120,8 @@ public class EC2Interceptor implements ExecutionInterceptor {
         return awsResponse;
     }
 
-    private DescribeSpotInstanceRequestsResponse convertDescribeSpotInstanceRequestsResponse(DescribeSpotInstanceRequestsResponse response) {
+    private DescribeSpotInstanceRequestsResponse convertDescribeSpotInstanceRequestsResponse(
+            DescribeSpotInstanceRequestsResponse response) {
         DescribeSpotInstanceRequestsResponse.Builder responseBuilder = response.toBuilder();
         responseBuilder.spotInstanceRequests(convertSpotInstanceRequests(response.spotInstanceRequests()));
         return responseBuilder.build();
