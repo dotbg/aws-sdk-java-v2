@@ -80,16 +80,6 @@ public class RetryPolicyAdapterTest {
     }
 
     @Test
-    public void shouldRetry_MaxErrorInClientConfigHonored_DoesNotUseMaxErrorInPolicy() {
-        when(retryCondition.shouldRetry(any(AmazonWebServiceRequest.class), any(AmazonClientException.class), anyInt()))
-                .thenReturn(true);
-        legacyPolicy = new RetryPolicy(retryCondition, backoffStrategy, 3, true);
-        adapter = new RetryPolicyAdapter(legacyPolicy);
-        assertTrue(adapter.shouldRetry(RetryPolicyContexts.withRetriesAttempted(3)));
-        assertFalse(adapter.shouldRetry(RetryPolicyContexts.withRetriesAttempted(10)));
-    }
-
-    @Test
     public void shouldRetry_MaxErrorNotExceeded_DelegatesToLegacyRetryCondition() {
         final RetryPolicyContext context = RetryPolicyContexts.LEGACY;
         adapter.shouldRetry(context);

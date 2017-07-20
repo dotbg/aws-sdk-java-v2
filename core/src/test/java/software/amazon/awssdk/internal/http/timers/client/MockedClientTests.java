@@ -60,6 +60,7 @@ public class MockedClientTests {
     @Test
     public void clientExecutionTimeoutEnabled_RequestCompletesWithinTimeout_TaskCanceled() throws Exception {
         AmazonHttpClient httpClient = HttpTestUtils.testClientBuilder()
+                                                   .httpClient(sdkHttpClient)
                                                    .retryPolicy(PredefinedRetryPolicies.NO_RETRY_POLICY)
                                                    .build();
 

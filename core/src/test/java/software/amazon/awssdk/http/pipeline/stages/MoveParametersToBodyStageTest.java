@@ -29,6 +29,7 @@ import software.amazon.awssdk.http.DefaultSdkHttpFullRequest;
 import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.internal.http.timers.ClientExecutionAndRequestTimerTestUtils;
 
 public class MoveParametersToBodyStageTest {
 
@@ -104,7 +105,7 @@ public class MoveParametersToBodyStageTest {
 
     private RequestExecutionContext requestContext(SdkHttpFullRequest.Builder mutableRequest) {
         return RequestExecutionContext.builder()
-                                      .executionContext(ExecutionContext.builder().build())
+                                      .executionContext(ClientExecutionAndRequestTimerTestUtils.executionContext(mutableRequest))
                                       .requestConfig(RequestConfig.NO_OP)
                                       .build();
     }

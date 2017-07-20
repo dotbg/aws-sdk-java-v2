@@ -35,7 +35,9 @@ import software.amazon.awssdk.Request;
 import software.amazon.awssdk.config.AdvancedClientOption;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.config.MutableClientConfiguration;
+import software.amazon.awssdk.config.defaults.GlobalClientConfigurationDefaults;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
+import software.amazon.awssdk.internal.http.timers.ClientExecutionAndRequestTimerTestUtils;
 import utils.HttpTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -62,9 +64,7 @@ public class AmazonHttpClientTest {
 
         when(abortableCallable.call()).thenThrow(ioException);
 
-        ExecutionContext context = ExecutionContext.builder()
-                                                   .signerProvider(new NoOpSignerProvider())
-                                                   .build();
+        ExecutionContext context = ClientExecutionAndRequestTimerTestUtils.executionContext(null);
 
         try {
             client.requestExecutionBuilder()
@@ -85,14 +85,11 @@ public class AmazonHttpClientTest {
     public void testRetryIoExceptionFromHandler() throws Exception {
         final IOException exception = new IOException("BOOM");
 
-
         HttpResponseHandler<?> mockHandler = mock(HttpResponseHandler.class);
         when(mockHandler.needsConnectionLeftOpen()).thenReturn(false);
         when(mockHandler.handle(any(), any())).thenThrow(exception);
 
-        ExecutionContext context = ExecutionContext.builder()
-                                                   .signerProvider(new NoOpSignerProvider())
-                                                   .build();
+        ExecutionContext context = ClientExecutionAndRequestTimerTestUtils.executionContext(null);
 
         try {
             client.requestExecutionBuilder()
@@ -125,13 +122,16 @@ public class AmazonHttpClientTest {
         MutableClientConfiguration config = new MutableClientConfiguration().overrideConfiguration(overrideConfig)
                                                                             .httpClient(sdkHttpClient);
 
+        new GlobalClientConfigurationDefaults().applySyncDefaults(config);
+
         AmazonHttpClient client = AmazonHttpClient.builder()
                 .syncClientConfiguration(config)
                 .build();
 
         client.requestExecutionBuilder()
-                .request(request)
-                .execute(handler);
+              .request(request)
+              .executionContext(ClientExecutionAndRequestTimerTestUtils.executionContext(null))
+              .execute(handler);
 
         ArgumentCaptor<SdkHttpFullRequest> httpRequestCaptor = ArgumentCaptor.forClass(SdkHttpFullRequest.class);
         verify(sdkHttpClient).prepareRequest(httpRequestCaptor.capture(), any());

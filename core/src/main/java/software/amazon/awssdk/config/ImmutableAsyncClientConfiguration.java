@@ -25,12 +25,12 @@ import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 @SdkInternalApi
 public final class ImmutableAsyncClientConfiguration extends ImmutableClientConfiguration implements AsyncClientConfiguration {
 
-    private final ScheduledExecutorService asyncExecutor;
+    private final ScheduledExecutorService asyncExecutorService;
     private final SdkAsyncHttpClient asyncHttpClient;
 
     public ImmutableAsyncClientConfiguration(AsyncClientConfiguration configuration) {
         super(configuration);
-        this.asyncExecutor = configuration.asyncExecutorService();
+        this.asyncExecutorService = configuration.asyncExecutorService();
         this.asyncHttpClient = configuration.asyncHttpClient();
 
         validate();
@@ -42,7 +42,7 @@ public final class ImmutableAsyncClientConfiguration extends ImmutableClientConf
 
     @Override
     public ScheduledExecutorService asyncExecutorService() {
-        return asyncExecutor;
+        return asyncExecutorService;
     }
 
     @Override

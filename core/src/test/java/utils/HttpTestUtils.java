@@ -61,7 +61,7 @@ public class HttpTestUtils {
             ClientOverrideConfiguration overrideConfiguration =
                     ClientOverrideConfiguration.builder()
                                                .totalExecutionTimeout(TimeoutTestConstants.CLIENT_EXECUTION_TIMEOUT)
-                                               .retryPolicy(new RetryPolicyAdapter(retryPolicy))
+                                               .apply(this::configureRetryPolicy)
                                                .build();
 
             MutableClientConfiguration clientConfig = new MutableClientConfiguration()
@@ -71,6 +71,13 @@ public class HttpTestUtils {
             new GlobalClientConfigurationDefaults().applySyncDefaults(clientConfig);
 
             return AmazonHttpClient.builder().syncClientConfiguration(clientConfig).build();
+        }
+
+        private ClientOverrideConfiguration.Builder configureRetryPolicy(ClientOverrideConfiguration.Builder builder) {
+            if (retryPolicy != null) {
+                builder.retryPolicy(new RetryPolicyAdapter(retryPolicy));
+            }
+            return builder;
         }
     }
 }

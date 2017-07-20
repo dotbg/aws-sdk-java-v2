@@ -26,6 +26,8 @@ import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.HttpMethodName;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpFullRequestAdapter;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
@@ -111,18 +113,23 @@ public class ClientExecutionAndRequestTimerTestUtils {
     public static void execute(AmazonHttpClient httpClient, Request<?> request) {
         httpClient.requestExecutionBuilder()
                 .request(request)
-                  .executionContext(ExecutionContext.builder().build())
+                  .executionContext(executionContext(SdkHttpFullRequestAdapter.toHttpFullRequest(request)))
                 .errorResponseHandler(new NullErrorResponseHandler())
                 .execute(new ErrorDuringUnmarshallingResponseHandler());
     }
 
-    public static ExecutionContext executionContext(SdkRequest request) {
+    public static ExecutionContext executionContext(SdkHttpFullRequest request) {
+        DefaultInterceptorContext incerceptorContext =
+                DefaultInterceptorContext.builder()
+                                         .request(new SdkRequest())
+                                         .httpRequest(request)
+                                         .build();
         return ExecutionContext.builder()
                                .awsRequestMetrics(new AwsRequestMetricsFullSupport())
                                .signerProvider(new NoOpSignerProvider())
                                .interceptorChain(new ExecutionInterceptorChain(Collections.emptyList()))
                                .executionAttributes(new ExecutionAttributes())
-                               .interceptorContext(DefaultInterceptorContext.builder().request(request).build())
+                               .interceptorContext(incerceptorContext)
                                .build();
     }
 

@@ -70,6 +70,7 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
         runBeforeExecutionInterceptors(executionContext);
         runModifyRequestInterceptors(executionContext);
+
         AwsRequestMetrics awsRequestMetrics = executionContext.awsRequestMetrics();
         awsRequestMetrics.startEvent(AwsRequestMetrics.Field.ClientExecuteTime);
         Request<InputT> request;

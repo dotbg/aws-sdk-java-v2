@@ -34,6 +34,7 @@ import org.mockito.MockitoAnnotations;
 import software.amazon.awssdk.AmazonServiceException;
 import software.amazon.awssdk.AmazonServiceException.ErrorType;
 import software.amazon.awssdk.DefaultRequest;
+import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.http.SdkHttpFullRequestAdapter;
@@ -100,7 +101,9 @@ public class JsonErrorResponseHandlerTest {
         httpResponse.setStatusCode(500);
         httpResponse.setContent(null);
 
-        AmazonServiceException ase = responseHandler.handle(httpResponse, new ExecutionAttributes());
+        ExecutionAttributes attributes =
+                new ExecutionAttributes().putAttribute(AwsExecutionAttributes.SERVICE_NAME, SERVICE_NAME);
+        AmazonServiceException ase = responseHandler.handle(httpResponse, attributes);
 
         // We assert these common properties are set again to make sure that code path is exercised
         // for unknown AmazonServiceExceptions as well
@@ -150,7 +153,9 @@ public class JsonErrorResponseHandlerTest {
         when(unmarshaller.unmarshall(anyObject()))
                 .thenReturn(new CustomException("error"));
 
-        AmazonServiceException ase = responseHandler.handle(httpResponse, new ExecutionAttributes());
+        ExecutionAttributes attributes =
+                new ExecutionAttributes().putAttribute(AwsExecutionAttributes.SERVICE_NAME, SERVICE_NAME);
+        AmazonServiceException ase = responseHandler.handle(httpResponse, attributes);
 
         assertEquals(ERROR_CODE, ase.getErrorCode());
         assertEquals(400, ase.getStatusCode());

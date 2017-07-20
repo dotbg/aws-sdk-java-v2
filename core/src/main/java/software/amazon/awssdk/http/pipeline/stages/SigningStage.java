@@ -21,6 +21,7 @@ import software.amazon.awssdk.auth.CanHandleNullCredentials;
 import software.amazon.awssdk.auth.Signer;
 import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.AmazonHttpClient;
+import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.pipeline.RequestToRequestPipeline;
@@ -53,6 +54,7 @@ public class SigningStage implements RequestToRequestPipeline {
      */
     private SdkHttpFullRequest signRequest(SdkHttpFullRequest request, RequestExecutionContext context) {
         final AwsCredentials credentials = context.credentialsProvider().getCredentials();
+        updateInterceptorContext(request, context.executionContext());
         Signer signer = newSigner(request, context);
         if (shouldSign(signer, credentials)) {
             context.awsRequestMetrics().startEvent(AwsRequestMetrics.Field.RequestSigningTime);
@@ -64,6 +66,13 @@ public class SigningStage implements RequestToRequestPipeline {
             }
         }
         return request;
+    }
+
+    /**
+     * TODO: Remove when we stop having two copies of the request.
+     */
+    private void updateInterceptorContext(SdkHttpFullRequest request, ExecutionContext executionContext) {
+        executionContext.interceptorContext(executionContext.interceptorContext().modify(b -> b.httpRequest(request)));
     }
 
     /**

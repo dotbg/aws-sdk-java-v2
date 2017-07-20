@@ -76,8 +76,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
     private CapacityManager createCapacityManager() {
         // When enabled, total retry capacity is computed based on retry cost and desired number of retries.
         // TODO: Allow customers to configure throttled retries (https://github.com/aws/aws-sdk-java-v2/issues/17)
-        int throttledRetryMaxCapacity = -1;
-        return new CapacityManager(throttledRetryMaxCapacity);
+        return new CapacityManager(AmazonHttpClient.THROTTLED_RETRY_COST * AmazonHttpClient.THROTTLED_RETRIES);
     }
 
     public static Builder builder() {

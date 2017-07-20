@@ -33,6 +33,7 @@ import software.amazon.awssdk.http.exception.ClientExecutionTimeoutException;
 import software.amazon.awssdk.http.exception.SdkInterruptedException;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
 import software.amazon.awssdk.http.pipeline.RequestToResponsePipeline;
+import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionTimer;
 
 /**
@@ -68,9 +69,10 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
      * {@link #wrapped#execute(Request)} so the interrupt status doesn't leak out to the callers code
      */
     private Response<OutputT> executeWithTimer(SdkHttpFullRequest request, RequestExecutionContext context) throws Exception {
+        ClientExecutionAbortTrackerTask task =
+                clientExecutionTimer.startTimer(getClientExecutionTimeoutInMillis(context.requestConfig()));
         try {
-            context.clientExecutionTrackerTask(
-                    clientExecutionTimer.startTimer(getClientExecutionTimeoutInMillis(context.requestConfig())));
+            context.clientExecutionTrackerTask(task);
             return wrapped.execute(request, context);
         } finally {
             context.clientExecutionTrackerTask().cancelTask();
@@ -130,8 +132,10 @@ public class ClientExecutionTimedStage<OutputT> implements RequestToResponsePipe
     private long getClientExecutionTimeoutInMillis(RequestConfig requestConfig) {
         if (requestConfig.getClientExecutionTimeout() != null) {
             return requestConfig.getClientExecutionTimeout();
-        } else {
+        } else if (clientConfig.overrideConfiguration().totalExecutionTimeout() != null) {
             return clientConfig.overrideConfiguration().totalExecutionTimeout().toMillis();
+        } else {
+            return 0;
         }
     }
 }

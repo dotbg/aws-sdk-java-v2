@@ -60,63 +60,44 @@ public class ImmutableClientConfigurationTest {
 
     @Test
     public void immutableSyncConfigurationMatchesMutableConfiguration() {
-        assertThat(new ImmutableSyncClientConfiguration(new InitializedSyncConfiguration()))
-                .isEqualToComparingFieldByField(new InitializedSyncConfiguration());
+        assertThat(new ImmutableSyncClientConfiguration(initializedSyncConfiguration()))
+                .isEqualToComparingFieldByFieldRecursively(initializedSyncConfiguration());
     }
 
     @Test
     public void immutableAsyncConfigurationMatchesMutableConfiguration() {
-        assertThat(new ImmutableAsyncClientConfiguration(new InitializedAsyncConfiguration()))
-                .isEqualToComparingFieldByField(new InitializedAsyncConfiguration());
+        assertThat(new ImmutableAsyncClientConfiguration(initializedAsyncConfiguration()))
+                .isEqualToComparingFieldByFieldRecursively(initializedAsyncConfiguration());
     }
 
-    private static class InitializedSyncConfiguration extends InitializedConfiguration implements SyncClientConfiguration {
-
-        @Override
-        public SdkHttpClient httpClient() {
-            return SYNC_HTTP_CLIENT;
-        }
+    private AsyncClientConfiguration initializedAsyncConfiguration() {
+        return new MutableClientConfiguration().overrideConfiguration(initializedOverrideConfiguration())
+                                               .credentialsProvider(CREDENTIALS_PROVIDER)
+                                               .endpoint(ENDPOINT)
+                                               .asyncExecutorService(EXECUTOR_SERVICE)
+                                               .asyncHttpClient(ASYNC_HTTP_CLIENT);
     }
 
-    private static class InitializedAsyncConfiguration extends InitializedConfiguration implements AsyncClientConfiguration {
-        @Override
-        public ScheduledExecutorService asyncExecutorService() {
-            return EXECUTOR_SERVICE;
-        }
-
-        @Override
-        public SdkAsyncHttpClient asyncHttpClient() {
-            return ASYNC_HTTP_CLIENT;
-        }
+    private SyncClientConfiguration initializedSyncConfiguration() {
+        return new MutableClientConfiguration().overrideConfiguration(initializedOverrideConfiguration())
+                                               .credentialsProvider(CREDENTIALS_PROVIDER)
+                                               .endpoint(ENDPOINT)
+                                               .httpClient(SYNC_HTTP_CLIENT);
     }
 
-    private static class InitializedConfiguration implements ClientConfiguration {
-
-        @Override
-        public ClientOverrideConfiguration overrideConfiguration() {
-            return ClientOverrideConfiguration.builder()
-                                              .httpRequestTimeout(Duration.ofSeconds(2))
-                                              .totalExecutionTimeout(Duration.ofSeconds(4))
-                                              .gzipEnabled(true)
-                                              .addAdditionalHttpHeader("header", "value")
-                                              .requestMetricCollector(RequestMetricCollector.NONE)
-                                              .advancedOption(AdvancedClientOption.USER_AGENT_PREFIX, "userAgentPrefix")
-                                              .advancedOption(AdvancedClientOption.USER_AGENT_SUFFIX, "userAgentSuffix")
-                                              .advancedOption(AdvancedClientOption.SIGNER_PROVIDER, SIGNER_PROVIDER)
-                                              .retryPolicy(RETRY_POLICY)
-                                              .addExecutionInterceptor(EXECUTION_INTERCEPTOR)
-                                              .build();
-        }
-
-        @Override
-        public AwsCredentialsProvider credentialsProvider() {
-            return CREDENTIALS_PROVIDER;
-        }
-
-        @Override
-        public URI endpoint() {
-            return ENDPOINT;
-        }
-
+    private ClientOverrideConfiguration initializedOverrideConfiguration() {
+        return ClientOverrideConfiguration.builder()
+                                          .httpRequestTimeout(Duration.ofSeconds(2))
+                                          .totalExecutionTimeout(Duration.ofSeconds(4))
+                                          .gzipEnabled(true)
+                                          .addAdditionalHttpHeader("header", "value")
+                                          .requestMetricCollector(RequestMetricCollector.NONE)
+                                          .advancedOption(AdvancedClientOption.USER_AGENT_PREFIX, "userAgentPrefix")
+                                          .advancedOption(AdvancedClientOption.USER_AGENT_SUFFIX, "userAgentSuffix")
+                                          .advancedOption(AdvancedClientOption.SIGNER_PROVIDER, SIGNER_PROVIDER)
+                                          .advancedOption(AdvancedClientOption.ENABLE_DEFAULT_REGION_DETECTION, false)
+                                          .retryPolicy(RETRY_POLICY)
+                                          .addExecutionInterceptor(EXECUTION_INTERCEPTOR)
+                                          .build();
     }
 }

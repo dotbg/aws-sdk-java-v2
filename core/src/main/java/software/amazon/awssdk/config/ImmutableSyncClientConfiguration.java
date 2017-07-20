@@ -24,15 +24,15 @@ import software.amazon.awssdk.http.SdkHttpClient;
 @SdkInternalApi
 public final class ImmutableSyncClientConfiguration extends ImmutableClientConfiguration implements SyncClientConfiguration {
 
-    private final SdkHttpClient sdkHttpClient;
+    private final SdkHttpClient httpClient;
 
     public ImmutableSyncClientConfiguration(SyncClientConfiguration configuration) {
         super(configuration);
-        this.sdkHttpClient = configuration.httpClient();
+        this.httpClient = configuration.httpClient();
     }
 
     @Override
     public SdkHttpClient httpClient() {
-        return sdkHttpClient;
+        return httpClient;
     }
 }
