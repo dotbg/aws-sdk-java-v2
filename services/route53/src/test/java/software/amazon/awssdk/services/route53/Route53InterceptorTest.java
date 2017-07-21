@@ -18,6 +18,7 @@ package software.amazon.awssdk.services.route53;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
@@ -35,7 +36,7 @@ import software.amazon.awssdk.services.route53.model.ListReusableDelegationSetsR
  * Unit test for request handler customization of delegation set id's
  */
 @ReviewBeforeRelease("This test appears to be wrong, see comment on line 80")
-public class Route53RequestHandlerTest {
+public class Route53InterceptorTest {
 
     private static final String delegationPrefix = "delegationset";
 
@@ -59,7 +60,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(interceptor, createResult);
+        createResult = (CreateHostedZoneResponse) modifyResponse(interceptor, createResult);
 
         assertEquals(createResult.delegationSet().id(), id);
 
@@ -67,7 +68,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(interceptor, createResuableResult);
+        createResuableResult = (CreateReusableDelegationSetResponse) modifyResponse(interceptor, createResuableResult);
 
         assertEquals(createResuableResult.delegationSet().id(), id);
 
@@ -75,7 +76,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(interceptor, getZoneResult);
+        getZoneResult = (GetHostedZoneResponse) modifyResponse(interceptor, getZoneResult);
 
         // This assert works, but only because of the other operations the are sequenced before this, that modify the id.
         assertEquals(getZoneResult.delegationSet().id(), id);
@@ -84,7 +85,7 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(interceptor, getResuableResult);
+        getResuableResult = (GetReusableDelegationSetResponse) modifyResponse(interceptor, getResuableResult);
 
         assertEquals(getResuableResult.delegationSet().id(), id);
 
@@ -92,7 +93,7 @@ public class Route53RequestHandlerTest {
                 .delegationSets(delegationSet)
                 .build();
 
-        afterResponse(interceptor, listResult);
+        listResult = (ListReusableDelegationSetsResponse) modifyResponse(interceptor, listResult);
 
         assertEquals(listResult.delegationSets().get(0).id(), id);
 
@@ -102,15 +103,16 @@ public class Route53RequestHandlerTest {
                 .delegationSet(delegationSet)
                 .build();
 
-        afterResponse(interceptor, createResult);
+        createResult = (CreateHostedZoneResponse) modifyResponse(interceptor, createResult);
 
         assertEquals(createResult.delegationSet().id(), id);
     }
 
-    private void afterResponse(ExecutionInterceptor interceptor, SdkResponse responseObject) {
-        interceptor.modifyResponse(InterceptorContext.builder()
-                                                     .response(responseObject)
-                                                     .build(),
-                                   new ExecutionAttributes());
+    private SdkResponse modifyResponse(ExecutionInterceptor interceptor, SdkResponse responseObject) {
+        return interceptor.modifyResponse(InterceptorContext.builder()
+                                                            .request(new SdkRequest())
+                                                            .response(responseObject)
+                                                            .build(),
+                                          new ExecutionAttributes());
     }
 }

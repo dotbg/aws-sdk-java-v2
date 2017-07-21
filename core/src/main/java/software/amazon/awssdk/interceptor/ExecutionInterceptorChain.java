@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import software.amazon.awssdk.SdkRequest;
+import software.amazon.awssdk.SdkResponse;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.interceptor.context.DefaultFailedExecutionInterceptorContext;
 import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.utils.Validate;
@@ -38,8 +42,10 @@ public class ExecutionInterceptorChain {
         return tryOrThrowInterceptorException(() -> {
             InterceptorContext result = context;
             for (ExecutionInterceptor interceptor : interceptors) {
-                result = context.modify(b -> b.request(interceptor.modifyRequest(context, executionAttributes)));
-                validateInterceptorResult(context, result, interceptor);
+                SdkRequest interceptorResult = interceptor.modifyRequest(context, executionAttributes);
+                validateInterceptorResult(context.request(), interceptorResult, interceptor, "modifyRequest");
+
+                result = context.modify(b -> b.request(interceptorResult));
             }
             return result;
         });
@@ -58,8 +64,10 @@ public class ExecutionInterceptorChain {
         return tryOrThrowInterceptorException(() -> {
             InterceptorContext result = context;
             for (ExecutionInterceptor interceptor : interceptors) {
-                result = context.modify(b -> b.httpRequest(interceptor.modifyHttpRequest(context, executionAttributes)));
-                validateInterceptorResult(context, result, interceptor);
+                SdkHttpFullRequest interceptorResult = interceptor.modifyHttpRequest(context, executionAttributes);
+                validateInterceptorResult(context.httpRequest(), interceptorResult, interceptor, "modifyHttpRequest");
+
+                result = context.modify(b -> b.httpRequest(interceptorResult));
             }
             return result;
         });
@@ -78,10 +86,10 @@ public class ExecutionInterceptorChain {
         return tryOrThrowInterceptorException(() -> {
             InterceptorContext result = context;
             for (int i = interceptors.size() - 1; i >= 0; i--) {
-                result = context.toBuilder()
-                                .httpResponse(interceptors.get(i).modifyHttpResponse(context, executionAttributes))
-                                .build();
-                validateInterceptorResult(context, result, interceptors.get(i));
+                SdkHttpFullResponse interceptorResult = interceptors.get(i).modifyHttpResponse(context, executionAttributes);
+                validateInterceptorResult(context.httpResponse(), interceptorResult, interceptors.get(i), "modifyHttpResponse");
+
+                result = context.modify(b -> b.httpResponse(interceptorResult));
             }
             return result;
         });
@@ -99,10 +107,10 @@ public class ExecutionInterceptorChain {
         return tryOrThrowInterceptorException(() -> {
             InterceptorContext result = context;
             for (int i = interceptors.size() - 1; i >= 0; i--) {
-                result = context.toBuilder()
-                                .response(interceptors.get(i).modifyResponse(context, executionAttributes))
-                                .build();
-                validateInterceptorResult(context, result, interceptors.get(i));
+                SdkResponse interceptorResult = interceptors.get(i).modifyResponse(context, executionAttributes);
+                validateInterceptorResult(context.response(), interceptorResult, interceptors.get(i), "modifyResponse");
+
+                result = context.modify(b -> b.response(interceptorResult));
             }
             return result;
         });
@@ -116,14 +124,14 @@ public class ExecutionInterceptorChain {
         tryOrThrowInterceptorException(() -> interceptors.forEach(i -> i.onExecutionFailure(context, executionAttributes)));
     }
 
-    private void validateInterceptorResult(InterceptorContext originalContext, InterceptorContext newContext,
-                                           ExecutionInterceptor interceptor) {
-        Validate.validState(newContext != null,
-                            "Request interceptor '%s' returned null from its modifyRequest interceptor.",
-                            interceptor);
-        Validate.isInstanceOf(originalContext.request().getClass(), newContext.request(),
-                              "Request interceptor '%s' returned '%s' from modifyRequest, but '%s' was expected.",
-                              interceptor, newContext.request().getClass(), originalContext.request().getClass());
+    private void validateInterceptorResult(Object originalMessage, Object newMessage,
+                                           ExecutionInterceptor interceptor, String methodName) {
+        Validate.validState(newMessage != null,
+                            "Request interceptor '%s' returned null from its %s interceptor.",
+                            interceptor, methodName);
+        Validate.isInstanceOf(originalMessage.getClass(), newMessage,
+                              "Request interceptor '%s' returned '%s' from its %s method, but '%s' was expected.",
+                              interceptor, newMessage.getClass(), methodName, originalMessage.getClass());
     }
 
     private <T> T tryOrThrowInterceptorException(Supplier<T> function) {
@@ -132,7 +140,7 @@ public class ExecutionInterceptorChain {
         } catch (ExecutionInterceptorException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new ExecutionInterceptorException("An exception was raised by an execution interceptor.", e);
+            throw new ExecutionInterceptorException("An exception was caused by an execution interceptor.", e);
         }
     }
 

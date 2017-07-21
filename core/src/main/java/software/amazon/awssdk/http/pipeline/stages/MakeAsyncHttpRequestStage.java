@@ -200,6 +200,9 @@ public class MakeAsyncHttpRequestStage<OutputT>
             // interceptors.modifyHttpResponse
             interceptorContext = context.interceptorChain().modifyHttpResponse(interceptorContext, context.executionAttributes());
 
+            // interceptors.beforeUnmarshalling
+            context.interceptorChain().beforeUnmarshalling(interceptorContext, context.executionAttributes());
+
             // Store updated context
             context.executionContext().interceptorContext(interceptorContext);
         }

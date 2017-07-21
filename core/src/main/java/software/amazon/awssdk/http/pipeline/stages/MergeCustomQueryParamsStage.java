@@ -36,6 +36,7 @@ public class MergeCustomQueryParamsStage implements MutableRequestToRequestPipel
 
     private Map<String, List<String>> mergeParams(SdkHttpFullRequest request, RequestExecutionContext context) {
         Map<String, List<String>> merged = new LinkedHashMap<>(request.getParameters().size());
+        merged.putAll(request.getParameters());
         context.requestConfig().getCustomQueryParameters()
                .forEach((key, val) -> merged.put(key, CollectionUtils.mergeLists(merged.get(key), val)));
         return merged;

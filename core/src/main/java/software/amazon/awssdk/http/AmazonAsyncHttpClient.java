@@ -196,9 +196,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
         private SdkHttpFullRequest request;
         private RequestConfig requestConfig;
         private SdkHttpResponseHandler<? extends SdkBaseException> errorResponseHandler;
-        private ExecutionContext executionContext = ExecutionContext.builder()
-                                                                    .signerProvider(new NoOpSignerProvider())
-                                                                    .build();
+        private ExecutionContext executionContext;
 
         @Override
         public RequestExecutionBuilder requestProvider(SdkHttpRequestProvider requestProvider) {

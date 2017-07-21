@@ -131,6 +131,7 @@ public class SyncClientClass implements ClassSpec {
                          .addStatement("this.clientHandler = new $T(clientConfiguration, serviceConfiguration)",
                                        protocolSpec.getClientHandlerClass())
                          .addStatement("this.$N = init()", protocolSpec.protocolFactory(model).name)
+                         .addStatement("this.clientConfiguration = clientConfiguration")
                          .build();
     }
 

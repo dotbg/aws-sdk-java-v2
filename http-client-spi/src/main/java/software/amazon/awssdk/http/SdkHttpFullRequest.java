@@ -34,6 +34,12 @@ import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
  */
 public interface SdkHttpFullRequest
         extends SdkHttpRequest, ToCopyableBuilder<SdkHttpFullRequest.Builder, SdkHttpFullRequest> {
+    /**
+     * @return Builder instance to construct a {@link DefaultSdkHttpFullRequest}.
+     */
+    public static Builder builder() {
+        return new DefaultSdkHttpFullRequest.Builder();
+    }
 
     /**
      * Returns the optional stream containing the payload data to include for

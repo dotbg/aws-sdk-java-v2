@@ -53,6 +53,13 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         this.content = builder.content;
     }
 
+    /**
+     * @return Builder instance to construct a {@link DefaultSdkHttpFullRequest}.
+     */
+    public static SdkHttpFullRequest.Builder builder() {
+        return SdkHttpFullRequest.builder();
+    }
+
     @Override
     public Map<String, List<String>> getHeaders() {
         return headers;
@@ -100,13 +107,6 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
     }
 
     /**
-     * @return Builder instance to construct a {@link DefaultSdkHttpFullRequest}.
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
      * Builder for a {@link DefaultSdkHttpFullRequest}.
      */
     public static final class Builder implements SdkHttpFullRequest.Builder {
@@ -119,7 +119,7 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         private SdkHttpMethod httpMethod;
         private InputStream content;
 
-        private Builder() {
+        Builder() {
         }
 
         @Override
