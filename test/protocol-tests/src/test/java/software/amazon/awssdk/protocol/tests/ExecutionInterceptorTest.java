@@ -33,7 +33,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.SdkResponse;
@@ -41,7 +40,6 @@ import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.StaticCredentialsProvider;
 import software.amazon.awssdk.client.builder.ClientBuilder;
 import software.amazon.awssdk.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.http.DefaultSdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
@@ -174,7 +172,7 @@ public class ExecutionInterceptorTest {
 //    }
 
     private SdkRequest CHANGED_REQUEST = AllTypesRequest.builder().build();
-    private SdkHttpFullRequest CHANGED_HTTP_REQUEST = DefaultSdkHttpFullRequest.builder().build();
+    private SdkHttpFullRequest CHANGED_HTTP_REQUEST = SdkHttpFullRequest.builder().build();
     private SdkHttpFullResponse CHANGED_HTTP_RESPONSE = SdkHttpFullResponse.builder().build();
     private SdkResponse CHANGED_RESPONSE = AllTypesResponse.builder().build();
 

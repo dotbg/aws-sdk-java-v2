@@ -29,7 +29,6 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import org.junit.Test;
 import software.amazon.awssdk.auth.internal.Aws4SignerUtils;
-import software.amazon.awssdk.http.DefaultSdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
 
@@ -146,14 +145,13 @@ public class Aws4SignerTest {
     }
 
     private SdkHttpFullRequest.Builder generateBasicRequest() {
-        return DefaultSdkHttpFullRequest
-                .builder()
-                .content(new ByteArrayInputStream("{\"TableName\": \"foo\"}".getBytes()))
-                .httpMethod(SdkHttpMethod.POST)
-                .header("Host", "demo.us-east-1.amazonaws.com")
-                .header("x-amz-archive-description", "test  test")
-                .resourcePath("/")
-                .endpoint(URI.create("http://demo.us-east-1.amazonaws.com"));
+        return SdkHttpFullRequest.builder()
+                                 .content(new ByteArrayInputStream("{\"TableName\": \"foo\"}".getBytes()))
+                                 .httpMethod(SdkHttpMethod.POST)
+                                 .header("Host", "demo.us-east-1.amazonaws.com")
+                                 .header("x-amz-archive-description", "test  test")
+                                 .resourcePath("/")
+                                 .endpoint(URI.create("http://demo.us-east-1.amazonaws.com"));
     }
 
     private String getOldTimeStamp(Date date) {

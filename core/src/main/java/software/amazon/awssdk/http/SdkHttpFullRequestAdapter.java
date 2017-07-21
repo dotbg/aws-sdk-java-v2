@@ -34,14 +34,13 @@ public class SdkHttpFullRequestAdapter {
     }
 
     public static SdkHttpFullRequest.Builder toMutableHttpFullRequest(Request<?> request) {
-        return DefaultSdkHttpFullRequest
-                .builder()
-                .content(request.getContent())
-                .httpMethod(SdkHttpMethod.fromValue(request.getHttpMethod().name()))
-                .headers(adaptHeaders(request.getHeaders()))
-                .queryParameters(request.getParameters())
-                .endpoint(request.getEndpoint())
-                .resourcePath(request.getResourcePath());
+        return SdkHttpFullRequest.builder()
+                                 .content(request.getContent())
+                                 .httpMethod(SdkHttpMethod.fromValue(request.getHttpMethod().name()))
+                                 .headers(adaptHeaders(request.getHeaders()))
+                                 .queryParameters(request.getParameters())
+                                 .endpoint(request.getEndpoint())
+                                 .resourcePath(request.getResourcePath());
     }
 
     private static Map<String, List<String>> adaptHeaders(Map<String, String> headers) {

@@ -28,8 +28,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import software.amazon.awssdk.AmazonClientException;
 import software.amazon.awssdk.AmazonServiceException;
-import software.amazon.awssdk.http.DefaultSdkHttpFullRequest;
 import software.amazon.awssdk.http.HttpResponse;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.internal.http.response.JsonErrorResponseHandler;
 import software.amazon.awssdk.runtime.transform.JsonErrorUnmarshaller;
@@ -66,7 +66,7 @@ public class SdkStructuredIonFactoryTest {
         payload.writeTo(writer);
         writer.close();
 
-        HttpResponse error = new HttpResponse(DefaultSdkHttpFullRequest.builder().build());
+        HttpResponse error = new HttpResponse(SdkHttpFullRequest.builder().build());
         error.setContent(new ByteArrayInputStream(bytes.toByteArray()));
         return error;
     }

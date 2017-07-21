@@ -35,7 +35,7 @@ import software.amazon.awssdk.utils.CollectionUtils;
  * Internal implementation of {@link SdkHttpFullRequest}. Provided to HTTP implement to execute a request.
  */
 @SdkInternalApi
-public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
+class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
 
     private final Map<String, List<String>> headers;
     private final String resourcePath;
@@ -51,13 +51,6 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
         this.endpoint = builder.endpoint;
         this.httpMethod = builder.httpMethod;
         this.content = builder.content;
-    }
-
-    /**
-     * @return Builder instance to construct a {@link DefaultSdkHttpFullRequest}.
-     */
-    public static SdkHttpFullRequest.Builder builder() {
-        return SdkHttpFullRequest.builder();
     }
 
     @Override
@@ -109,7 +102,7 @@ public class DefaultSdkHttpFullRequest implements SdkHttpFullRequest {
     /**
      * Builder for a {@link DefaultSdkHttpFullRequest}.
      */
-    public static final class Builder implements SdkHttpFullRequest.Builder {
+    static final class Builder implements SdkHttpFullRequest.Builder {
 
         private Map<String, List<String>> headers = new HashMap<>();
         private String resourcePath;

@@ -38,7 +38,7 @@ import software.amazon.awssdk.util.StringInputStream;
 @RunWith(MockitoJUnitRunner.class)
 public class SdkHttpFullResponseAdapterTest {
 
-    private final SdkHttpFullRequest request = DefaultSdkHttpFullRequest.builder().build();
+    private final SdkHttpFullRequest request = SdkHttpFullRequest.builder().build();
 
     @Test
     public void adapt_SingleHeaderValue_AdaptedCorrectly() throws Exception {
