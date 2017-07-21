@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.Date;
 import org.joda.time.DateTime;
 import software.amazon.awssdk.RequestConfig;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.auth.SdkClock;
 import software.amazon.awssdk.auth.presign.PresignerFacade;
@@ -51,6 +52,7 @@ public final class PollyClientPresigners {
      * Presign a {@link SynthesizeSpeechRequest} to be vended to consumers. The expiration time of the presigned URL is
      * {@value #SYNTHESIZE_SPEECH_DEFAULT_EXPIRATION_MINUTES} from generation time.
      */
+    @ReviewBeforeRelease("Refactor as part of siging changes.")
     public URL getPresignedSynthesizeSpeechUrl(SynthesizeSpeechPresignRequest synthesizeSpeechPresignRequest) {
         SdkHttpFullRequest.Builder request = DefaultSdkHttpFullRequest.builder()
                 .endpoint(endpoint)

@@ -36,13 +36,13 @@ import software.amazon.awssdk.services.rds.model.CopyDBSnapshotRequest;
 import software.amazon.awssdk.services.rds.transform.CopyDBSnapshotRequestMarshaller;
 
 /**
- * Unit Tests for {@link PresignInterceptor}
+ * Unit Tests for {@link RdsPresignInterceptor}
  */
 public class PresignRequestHandlerTest {
     private static final AwsCredentials CREDENTIALS = new AwsCredentials("foo", "bar");
     private static final Region DESTINATION_REGION = Region.of("us-west-2");
 
-    private static PresignInterceptor<CopyDBSnapshotRequest> presignHandler = new CopyDbSnapshotPresignInterceptor();
+    private static RdsPresignInterceptor<CopyDBSnapshotRequest> presignHandler = new CopyDbSnapshotPresignInterceptor();
     private final CopyDBSnapshotRequestMarshaller marshaller = new CopyDBSnapshotRequestMarshaller();
 
     @Test
@@ -72,7 +72,7 @@ public class PresignRequestHandlerTest {
         // Note: month is 0-based
         c.set(2016, 11, 21, 18, 7, 35);
 
-        PresignInterceptor<CopyDBSnapshotRequest> handler = new CopyDbSnapshotPresignInterceptor(c.getTime());
+        RdsPresignInterceptor<CopyDBSnapshotRequest> handler = new CopyDbSnapshotPresignInterceptor(c.getTime());
 
         handler.beforeRequest(marshallRequest(request));
 

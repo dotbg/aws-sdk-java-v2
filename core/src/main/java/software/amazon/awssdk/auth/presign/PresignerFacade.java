@@ -29,7 +29,7 @@ import software.amazon.awssdk.auth.Presigner;
 import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.runtime.auth.SignerProvider;
 import software.amazon.awssdk.runtime.auth.SignerProviderContext;
 import software.amazon.awssdk.util.CredentialUtils;
@@ -68,10 +68,10 @@ public final class PresignerFacade {
         ExecutionAttributes executionAttributes = new ExecutionAttributes();
         executionAttributes.putAttribute(AwsExecutionAttributes.AWS_CREDENTIALS, credentialsProvider.getCredentials());
 
-        SdkHttpFullRequest signed = presigner.presign(DefaultInterceptorContext.builder()
-                                                                               .request(request)
-                                                                               .httpRequest(mutableHttpRequest.build())
-                                                                               .build(),
+        SdkHttpFullRequest signed = presigner.presign(InterceptorContext.builder()
+                                                                        .request(request)
+                                                                        .httpRequest(mutableHttpRequest.build())
+                                                                        .build(),
                                                       executionAttributes,
                                                       expirationDate);
         return RuntimeHttpUtils.convertRequestToUrl(signed, true, false);

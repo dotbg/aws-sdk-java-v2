@@ -24,7 +24,7 @@ import software.amazon.awssdk.util.ImmutableObjectUtils;
 /**
  * Handler for pre-signing {@link CreateDBInstanceReadReplicaRequest}.
  */
-public class CreateDbInstanceReadReplicaPresignInterceptor extends PresignInterceptor<CreateDBInstanceReadReplicaRequest> {
+public class CreateDbInstanceReadReplicaPresignInterceptor extends RdsPresignInterceptor<CreateDBInstanceReadReplicaRequest> {
     public CreateDbInstanceReadReplicaPresignInterceptor() {
         super(CreateDBInstanceReadReplicaRequest.class);
     }

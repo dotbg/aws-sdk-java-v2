@@ -21,7 +21,7 @@ import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionAbortTrackerTask;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 import software.amazon.awssdk.runtime.auth.SignerProvider;
@@ -38,7 +38,7 @@ import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 public class ExecutionContext implements ToCopyableBuilder<ExecutionContext.Builder, ExecutionContext> {
     private final AwsRequestMetrics awsRequestMetrics;
     private final SignerProvider signerProvider;
-    private DefaultInterceptorContext interceptorContext;
+    private InterceptorContext interceptorContext;
     private final ExecutionInterceptorChain interceptorChain;
     private final ExecutionAttributes executionAttributes;
 
@@ -64,11 +64,11 @@ public class ExecutionContext implements ToCopyableBuilder<ExecutionContext.Buil
         return new ExecutionContext.Builder();
     }
 
-    public DefaultInterceptorContext interceptorContext() {
+    public InterceptorContext interceptorContext() {
         return interceptorContext;
     }
 
-    public ExecutionContext interceptorContext(DefaultInterceptorContext interceptorContext) {
+    public ExecutionContext interceptorContext(InterceptorContext interceptorContext) {
         // TODO: this shouldn't be mutable
         this.interceptorContext = interceptorContext;
         return this;
@@ -145,7 +145,7 @@ public class ExecutionContext implements ToCopyableBuilder<ExecutionContext.Buil
     }
 
     public static class Builder implements CopyableBuilder<Builder, ExecutionContext> {
-        private DefaultInterceptorContext interceptorContext;
+        private InterceptorContext interceptorContext;
         private ExecutionInterceptorChain interceptorChain;
         private ExecutionAttributes executionAttributes;
         private SignerProvider signerProvider;
@@ -162,7 +162,7 @@ public class ExecutionContext implements ToCopyableBuilder<ExecutionContext.Buil
             this.executionAttributes = executionContext.executionAttributes;
         }
 
-        public Builder interceptorContext(DefaultInterceptorContext interceptorContext) {
+        public Builder interceptorContext(InterceptorContext interceptorContext) {
             this.interceptorContext = interceptorContext;
             return this;
         }

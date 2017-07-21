@@ -32,7 +32,7 @@ import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
 
 /**
@@ -81,7 +81,7 @@ public class HandleResponseStage<OutputT> implements RequestPipeline<HttpRespons
         SdkResponse response = (SdkResponse) legacyResponse;
 
         // Update interceptor context
-        DefaultInterceptorContext interceptorContext =
+        InterceptorContext interceptorContext =
                 context.executionContext().interceptorContext().modify(b -> b.response(response));
 
         // interceptors.afterUnmarshalling

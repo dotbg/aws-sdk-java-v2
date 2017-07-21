@@ -42,7 +42,7 @@ import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.http.async.SimpleRequestProvider;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 
 /**
  * Delegate to the HTTP implementation to make an HTTP request and receive the response.
@@ -191,7 +191,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
         private void beforeUnmarshalling(SdkHttpFullResponse response) {
             // TODO: Duplicate code
             // Update interceptor context
-            DefaultInterceptorContext interceptorContext =
+            InterceptorContext interceptorContext =
                     context.executionContext().interceptorContext().modify(b -> b.httpResponse(response));
 
             // interceptors.afterTransmission
@@ -226,7 +226,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
             SdkResponse response = (SdkResponse) legacyResponse;
 
             // Update interceptor context
-            DefaultInterceptorContext interceptorContext =
+            InterceptorContext interceptorContext =
                     context.executionContext().interceptorContext().modify(b -> b.response(response));
 
             // interceptors.afterUnmarshalling

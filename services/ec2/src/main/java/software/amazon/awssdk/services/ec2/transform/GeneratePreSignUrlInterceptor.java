@@ -27,7 +27,7 @@ import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.EC2Client;
 import software.amazon.awssdk.services.ec2.model.CopySnapshotRequest;
@@ -86,10 +86,10 @@ public class GeneratePreSignUrlInterceptor implements ExecutionInterceptor {
             Aws4Signer signer = new Aws4Signer();
             signer.setServiceName(serviceName);
 
-            DefaultInterceptorContext newExecutionContext = DefaultInterceptorContext.builder()
-                                                                                     .request(originalRequest)
-                                                                                     .httpRequest(requestForPresigning)
-                                                                                     .build();
+            InterceptorContext newExecutionContext = InterceptorContext.builder()
+                                                                       .request(originalRequest)
+                                                                       .httpRequest(requestForPresigning)
+                                                                       .build();
 
             final SdkHttpFullRequest presignedRequest =
                     signer.presign(newExecutionContext, executionAttributes, null);

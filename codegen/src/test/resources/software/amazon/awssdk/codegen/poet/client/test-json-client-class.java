@@ -9,6 +9,8 @@ import software.amazon.awssdk.auth.presign.PresignerParams;
 import software.amazon.awssdk.client.ClientExecutionParams;
 import software.amazon.awssdk.client.ClientHandler;
 import software.amazon.awssdk.client.SdkClientHandler;
+import software.amazon.awssdk.config.AdvancedClientOption;
+import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.config.SyncClientConfiguration;
 import software.amazon.awssdk.http.HttpResponseHandler;
 import software.amazon.awssdk.protocol.json.JsonClientMetadata;
@@ -40,9 +42,12 @@ final class DefaultJsonClient implements JsonClient {
 
     private final SdkJsonProtocolFactory protocolFactory;
 
+    private final ClientConfiguration clientConfiguration;
+
     protected DefaultJsonClient(SyncClientConfiguration clientConfiguration) {
         this.clientHandler = new SdkClientHandler(clientConfiguration, null);
         this.protocolFactory = init();
+        this.clientConfiguration = clientConfiguration;
     }
 
     /**
@@ -131,8 +136,10 @@ final class DefaultJsonClient implements JsonClient {
     }
 
     public AcmClientPresigners presigners() {
-        return new AcmClientPresigners(PresignerParams.builder().endpoint(clientParams.getEndpoint())
-                                                      .credentialsProvider(clientParams.getCredentialsProvider()).signerProvider(clientParams.signerProvider()).build());
+        return new AcmClientPresigners(PresignerParams.builder().endpoint(clientConfiguration.endpoint())
+                                                      .credentialsProvider(clientConfiguration.credentialsProvider())
+                                                      .signerProvider(clientConfiguration.overrideConfiguration().advancedOption(AdvancedClientOption.SIGNER_PROVIDER))
+                                                      .build());
     }
 
     @Override

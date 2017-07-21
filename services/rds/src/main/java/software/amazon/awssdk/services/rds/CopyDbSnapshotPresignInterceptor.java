@@ -26,7 +26,7 @@ import software.amazon.awssdk.util.ImmutableObjectUtils;
 /**
  * Handler for pre-signing {@link CopyDBSnapshotRequest}.
  */
-public class CopyDbSnapshotPresignInterceptor extends PresignInterceptor<CopyDBSnapshotRequest> {
+public class CopyDbSnapshotPresignInterceptor extends RdsPresignInterceptor<CopyDBSnapshotRequest> {
 
     public CopyDbSnapshotPresignInterceptor() {
         super(CopyDBSnapshotRequest.class);

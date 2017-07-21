@@ -11,6 +11,7 @@ import software.amazon.awssdk.annotation.SdkInternalApi;
 import software.amazon.awssdk.client.ClientExecutionParams;
 import software.amazon.awssdk.client.ClientHandler;
 import software.amazon.awssdk.client.SdkClientHandler;
+import software.amazon.awssdk.config.ClientConfiguration;
 import software.amazon.awssdk.config.SyncClientConfiguration;
 import software.amazon.awssdk.http.DefaultErrorResponseHandler;
 import software.amazon.awssdk.http.StaxResponseHandler;
@@ -41,11 +42,14 @@ final class DefaultQueryClient implements QueryClient {
 
     private final List<Unmarshaller<AmazonServiceException, Node>> exceptionUnmarshallers;
 
+    private final ClientConfiguration clientConfiguration;
+
     private volatile QueryClientWaiters waiters;
 
     protected DefaultQueryClient(SyncClientConfiguration clientConfiguration) {
         this.clientHandler = new SdkClientHandler(clientConfiguration, null);
         this.exceptionUnmarshallers = init();
+        this.clientConfiguration = clientConfiguration;
     }
 
     /**

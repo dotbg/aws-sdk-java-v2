@@ -19,7 +19,7 @@ import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.pipeline.RequestPipeline;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.utils.Pair;
 
 public class AfterTransmissionExecutionInterceptorsStage
@@ -28,7 +28,7 @@ public class AfterTransmissionExecutionInterceptorsStage
     public Pair<SdkHttpFullRequest, SdkHttpFullResponse> execute(Pair<SdkHttpFullRequest, SdkHttpFullResponse> input,
                                                                  RequestExecutionContext context) throws Exception {
         // Update interceptor context
-        DefaultInterceptorContext interceptorContext =
+        InterceptorContext interceptorContext =
                 context.executionContext().interceptorContext().modify(b -> b.httpResponse(input.right()));
 
         // interceptors.afterTransmission

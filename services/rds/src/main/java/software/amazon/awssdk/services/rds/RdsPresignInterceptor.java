@@ -22,13 +22,12 @@ import software.amazon.awssdk.AmazonWebServiceRequest;
 import software.amazon.awssdk.Protocol;
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.auth.Aws4Signer;
-import software.amazon.awssdk.auth.AwsCredentials;
-import software.amazon.awssdk.handlers.AwsExecutionAttributes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.interceptor.context.BeforeTransmissionContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.runtime.endpoint.DefaultServiceEndpointBuilder;
 import software.amazon.awssdk.util.AwsHostNameUtils;
@@ -41,7 +40,7 @@ import software.amazon.awssdk.utils.StringUtils;
  *
  * @param <T> The request type.
  */
-abstract class PresignInterceptor<T extends AmazonWebServiceRequest> implements ExecutionInterceptor {
+abstract class RdsPresignInterceptor<T extends AmazonWebServiceRequest> implements ExecutionInterceptor {
     private static final String SERVICE_NAME = "rds";
     private static final String PARAM_SOURCE_REGION = "SourceRegion";
     private static final String PARAM_DESTINATION_REGION = "DestinationRegion";
@@ -59,11 +58,11 @@ abstract class PresignInterceptor<T extends AmazonWebServiceRequest> implements 
 
     private final Date signingOverrideDate;
 
-    PresignInterceptor(Class<T> requestClassToPreSign) {
+    RdsPresignInterceptor(Class<T> requestClassToPreSign) {
         this(requestClassToPreSign, null);
     }
 
-    PresignInterceptor(Class<T> requestClassToPreSign, Date signingOverrideDate) {
+    RdsPresignInterceptor(Class<T> requestClassToPreSign, Date signingOverrideDate) {
         this.requestClassToPreSign = requestClassToPreSign;
         if (signingOverrideDate != null) {
             this.signingOverrideDate = new Date(signingOverrideDate.getTime());
@@ -101,9 +100,12 @@ abstract class PresignInterceptor<T extends AmazonWebServiceRequest> implements 
                                   .endpoint(createEndpoint(sourceRegion, SERVICE_NAME))
                                   .build();
 
-        AwsCredentials credentials = request.handlerContext(AwsExecutionAttributes.AWS_CREDENTIALS);
+        BeforeTransmissionContext contextToSign = InterceptorContext.builder()
+                                                                    .request(execution.request())
+                                                                    .httpRequest(requestToPresign)
+                                                                    .build();
 
-        requestToPresign = presignRequest(requestToPresign, credentials, sourceRegion);
+        requestToPresign = presignRequest(contextToSign, executionAttributes, sourceRegion);
 
         final String presignedUrl = generateUrl(requestToPresign);
 
@@ -118,9 +120,11 @@ abstract class PresignInterceptor<T extends AmazonWebServiceRequest> implements 
 
     protected abstract PresignableRequest adaptRequest(T originalRequest);
 
-    private SdkHttpFullRequest presignRequest(SdkHttpFullRequest request, AwsCredentials credentials, String signingRegion) {
+    private SdkHttpFullRequest presignRequest(BeforeTransmissionContext context,
+                                              ExecutionAttributes attributes,
+                                              String signingRegion) {
         Aws4Signer signer = createNewSignerWithRegion(signingRegion);
-        return signer.presign(request, credentials, null);
+        return signer.presign(context, attributes, null);
     }
 
     private Aws4Signer createNewSignerWithRegion(String signingRegion) {

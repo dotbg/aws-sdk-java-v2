@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import software.amazon.awssdk.interceptor.context.DefaultFailedExecutionInterceptorContext;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.utils.Validate;
 
 public class ExecutionInterceptorChain {
@@ -30,13 +30,13 @@ public class ExecutionInterceptorChain {
         this.interceptors = new ArrayList<>(Validate.paramNotNull(interceptors, "interceptors"));
     }
 
-    public void beforeExecution(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void beforeExecution(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> interceptors.forEach(i -> i.beforeExecution(context, executionAttributes)));
     }
 
-    public DefaultInterceptorContext modifyRequest(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public InterceptorContext modifyRequest(InterceptorContext context, ExecutionAttributes executionAttributes) {
         return tryOrThrowInterceptorException(() -> {
-            DefaultInterceptorContext result = context;
+            InterceptorContext result = context;
             for (ExecutionInterceptor interceptor : interceptors) {
                 result = context.modify(b -> b.request(interceptor.modifyRequest(context, executionAttributes)));
                 validateInterceptorResult(context, result, interceptor);
@@ -45,18 +45,18 @@ public class ExecutionInterceptorChain {
         });
     }
 
-    public void beforeMarshalling(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void beforeMarshalling(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> interceptors.forEach(i -> i.beforeMarshalling(context, executionAttributes)));
     }
 
-    public void afterMarshalling(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void afterMarshalling(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> interceptors.forEach(i -> i.afterMarshalling(context, executionAttributes)));
     }
 
-    public DefaultInterceptorContext modifyHttpRequest(DefaultInterceptorContext context,
-                                                       ExecutionAttributes executionAttributes) {
+    public InterceptorContext modifyHttpRequest(InterceptorContext context,
+                                                ExecutionAttributes executionAttributes) {
         return tryOrThrowInterceptorException(() -> {
-            DefaultInterceptorContext result = context;
+            InterceptorContext result = context;
             for (ExecutionInterceptor interceptor : interceptors) {
                 result = context.modify(b -> b.httpRequest(interceptor.modifyHttpRequest(context, executionAttributes)));
                 validateInterceptorResult(context, result, interceptor);
@@ -65,18 +65,18 @@ public class ExecutionInterceptorChain {
         });
     }
 
-    public void beforeTransmission(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void beforeTransmission(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> interceptors.forEach(i -> i.beforeTransmission(context, executionAttributes)));
     }
 
-    public void afterTransmission(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void afterTransmission(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> reverseForEach(i -> i.afterTransmission(context, executionAttributes)));
     }
 
-    public DefaultInterceptorContext modifyHttpResponse(DefaultInterceptorContext context,
-                                                        ExecutionAttributes executionAttributes) {
+    public InterceptorContext modifyHttpResponse(InterceptorContext context,
+                                                 ExecutionAttributes executionAttributes) {
         return tryOrThrowInterceptorException(() -> {
-            DefaultInterceptorContext result = context;
+            InterceptorContext result = context;
             for (int i = interceptors.size() - 1; i >= 0; i--) {
                 result = context.toBuilder()
                                 .httpResponse(interceptors.get(i).modifyHttpResponse(context, executionAttributes))
@@ -87,17 +87,17 @@ public class ExecutionInterceptorChain {
         });
     }
 
-    public void beforeUnmarshalling(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void beforeUnmarshalling(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> reverseForEach(i -> i.beforeUnmarshalling(context, executionAttributes)));
     }
 
-    public void afterUnmarshalling(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void afterUnmarshalling(InterceptorContext context, ExecutionAttributes executionAttributes) {
         reverseForEach(i -> i.afterUnmarshalling(context, executionAttributes));
     }
 
-    public DefaultInterceptorContext modifyResponse(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public InterceptorContext modifyResponse(InterceptorContext context, ExecutionAttributes executionAttributes) {
         return tryOrThrowInterceptorException(() -> {
-            DefaultInterceptorContext result = context;
+            InterceptorContext result = context;
             for (int i = interceptors.size() - 1; i >= 0; i--) {
                 result = context.toBuilder()
                                 .response(interceptors.get(i).modifyResponse(context, executionAttributes))
@@ -108,7 +108,7 @@ public class ExecutionInterceptorChain {
         });
     }
 
-    public void afterExecution(DefaultInterceptorContext context, ExecutionAttributes executionAttributes) {
+    public void afterExecution(InterceptorContext context, ExecutionAttributes executionAttributes) {
         tryOrThrowInterceptorException(() -> reverseForEach(i -> i.afterExecution(context, executionAttributes)));
     }
 
@@ -116,7 +116,7 @@ public class ExecutionInterceptorChain {
         tryOrThrowInterceptorException(() -> interceptors.forEach(i -> i.onExecutionFailure(context, executionAttributes)));
     }
 
-    private void validateInterceptorResult(DefaultInterceptorContext originalContext, DefaultInterceptorContext newContext,
+    private void validateInterceptorResult(InterceptorContext originalContext, InterceptorContext newContext,
                                            ExecutionInterceptor interceptor) {
         Validate.validState(newContext != null,
                             "Request interceptor '%s' returned null from its modifyRequest interceptor.",

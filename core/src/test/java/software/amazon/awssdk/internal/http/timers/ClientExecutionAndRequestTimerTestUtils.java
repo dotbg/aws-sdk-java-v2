@@ -30,7 +30,7 @@ import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpFullRequestAdapter;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.request.EmptyHttpRequest;
 import software.amazon.awssdk.internal.http.response.ErrorDuringUnmarshallingResponseHandler;
@@ -119,11 +119,11 @@ public class ClientExecutionAndRequestTimerTestUtils {
     }
 
     public static ExecutionContext executionContext(SdkHttpFullRequest request) {
-        DefaultInterceptorContext incerceptorContext =
-                DefaultInterceptorContext.builder()
-                                         .request(new SdkRequest())
-                                         .httpRequest(request)
-                                         .build();
+        InterceptorContext incerceptorContext =
+                InterceptorContext.builder()
+                                  .request(new SdkRequest())
+                                  .httpRequest(request)
+                                  .build();
         return ExecutionContext.builder()
                                .awsRequestMetrics(new AwsRequestMetricsFullSupport())
                                .signerProvider(new NoOpSignerProvider())

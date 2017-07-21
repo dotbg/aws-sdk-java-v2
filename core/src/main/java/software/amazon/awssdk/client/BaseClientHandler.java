@@ -28,7 +28,7 @@ import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
 import software.amazon.awssdk.interceptor.context.DefaultFailedExecutionInterceptorContext;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.metrics.AwsSdkMetrics;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
@@ -62,9 +62,9 @@ abstract class BaseClientHandler {
 
         return ExecutionContext.builder()
                                .interceptorChain(new ExecutionInterceptorChain(overrideConfiguration.executionInterceptors()))
-                               .interceptorContext(DefaultInterceptorContext.builder()
-                                                                            .request(requestConfig.getOriginalRequest())
-                                                                            .build())
+                               .interceptorContext(InterceptorContext.builder()
+                                                                     .request(requestConfig.getOriginalRequest())
+                                                                     .build())
                                .executionAttributes(executionAttributes)
                                .awsRequestMetrics(requestMetrics)
                                .signerProvider(overrideConfiguration.advancedOption(AdvancedClientOption.SIGNER_PROVIDER))
@@ -135,7 +135,7 @@ abstract class BaseClientHandler {
     }
 
     protected <T> T runModifyRequestInterceptors(ExecutionContext executionContext) {
-        DefaultInterceptorContext interceptorContext =
+        InterceptorContext interceptorContext =
                 executionContext.interceptorChain().modifyRequest(executionContext.interceptorContext(),
                                                                   executionContext.executionAttributes());
         executionContext.interceptorContext(interceptorContext);
@@ -148,7 +148,7 @@ abstract class BaseClientHandler {
     }
 
     protected void addHttpRequest(ExecutionContext executionContext, SdkHttpFullRequest request) {
-        DefaultInterceptorContext interceptorContext = executionContext.interceptorContext().modify(b -> b.httpRequest(request));
+        InterceptorContext interceptorContext = executionContext.interceptorContext().modify(b -> b.httpRequest(request));
         executionContext.interceptorContext(interceptorContext);
     }
 
@@ -158,7 +158,7 @@ abstract class BaseClientHandler {
     }
 
     protected SdkHttpFullRequest runModifyHttpRequestInterceptors(ExecutionContext executionContext) {
-        DefaultInterceptorContext interceptorContext =
+        InterceptorContext interceptorContext =
                 executionContext.interceptorChain().modifyHttpRequest(executionContext.interceptorContext(),
                                                                       executionContext.executionAttributes());
         executionContext.interceptorContext(interceptorContext);

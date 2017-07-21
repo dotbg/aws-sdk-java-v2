@@ -30,7 +30,7 @@ import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 public class DefaultFailedExecutionInterceptorContext
         implements ToCopyableBuilder<DefaultFailedExecutionInterceptorContext.Builder, DefaultFailedExecutionInterceptorContext>,
                    FailedExecutionContext {
-    private final DefaultInterceptorContext interceptorContext;
+    private final InterceptorContext interceptorContext;
     private final Exception exception;
 
     private DefaultFailedExecutionInterceptorContext(Builder builder) {
@@ -74,7 +74,7 @@ public class DefaultFailedExecutionInterceptorContext
 
     @NotThreadSafe
     public static final class Builder implements CopyableBuilder<Builder, DefaultFailedExecutionInterceptorContext> {
-        private DefaultInterceptorContext interceptorContext;
+        private InterceptorContext interceptorContext;
         private Exception exception;
 
         private Builder() {
@@ -86,7 +86,7 @@ public class DefaultFailedExecutionInterceptorContext
             this.exception = context.exception;
         }
 
-        public Builder interceptorContext(DefaultInterceptorContext interceptorContext) {
+        public Builder interceptorContext(InterceptorContext interceptorContext) {
             this.interceptorContext = interceptorContext;
             return this;
         }

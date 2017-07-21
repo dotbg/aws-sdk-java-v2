@@ -38,7 +38,7 @@ import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.internal.AmazonWebServiceRequestAdapter;
 import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.metrics.spi.AwsRequestMetrics;
@@ -308,7 +308,7 @@ public class AmazonHttpClientRetryPolicyTest extends RetryPolicyTestBase {
                                .signerProvider(new NoOpSignerProvider())
                                .interceptorChain(new ExecutionInterceptorChain(Collections.emptyList()))
                                .executionAttributes(new ExecutionAttributes())
-                               .interceptorContext(DefaultInterceptorContext.builder().request(request).build())
+                               .interceptorContext(InterceptorContext.builder().request(request).build())
                                .build();
     }
 

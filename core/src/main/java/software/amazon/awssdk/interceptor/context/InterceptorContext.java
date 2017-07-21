@@ -27,15 +27,15 @@ import software.amazon.awssdk.utils.builder.CopyableBuilder;
 import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
 
 @SdkInternalApi
-public final class DefaultInterceptorContext
+public final class InterceptorContext
         implements AfterExecutionContext,
-                   ToCopyableBuilder<DefaultInterceptorContext.Builder, DefaultInterceptorContext> {
+                   ToCopyableBuilder<InterceptorContext.Builder, InterceptorContext> {
     private SdkRequest request;
     private SdkHttpFullRequest httpRequest;
     private SdkHttpFullResponse httpResponse;
     private SdkResponse response;
 
-    private DefaultInterceptorContext(Builder builder) {
+    private InterceptorContext(Builder builder) {
         this.request = Validate.paramNotNull(builder.request, "request");
         this.httpRequest = builder.httpRequest;
         this.httpResponse = builder.httpResponse;
@@ -73,7 +73,7 @@ public final class DefaultInterceptorContext
 
     @NotThreadSafe
     @SdkPublicApi
-    public static final class Builder implements CopyableBuilder<Builder, DefaultInterceptorContext> {
+    public static final class Builder implements CopyableBuilder<Builder, InterceptorContext> {
         private SdkRequest request;
         private SdkHttpFullRequest httpRequest;
         private SdkHttpFullResponse httpResponse;
@@ -83,7 +83,7 @@ public final class DefaultInterceptorContext
             super();
         }
 
-        private Builder(DefaultInterceptorContext context) {
+        private Builder(InterceptorContext context) {
             this.request = context.request;
             this.httpRequest = context.httpRequest;
             this.httpResponse = context.httpResponse;
@@ -111,8 +111,8 @@ public final class DefaultInterceptorContext
         }
 
         @Override
-        public DefaultInterceptorContext build() {
-            return new DefaultInterceptorContext(this);
+        public InterceptorContext build() {
+            return new InterceptorContext(this);
         }
     }
 }

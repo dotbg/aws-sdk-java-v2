@@ -22,7 +22,7 @@ import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptor;
-import software.amazon.awssdk.interceptor.context.DefaultInterceptorContext;
+import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.services.route53.internal.Route53IdInterceptor;
 import software.amazon.awssdk.services.route53.model.CreateHostedZoneResponse;
 import software.amazon.awssdk.services.route53.model.CreateReusableDelegationSetResponse;
@@ -108,9 +108,9 @@ public class Route53RequestHandlerTest {
     }
 
     private void afterResponse(ExecutionInterceptor interceptor, SdkResponse responseObject) {
-        interceptor.modifyResponse(DefaultInterceptorContext.builder()
-                                                            .response(responseObject)
-                                                            .build(),
+        interceptor.modifyResponse(InterceptorContext.builder()
+                                                     .response(responseObject)
+                                                     .build(),
                                    new ExecutionAttributes());
     }
 }
