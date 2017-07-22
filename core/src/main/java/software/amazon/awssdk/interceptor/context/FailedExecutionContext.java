@@ -34,5 +34,5 @@ public interface FailedExecutionContext {
 
     Optional<SdkResponse> response();
 
-    Exception exception();
+    Throwable exception();
 }

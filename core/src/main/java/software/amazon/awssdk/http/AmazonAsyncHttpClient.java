@@ -30,6 +30,7 @@ import software.amazon.awssdk.config.AsyncClientConfiguration;
 import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
 import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
+import software.amazon.awssdk.http.pipeline.stages.AfterExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyTransactionIdStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyUserAgentStage;
 import software.amazon.awssdk.http.pipeline.stages.AsyncRetryableStage;
@@ -43,7 +44,6 @@ import software.amazon.awssdk.http.pipeline.stages.MoveParametersToBodyStage;
 import software.amazon.awssdk.http.pipeline.stages.ReportRequestContentLengthStage;
 import software.amazon.awssdk.http.pipeline.stages.SigningStage;
 import software.amazon.awssdk.http.pipeline.stages.UnwrapResponseContainer;
-import software.amazon.awssdk.internal.auth.NoOpSignerProvider;
 import software.amazon.awssdk.internal.http.timers.client.ClientExecutionTimer;
 import software.amazon.awssdk.metrics.AwsSdkMetrics;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
@@ -249,6 +249,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
                                       .wrap(AsyncRetryableStage::new)
                                       ::build)
                         .then(async(() -> new UnwrapResponseContainer<>()))
+                        .then(async(() -> new AfterExecutionInterceptorsStage<>()))
                         .build(httpClientDependencies)
                         .execute(request, createRequestExecutionDependencies());
             } catch (RuntimeException e) {

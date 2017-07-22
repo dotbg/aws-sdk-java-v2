@@ -64,6 +64,8 @@ public interface SdkHttpFullResponse
 
         Builder headers(Map<String, List<String>> headers);
 
+        @ReviewBeforeRelease("This is completely different from the HTTP request. "
+                             + "This should be the same between both interfaces.")
         Builder addHeader(String headerName, List<String> headerValues);
     }
 }

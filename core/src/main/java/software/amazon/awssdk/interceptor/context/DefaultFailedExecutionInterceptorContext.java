@@ -16,6 +16,7 @@
 package software.amazon.awssdk.interceptor.context;
 
 import java.util.Optional;
+import java.util.concurrent.CompletionException;
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.SdkResponse;
 import software.amazon.awssdk.annotation.NotThreadSafe;
@@ -31,11 +32,18 @@ public class DefaultFailedExecutionInterceptorContext
         implements ToCopyableBuilder<DefaultFailedExecutionInterceptorContext.Builder, DefaultFailedExecutionInterceptorContext>,
                    FailedExecutionContext {
     private final InterceptorContext interceptorContext;
-    private final Exception exception;
+    private final Throwable exception;
 
     private DefaultFailedExecutionInterceptorContext(Builder builder) {
         this.interceptorContext = Validate.paramNotNull(builder.interceptorContext, "interceptorContext");
-        this.exception = Validate.paramNotNull(builder.exception, "exception");
+        this.exception = unwrap(Validate.paramNotNull(builder.exception, "exception"));
+    }
+
+    private Throwable unwrap(Throwable exception) {
+        while (exception instanceof CompletionException) {
+            exception = exception.getCause();
+        }
+        return exception;
     }
 
     public static Builder builder() {
@@ -68,14 +76,14 @@ public class DefaultFailedExecutionInterceptorContext
     }
 
     @Override
-    public Exception exception() {
+    public Throwable exception() {
         return exception;
     }
 
     @NotThreadSafe
     public static final class Builder implements CopyableBuilder<Builder, DefaultFailedExecutionInterceptorContext> {
         private InterceptorContext interceptorContext;
-        private Exception exception;
+        private Throwable exception;
 
         private Builder() {
             super();
@@ -91,7 +99,7 @@ public class DefaultFailedExecutionInterceptorContext
             return this;
         }
 
-        public Builder exception(Exception exception) {
+        public Builder exception(Throwable exception) {
             this.exception = exception;
             return this;
         }

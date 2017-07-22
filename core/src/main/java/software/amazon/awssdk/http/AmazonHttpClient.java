@@ -34,6 +34,7 @@ import software.amazon.awssdk.config.SyncClientConfiguration;
 import software.amazon.awssdk.http.exception.SdkInterruptedException;
 import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
 import software.amazon.awssdk.http.pipeline.stages.AfterCallbackStage;
+import software.amazon.awssdk.http.pipeline.stages.AfterExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.AfterTransmissionExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyTransactionIdStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyUserAgentStage;
@@ -41,6 +42,7 @@ import software.amazon.awssdk.http.pipeline.stages.BeforeTransmissionExecutionIn
 import software.amazon.awssdk.http.pipeline.stages.BeforeUnmarshallingExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.ClientExecutionTimedStage;
 import software.amazon.awssdk.http.pipeline.stages.ExceptionReportingStage;
+import software.amazon.awssdk.http.pipeline.stages.ExecutionFailureExceptionReportingStage;
 import software.amazon.awssdk.http.pipeline.stages.HandleResponseStage;
 import software.amazon.awssdk.http.pipeline.stages.HttpResponseAdaptingStage;
 import software.amazon.awssdk.http.pipeline.stages.InstrumentHttpResponseContentStage;
@@ -387,32 +389,35 @@ public class AmazonHttpClient implements AutoCloseable {
             try {
                 return RequestPipelineBuilder
                         // Start of mutating request
-                        .first(MakeRequestMutable::new)
-                        .then(ApplyTransactionIdStage::new)
-                        .then(ApplyUserAgentStage::new)
-                        .then(MergeCustomHeadersStage::new)
-                        .then(MergeCustomQueryParamsStage::new)
-                        .then(MoveParametersToBodyStage::new)
-                        .then(MakeRequestImmutable::new)
-                        // End of mutating request
-                        .then(ReportRequestContentLengthStage::new)
-                        .then(RequestPipelineBuilder
-                                      .first(SigningStage::new)
-                                      .then(BeforeTransmissionExecutionInterceptorsStage::new)
-                                      .then(MakeHttpRequestStage::new)
-                                      .then(AfterTransmissionExecutionInterceptorsStage::new)
-                                      .then(HttpResponseAdaptingStage::new)
-                                      .then(InstrumentHttpResponseContentStage::new)
-                                      .then(BeforeUnmarshallingExecutionInterceptorsStage::new)
-                                      .then(() -> new HandleResponseStage<>(getNonNullResponseHandler(responseHandler),
-                                                                            getNonNullResponseHandler(errorResponseHandler)))
-                                      .wrap(ExceptionReportingStage::new)
-                                      .wrap(TimerExceptionHandlingStage::new)
-                                      .wrap(RetryableStage::new)::build)
-                        .wrap(StreamManagingStage::new)
-                        .wrap(AfterCallbackStage::new)
-                        .wrap(ClientExecutionTimedStage::new)
+                        .first(RequestPipelineBuilder
+                                .first(MakeRequestMutable::new)
+                                .then(ApplyTransactionIdStage::new)
+                                .then(ApplyUserAgentStage::new)
+                                .then(MergeCustomHeadersStage::new)
+                                .then(MergeCustomQueryParamsStage::new)
+                                .then(MoveParametersToBodyStage::new)
+                                .then(MakeRequestImmutable::new)
+                                // End of mutating request
+                                .then(ReportRequestContentLengthStage::new)
+                                .then(RequestPipelineBuilder
+                                              .first(SigningStage::new)
+                                              .then(BeforeTransmissionExecutionInterceptorsStage::new)
+                                              .then(MakeHttpRequestStage::new)
+                                              .then(AfterTransmissionExecutionInterceptorsStage::new)
+                                              .then(HttpResponseAdaptingStage::new)
+                                              .then(InstrumentHttpResponseContentStage::new)
+                                              .then(BeforeUnmarshallingExecutionInterceptorsStage::new)
+                                              .then(() -> new HandleResponseStage<>(getNonNullResponseHandler(responseHandler),
+                                                                                    getNonNullResponseHandler(errorResponseHandler)))
+                                              .wrap(ExceptionReportingStage::new)
+                                              .wrap(TimerExceptionHandlingStage::new)
+                                              .wrap(RetryableStage::new)::build)
+                                .wrap(StreamManagingStage::new)
+                                .wrap(AfterCallbackStage::new)
+                                .wrap(ClientExecutionTimedStage::new)::build)
                         .then(() -> new UnwrapResponseContainer<>())
+                        .then(() -> new AfterExecutionInterceptorsStage<>())
+                        .wrap(ExecutionFailureExceptionReportingStage::new)
                         .build(httpClientDependencies)
                         .execute(request, createRequestExecutionDependencies());
             } catch (RuntimeException e) {

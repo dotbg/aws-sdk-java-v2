@@ -89,11 +89,8 @@ public class SyncClientHandlerImpl extends ClientHandler {
                               executionContext,
                               executionParams.getResponseHandler(),
                               executionParams.getErrorResponseHandler());
-
-            runAfterExecutionInterceptors(executionContext);
             return response;
         } catch (RuntimeException e) {
-            runOnFailureInterceptors(executionContext, e);
             throw e;
         } finally {
             endClientExecution(awsRequestMetrics, executionParams.getRequestConfig(), request, response);

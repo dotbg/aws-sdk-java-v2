@@ -121,7 +121,6 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
                         if (err != null) {
                             throw Throwables.failure(err);
                         }
-                        runAfterExecutionInterceptors(executionContext);
                         return resp;
                     } catch (Exception e) {
                         runOnFailureInterceptors(executionContext, e);
