@@ -15,6 +15,7 @@
 
 package software.amazon.awssdk;
 
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.auth.AnonymousCredentialsProvider;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.MetricsReportingCredentialsProvider;
@@ -83,8 +84,9 @@ public final class RequestExecutionContext {
         return executionContext.executionAttributes();
     }
 
+    @ReviewBeforeRelease("We should combine RequestExecutionContext and ExecutionContext. There's no benefit to both of "
+                         + "these. Once that's done, this won't be needed.")
     public ExecutionContext executionContext() {
-        // TODO: This should be cleaned up. Why delegate for others, but return here?
         return executionContext;
     }
 

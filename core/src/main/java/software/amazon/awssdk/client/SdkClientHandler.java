@@ -35,7 +35,7 @@ public class SdkClientHandler extends ClientHandler {
     private final ClientHandler delegateHandler;
 
     public SdkClientHandler(SyncClientConfiguration syncClientConfiguration,
-                            ServiceAdvancedConfiguration serviceAdvancedConfiguration) { // TODO: Builder?
+                            ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
         super(syncClientConfiguration, serviceAdvancedConfiguration);
         this.delegateHandler = new SyncClientHandlerImpl(syncClientConfiguration, serviceAdvancedConfiguration);
     }

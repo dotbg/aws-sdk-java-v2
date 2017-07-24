@@ -25,6 +25,7 @@ import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
 import software.amazon.awssdk.async.AsyncRequestProvider;
@@ -56,8 +57,9 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
     private final AsyncClientConfiguration asyncClientConfiguration;
     private final AmazonAsyncHttpClient client;
 
+    @ReviewBeforeRelease("Should this be migrated to use a builder, particularly because it crosses module boundaries?")
     public AsyncClientHandlerImpl(AsyncClientConfiguration asyncClientConfiguration,
-                                  ServiceAdvancedConfiguration serviceAdvancedConfiguration) { // TODO: Builder?
+                                  ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
         super(asyncClientConfiguration, serviceAdvancedConfiguration);
         this.asyncClientConfiguration = asyncClientConfiguration;
         this.client = AmazonAsyncHttpClient.builder()
@@ -68,7 +70,6 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
     @Override
     public <InputT extends SdkRequest, OutputT> CompletableFuture<OutputT> execute(
             ClientExecutionParams<InputT, OutputT> executionParams) {
-        // TODO: Simplify signature?
         ExecutionContext executionContext = createExecutionContext(executionParams.getRequestConfig());
         runBeforeExecutionInterceptors(executionContext);
         InputT inputT = runModifyRequestInterceptors(executionContext);
@@ -84,7 +85,7 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
             request.setAwsRequestMetrics(awsRequestMetrics);
             request.setEndpoint(asyncClientConfiguration.endpoint());
 
-            // TODO: Can any of this be merged into the parent class?
+            // TODO: Can any of this be merged into the parent class? There's a lot of duplication here.
             executionContext.executionAttributes().putAttribute(AwsExecutionAttributes.SERVICE_NAME, request.getServiceName());
         } catch (Exception e) {
             endClientExecution(awsRequestMetrics, executionParams.getRequestConfig(), null, null);

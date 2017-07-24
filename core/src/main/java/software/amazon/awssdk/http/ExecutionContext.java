@@ -16,6 +16,7 @@
 package software.amazon.awssdk.http;
 
 import software.amazon.awssdk.annotation.NotThreadSafe;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.auth.AwsCredentials;
 import software.amazon.awssdk.auth.AwsCredentialsProvider;
@@ -68,8 +69,9 @@ public class ExecutionContext implements ToCopyableBuilder<ExecutionContext.Buil
         return interceptorContext;
     }
 
+    @ReviewBeforeRelease("We should switch to fully immutable execution contexts. Currently, we mutate it for the interceptor "
+                         + "context, credential providers, etc.")
     public ExecutionContext interceptorContext(InterceptorContext interceptorContext) {
-        // TODO: this shouldn't be mutable
         this.interceptorContext = interceptorContext;
         return this;
     }

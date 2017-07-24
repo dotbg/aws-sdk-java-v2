@@ -17,11 +17,15 @@ package software.amazon.awssdk.handlers;
 
 import software.amazon.awssdk.RequestConfig;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.auth.AwsCredentials;
+import software.amazon.awssdk.auth.Signer;
 import software.amazon.awssdk.interceptor.ExecutionAttribute;
+import software.amazon.awssdk.interceptor.ExecutionInterceptor;
 
 /**
- * TODO: Are all of these used?!
+ * AWS-specific attributes attached to the execution. This information is available to {@link ExecutionInterceptor}s and
+ * {@link Signer}s.
  */
 public class AwsExecutionAttributes {
     /**
@@ -32,6 +36,7 @@ public class AwsExecutionAttributes {
     /**
      * The key under which the request config is stored.
      */
+    @ReviewBeforeRelease("RequestConfig feels pretty internal. Can we just expose parts of it?")
     public static final ExecutionAttribute<RequestConfig> REQUEST_CONFIG = new ExecutionAttribute<>();
 
     /**

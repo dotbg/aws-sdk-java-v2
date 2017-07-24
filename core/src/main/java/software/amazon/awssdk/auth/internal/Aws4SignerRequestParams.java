@@ -81,12 +81,10 @@ public final class Aws4SignerRequestParams {
     private final SdkHttpFullRequest httpRequest;
 
     /**
-     * Generates an instance of AWS4signerRequestParams that holds the
-     * parameters used for computing a AWS 4 signature for a request.
-     *
-     * TODO: This is a lot of parameters. Clean up with signing refactor? There is also a lot of other things passed around with
-     * this object elsewhere. More should be moved here, or this shouldn't be used.
+     * Generates an instance of AWS4signerRequestParams that holds the parameters used for computing a AWS 4 signature
+     * for a request.
      */
+    @ReviewBeforeRelease("This should be simplified with the signer refactor.")
     public Aws4SignerRequestParams(SdkRequest originalRequest, SdkHttpFullRequest httpRequest,
                                    ExecutionAttributes executionAttributes,
                                    Date signingDateOverride, String regionNameOverride,

@@ -21,6 +21,7 @@ import software.amazon.awssdk.SdkBaseException;
 import software.amazon.awssdk.SdkRequest;
 import software.amazon.awssdk.ServiceAdvancedConfiguration;
 import software.amazon.awssdk.annotation.Immutable;
+import software.amazon.awssdk.annotation.ReviewBeforeRelease;
 import software.amazon.awssdk.annotation.SdkProtectedApi;
 import software.amazon.awssdk.annotation.ThreadSafe;
 import software.amazon.awssdk.config.SyncClientConfiguration;
@@ -43,8 +44,9 @@ public class SyncClientHandlerImpl extends ClientHandler {
     private final SyncClientConfiguration syncClientConfiguration;
     private final AmazonHttpClient client;
 
+    @ReviewBeforeRelease("Should this be migrated to use a builder, particularly because it crosses module boundaries?")
     public SyncClientHandlerImpl(SyncClientConfiguration syncClientConfiguration,
-                                 ServiceAdvancedConfiguration serviceAdvancedConfiguration) { // TODO: Builder?
+                                 ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
         super(syncClientConfiguration, serviceAdvancedConfiguration);
         this.syncClientConfiguration = syncClientConfiguration;
         this.client = AmazonHttpClient.builder()
@@ -72,7 +74,7 @@ public class SyncClientHandlerImpl extends ClientHandler {
                 request.setAwsRequestMetrics(awsRequestMetrics);
                 request.setEndpoint(syncClientConfiguration.endpoint());
 
-                // TODO: Can any of this be merged into the parent class?
+                // TODO: Can any of this be merged into the parent class? There's a lot of duplication here.
                 executionContext.executionAttributes().putAttribute(AwsExecutionAttributes.SERVICE_NAME,
                                                                     request.getServiceName());
             } finally {

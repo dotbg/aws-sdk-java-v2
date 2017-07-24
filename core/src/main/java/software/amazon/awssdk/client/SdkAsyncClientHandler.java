@@ -36,7 +36,7 @@ public class SdkAsyncClientHandler extends AsyncClientHandler {
     private final AsyncClientHandler delegateHandler;
 
     public SdkAsyncClientHandler(AsyncClientConfiguration asyncClientConfiguration,
-                                 ServiceAdvancedConfiguration serviceAdvancedConfiguration) { // TODO: Builder?
+                                 ServiceAdvancedConfiguration serviceAdvancedConfiguration) {
         super(asyncClientConfiguration, serviceAdvancedConfiguration);
         this.delegateHandler = new AsyncClientHandlerImpl(asyncClientConfiguration, serviceAdvancedConfiguration);
     }
