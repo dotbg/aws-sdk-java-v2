@@ -181,14 +181,14 @@ public class MakeAsyncHttpRequestStage<OutputT>
             SdkHttpFullResponse httpFullResponse = (SdkHttpFullResponse) this.response;
 
             publishProgress(listener, ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT);
-            beforeUnmarshalling(httpFullResponse); // TODO: Why so gross?!
+            httpFullResponse = beforeUnmarshalling(httpFullResponse); // TODO: Why so gross?!
             final HttpResponse httpResponse = SdkHttpResponseAdapter.adapt(false, request, httpFullResponse);
             Response<OutputT> toReturn = handleResponse(httpResponse);
             future.complete(toReturn);
             return toReturn;
         }
 
-        private void beforeUnmarshalling(SdkHttpFullResponse response) {
+        private SdkHttpFullResponse beforeUnmarshalling(SdkHttpFullResponse response) {
             // TODO: Duplicate code
             // Update interceptor context
             InterceptorContext interceptorContext =
@@ -205,6 +205,8 @@ public class MakeAsyncHttpRequestStage<OutputT>
 
             // Store updated context
             context.executionContext().interceptorContext(interceptorContext);
+
+            return interceptorContext.httpResponse();
         }
 
         /**

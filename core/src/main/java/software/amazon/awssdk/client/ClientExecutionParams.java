@@ -114,13 +114,4 @@ public class ClientExecutionParams<InputT extends SdkRequest, OutputT> {
         this.asyncRequestProvider = asyncRequestProvider;
         return this;
     }
-
-    public ServiceAdvancedConfiguration getServiceAdvancedConfiguration() {
-        return serviceAdvancedConfiguration;
-    }
-
-    public ClientExecutionParams<InputT, OutputT> withServiceAdvancedConfiguration(ServiceAdvancedConfiguration serviceConfig) {
-        this.serviceAdvancedConfiguration = serviceConfig;
-        return this;
-    }
 }

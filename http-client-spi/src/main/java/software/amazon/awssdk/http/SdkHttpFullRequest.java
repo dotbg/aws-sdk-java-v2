@@ -37,7 +37,7 @@ public interface SdkHttpFullRequest
     /**
      * @return Builder instance to construct a {@link DefaultSdkHttpFullRequest}.
      */
-    public static Builder builder() {
+    static Builder builder() {
         return new DefaultSdkHttpFullRequest.Builder();
     }
 

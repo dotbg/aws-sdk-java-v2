@@ -210,6 +210,14 @@ public class DefaultRequest<T> implements Request<T> {
     }
 
     /**
+     * @see Request#setHttpMethod(HttpMethodName)
+     */
+    public Request<T> withHttpMethod(HttpMethodName httpMethod) {
+        setHttpMethod(httpMethod);
+        return this;
+    }
+
+    /**
      * @see Request#getEndpoint()
      */
     public URI getEndpoint() {

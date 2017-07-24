@@ -33,6 +33,7 @@ import software.amazon.awssdk.http.pipeline.RequestPipelineBuilder;
 import software.amazon.awssdk.http.pipeline.stages.AfterExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyTransactionIdStage;
 import software.amazon.awssdk.http.pipeline.stages.ApplyUserAgentStage;
+import software.amazon.awssdk.http.pipeline.stages.AsyncExecutionFailureExceptionReportingStage;
 import software.amazon.awssdk.http.pipeline.stages.AsyncRetryableStage;
 import software.amazon.awssdk.http.pipeline.stages.BeforeTransmissionExecutionInterceptorsStage;
 import software.amazon.awssdk.http.pipeline.stages.MakeAsyncHttpRequestStage;
@@ -234,22 +235,24 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
         public <OutputT> CompletableFuture<OutputT> execute(SdkHttpResponseHandler<OutputT> responseHandler) {
             try {
                 return RequestPipelineBuilder
-                        .first(MakeRequestMutable::new)
-                        .then(ApplyTransactionIdStage::new)
-                        .then(ApplyUserAgentStage::new)
-                        .then(MergeCustomHeadersStage::new)
-                        .then(MergeCustomQueryParamsStage::new)
-                        .then(MoveParametersToBodyStage::new)
-                        .then(MakeRequestImmutable::new)
-                        .then(ReportRequestContentLengthStage::new)
-                        .then(RequestPipelineBuilder
+                        .first(RequestPipelineBuilder
+                                .first(MakeRequestMutable::new)
+                                .then(ApplyTransactionIdStage::new)
+                                .then(ApplyUserAgentStage::new)
+                                .then(MergeCustomHeadersStage::new)
+                                .then(MergeCustomQueryParamsStage::new)
+                                .then(MoveParametersToBodyStage::new)
+                                .then(MakeRequestImmutable::new)
+                                .then(ReportRequestContentLengthStage::new)
+                                .then(RequestPipelineBuilder
                                       .first(SigningStage::new)
                                       .then(BeforeTransmissionExecutionInterceptorsStage::new)
                                       .then(d -> new MakeAsyncHttpRequestStage<>(responseHandler, errorResponseHandler, d))
                                       .wrap(AsyncRetryableStage::new)
                                       ::build)
-                        .then(async(() -> new UnwrapResponseContainer<>()))
-                        .then(async(() -> new AfterExecutionInterceptorsStage<>()))
+                                .then(async(() -> new UnwrapResponseContainer<>()))
+                                .then(async(() -> new AfterExecutionInterceptorsStage<>()))::build)
+                        .wrap(AsyncExecutionFailureExceptionReportingStage::new)
                         .build(httpClientDependencies)
                         .execute(request, createRequestExecutionDependencies());
             } catch (RuntimeException e) {

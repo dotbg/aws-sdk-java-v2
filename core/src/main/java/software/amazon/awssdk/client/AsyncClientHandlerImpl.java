@@ -123,7 +123,6 @@ public class AsyncClientHandlerImpl extends AsyncClientHandler {
                         }
                         return resp;
                     } catch (Exception e) {
-                        runOnFailureInterceptors(executionContext, e);
                         throw e;
                     } finally {
                         endClientExecution(awsRequestMetrics, executionParams.getRequestConfig(), request, resp);

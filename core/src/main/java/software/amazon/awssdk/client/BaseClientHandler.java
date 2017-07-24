@@ -27,7 +27,6 @@ import software.amazon.awssdk.http.ExecutionContext;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.interceptor.ExecutionInterceptorChain;
-import software.amazon.awssdk.interceptor.context.DefaultFailedExecutionInterceptorContext;
 import software.amazon.awssdk.interceptor.context.InterceptorContext;
 import software.amazon.awssdk.metrics.AwsSdkMetrics;
 import software.amazon.awssdk.metrics.RequestMetricCollector;
@@ -163,19 +162,5 @@ abstract class BaseClientHandler {
                                                                       executionContext.executionAttributes());
         executionContext.interceptorContext(interceptorContext);
         return interceptorContext.httpRequest();
-    }
-
-    protected void runAfterExecutionInterceptors(ExecutionContext executionContext) {
-        executionContext.interceptorChain().afterExecution(executionContext.interceptorContext(),
-                                                           executionContext.executionAttributes());
-    }
-
-    protected void runOnFailureInterceptors(ExecutionContext executionContext, Exception e) {
-        DefaultFailedExecutionInterceptorContext interceptorContext =
-                DefaultFailedExecutionInterceptorContext.builder()
-                                                        .exception(e)
-                                                        .interceptorContext(executionContext.interceptorContext())
-                                                        .build();
-        executionContext.interceptorChain().onExecutionFailure(interceptorContext, executionContext.executionAttributes());
     }
 }

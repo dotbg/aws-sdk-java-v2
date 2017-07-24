@@ -21,9 +21,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -31,7 +31,6 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -87,7 +86,7 @@ public class ExecutionInterceptorTest {
         AllTypesResponse result = client.allTypes(request);
 
         // Expect
-        expectAllMethodsCalled(interceptor, request, result);
+        expectAllMethodsCalled(interceptor, request, result, null);
     }
 
     @Test
@@ -103,7 +102,7 @@ public class ExecutionInterceptorTest {
         AllTypesResponse result = client.allTypes(request).get();
 
         // Expect
-        expectAllMethodsCalled(interceptor, request, result);
+        expectAllMethodsCalled(interceptor, request, result, null);
     }
 
     @Test
@@ -130,90 +129,53 @@ public class ExecutionInterceptorTest {
         AllTypesRequest request = AllTypesRequest.builder().build();
 
         // When
-        client.allTypes(request).exceptionally(t -> {
-            assertThat(t).isInstanceOf(CompletionException.class);
-            assertThat(t.getCause()).isInstanceOf(AmazonServiceException.class);
-            return null;
-        }).get();
+        assertThatExceptionOfType(ExecutionException.class).isThrownBy(() -> client.allTypes(request).get())
+                                                           .withCauseInstanceOf(AmazonServiceException.class);
 
         // Expect
         expectServiceCallErrorMethodsCalled(interceptor);
     }
 
-    //
-//    @Test
-//    public void exceptionRequestHandlerMethodsCalled() {
-//        // Given
-//        ExecutionInterceptor interceptor = mock(ExecutionInterceptor.class, Mockito.CALLS_REAL_METHODS);
-//        ProtocolRestJsonClient client = client(interceptor);
-//        HeadOperationRequest request = HeadOperationRequest.builder().build();
-//
-//        // When
-//        try {
-//            client.headOperation(request);
-//            fail();
-//        } catch (Exception e) {
-//            // Expected
-//        }
-//
-//        // Expect
-//        InOrder inOrder = Mockito.inOrder(interceptor);
-//        inOrder.verify(interceptor).beforeExecution(any(), any()); // TODO: Validate input
-//        inOrder.verify(interceptor).modifyRequest(any(), any());
-//        inOrder.verify(interceptor).beforeMarshalling(any(), any());
-//        inOrder.verify(interceptor).afterMarshalling(any(), any());
-//        inOrder.verify(interceptor).modifyHttpRequest(any(), any());
-//        inOrder.verify(interceptor).beforeTransmission(any(), any());
-//        inOrder.verify(interceptor).onExecutionFailure(any(), any());
-//        verifyNoMoreInteractions(interceptor);
-//    }
+    @Test
+    public void interceptorExceptionCallsOnFailureWithSyncClient() {
+        // Given
+        ExecutionInterceptor interceptor = mock(MessageUpdatingInterceptor.class, CALLS_REAL_METHODS);
+        ExecutionInterceptorException exception = new ExecutionInterceptorException("Uh oh!");
+        doThrow(exception).when(interceptor).afterExecution(any(), any());
 
-//    @Test
-//    public void clientUsesCopiedRequests() {
-//        // Given
-//        ExecutionInterceptor interceptor = mock(ExecutionInterceptor.class, Mockito.CALLS_REAL_METHODS);
-//        ProtocolRestJsonClient client = client(interceptor);
-//        AllTypesRequest inputRequest = AllTypesRequest.builder().build();
-//        AllTypesRequest beforeExecutionRequest = AllTypesRequest.builder().build();
-//        AllTypesRequest beforeMarshallingRequest = AllTypesRequest.builder().build();
-//
-//        when(interceptor.beforeExecution(eq(inputRequest))).thenReturn(beforeExecutionRequest);
-//        when(interceptor.beforeMarshalling(eq(beforeExecutionRequest))).thenReturn(beforeMarshallingRequest);
-//
-//        stubFor(post(urlPathEqualTo(ALL_TYPES_PATH)).willReturn(aResponse().withStatus(200).withBody("")));
-//
-//        // When
-//        AllTypesResult result = client.allTypes(inputRequest);
-//
-//        // Expect
-//        InOrder inOrder = Mockito.inOrder(interceptor);
-//        inOrder.verify(interceptor).beforeExecution(inputRequest);
-//        inOrder.verify(interceptor).beforeMarshalling(beforeExecutionRequest);
-//    }
-//
-//    @Test
-//    public void clientPropagatesRequestHandlerValues() {
-//        // Given
-//        HandlerContextKey<String> contextKey = new HandlerContextKey<>("");
-//        ExecutionInterceptor interceptor = mock(ExecutionInterceptor.class, Mockito.CALLS_REAL_METHODS);
-//        ProtocolRestJsonClient client = client(interceptor);
-//        AllTypesRequest request = AllTypesRequest.builder().build();
-//
-//        request.addHandlerContext(contextKey, "Value");
-//        stubFor(post(urlPathEqualTo(ALL_TYPES_PATH)).willReturn(aResponse().withStatus(200).withBody("")));
-//
-//        // When
-//        AllTypesResult result = client.allTypes(request);
-//
-//        // Expect
-//        ArgumentCaptor<Request> httpRequestCaptor = ArgumentCaptor.forClass(Request.class);
-//        verify(interceptor).afterResponse(httpRequestCaptor.capture(), any());
-//        Request<?> httpRequest = httpRequestCaptor.getValue();
-//        assertThat(httpRequest.getHandlerContext(contextKey), equalTo("Value"));
-//    }
+        ProtocolRestJsonClient client = client(interceptor);
+        AllTypesRequest request = AllTypesRequest.builder().build();
+        stubFor(post(urlPathEqualTo(ALL_TYPES_PATH)).willReturn(aResponse().withStatus(200).withBody("")));
+
+        // When
+        assertThatExceptionOfType(ExecutionInterceptorException.class).isThrownBy(() -> client.allTypes(request));
+
+        // Expect
+        expectAllMethodsCalled(interceptor, request, null, exception);
+    }
+
+    @Test
+    public void interceptorExceptionCallsOnFailureWithAsyncClient() {
+        // Given
+        ExecutionInterceptor interceptor = mock(MessageUpdatingInterceptor.class, CALLS_REAL_METHODS);
+        ExecutionInterceptorException exception = new ExecutionInterceptorException("Uh oh!");
+        doThrow(exception).when(interceptor).afterExecution(any(), any());
+
+        ProtocolRestJsonAsyncClient client = asyncClient(interceptor);
+        AllTypesRequest request = AllTypesRequest.builder().build();
+        stubFor(post(urlPathEqualTo(ALL_TYPES_PATH)).willReturn(aResponse().withStatus(200).withBody("")));
+
+        // When
+        assertThatExceptionOfType(ExecutionException.class).isThrownBy(() -> client.allTypes(request).get())
+                                                           .withCause(exception);
+
+        // Expect
+        expectAllMethodsCalled(interceptor, request, null, exception);
+    }
 
     private void expectAllMethodsCalled(ExecutionInterceptor interceptor,
-                                        SdkRequest inputRequest, SdkResponse outputResponse) {
+                                        SdkRequest inputRequest, AllTypesResponse outputResponse,
+                                        Exception expectedException) {
         ArgumentCaptor<ExecutionAttributes> attributes = ArgumentCaptor.forClass(ExecutionAttributes.class);
 
         ArgumentCaptor<BeforeExecutionContext> beforeExecutionArg = ArgumentCaptor.forClass(BeforeExecutionContext.class);
@@ -243,6 +205,12 @@ public class ExecutionInterceptorTest {
         inOrder.verify(interceptor).afterUnmarshalling(afterUnmarshallingArg.capture(), attributes.capture());
         inOrder.verify(interceptor).modifyResponse(modifyResponseArg.capture(), attributes.capture());
         inOrder.verify(interceptor).afterExecution(afterExecutionArg.capture(), attributes.capture());
+        if (expectedException != null) {
+            ArgumentCaptor<FailedExecutionContext> failedExecutionArg = ArgumentCaptor.forClass(FailedExecutionContext.class);
+            inOrder.verify(interceptor).onExecutionFailure(failedExecutionArg.capture(), attributes.capture());
+            verifyFailedExecutionMethodCalled(failedExecutionArg, true);
+            assertThat(failedExecutionArg.getValue().exception()).isEqualTo(expectedException);
+        }
         verifyNoMoreInteractions(interceptor);
 
         // Verify beforeExecution gets untouched request
@@ -263,7 +231,10 @@ public class ExecutionInterceptorTest {
         validateArgs(afterExecutionArg.getValue(), "1", "2", "3", "4");
 
         // Verify afterExecution gets same response as the one returned by client
-        assertThat(afterExecutionArg.getValue().response()).isSameAs(outputResponse);
+        if (expectedException == null) {
+            assertThat(outputResponse.stringMember()).isEqualTo("4");
+            assertThat(afterExecutionArg.getValue().response()).isSameAs(outputResponse);
+        }
 
         // Verify same execution attributes were used for all method calls
         assertThat(attributes.getAllValues()).containsOnly(attributes.getAllValues().get(0));
@@ -294,9 +265,15 @@ public class ExecutionInterceptorTest {
         assertThat(beforeUnmarshallingArg.getValue().httpResponse().getStatusCode()).isEqualTo(404);
 
         // Verify failed execution parameters
+        assertThat(failedExecutionArg.getValue().exception()).isInstanceOf(AmazonServiceException.class);
+        verifyFailedExecutionMethodCalled(failedExecutionArg, false);
+    }
+
+    private void verifyFailedExecutionMethodCalled(ArgumentCaptor<FailedExecutionContext> failedExecutionArg,
+                                                   boolean expectResponse) {
         AllTypesRequest failedRequest = (AllTypesRequest) failedExecutionArg.getValue().request();
 
-        assertThat(failedExecutionArg.getValue().exception()).isInstanceOf(AmazonServiceException.class);
+
         assertThat(failedRequest.stringMember()).isEqualTo("1");
         assertThat(failedExecutionArg.getValue().httpRequest()).hasValueSatisfying(httpRequest -> {
             assertThat(httpRequest.getFirstHeaderValue("Foo")).hasValue("2");
@@ -304,7 +281,14 @@ public class ExecutionInterceptorTest {
         assertThat(failedExecutionArg.getValue().httpResponse()).hasValueSatisfying(httpResponse -> {
             assertThat(httpResponse.getFirstHeaderValue("Foo")).hasValue("3");
         });
-        assertThat(failedExecutionArg.getValue().response()).isNotPresent();
+
+        if (expectResponse) {
+            assertThat(failedExecutionArg.getValue().response().map(AllTypesResponse.class::cast)).hasValueSatisfying(response -> {
+                assertThat(response.stringMember()).isEqualTo("4");
+            });
+        } else {
+            assertThat(failedExecutionArg.getValue().response()).isNotPresent();
+        }
     }
 
     private void validateArgs(BeforeExecutionContext context,
