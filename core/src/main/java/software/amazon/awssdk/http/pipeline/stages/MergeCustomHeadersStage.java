@@ -55,7 +55,7 @@ public class MergeCustomHeadersStage implements MutableRequestToRequestPipeline 
         return result;
     }
 
-    // TODO change thi representation
+    // TODO change this representation
     private Map<String, List<String>> adaptHeaders(Map<String, String> toConvert) {
         Map<String, List<String>> adapted = new HashMap<>(toConvert.size());
         toConvert.forEach((k, v) -> adapted.put(k, Collections.singletonList(v)));

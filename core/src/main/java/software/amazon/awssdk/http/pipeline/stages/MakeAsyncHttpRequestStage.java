@@ -28,7 +28,6 @@ import software.amazon.awssdk.event.ProgressEventType;
 import software.amazon.awssdk.event.ProgressListener;
 import software.amazon.awssdk.http.AmazonHttpClient;
 import software.amazon.awssdk.http.HttpAsyncClientDependencies;
-import software.amazon.awssdk.http.HttpClientDependencies;
 import software.amazon.awssdk.http.HttpResponse;
 import software.amazon.awssdk.http.HttpStatusCodes;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
@@ -56,12 +55,10 @@ public class MakeAsyncHttpRequestStage<OutputT>
 
     public MakeAsyncHttpRequestStage(SdkHttpResponseHandler<OutputT> responseHandler,
                                      SdkHttpResponseHandler<? extends SdkBaseException> errorResponseHandler,
-                                     HttpClientDependencies dependencies) {
-        // TODO: Ewww!
-        HttpAsyncClientDependencies asyncDependencies = (HttpAsyncClientDependencies) dependencies;
+                                     HttpAsyncClientDependencies dependencies) {
         this.responseHandler = responseHandler;
         this.errorResponseHandler = errorResponseHandler;
-        this.sdkAsyncHttpClient = asyncDependencies.asyncClientConfiguration().asyncHttpClient();
+        this.sdkAsyncHttpClient = dependencies.asyncClientConfiguration().asyncHttpClient();
     }
 
     /**
@@ -181,7 +178,7 @@ public class MakeAsyncHttpRequestStage<OutputT>
             SdkHttpFullResponse httpFullResponse = (SdkHttpFullResponse) this.response;
 
             publishProgress(listener, ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT);
-            httpFullResponse = beforeUnmarshalling(httpFullResponse); // TODO: Why so gross?!
+            httpFullResponse = beforeUnmarshalling(httpFullResponse);
             final HttpResponse httpResponse = SdkHttpResponseAdapter.adapt(false, request, httpFullResponse);
             Response<OutputT> toReturn = handleResponse(httpResponse);
             future.complete(toReturn);
@@ -189,7 +186,6 @@ public class MakeAsyncHttpRequestStage<OutputT>
         }
 
         private SdkHttpFullResponse beforeUnmarshalling(SdkHttpFullResponse response) {
-            // TODO: Duplicate code
             // Update interceptor context
             InterceptorContext interceptorContext =
                     context.executionContext().interceptorContext().modify(b -> b.httpResponse(response));
@@ -226,8 +222,9 @@ public class MakeAsyncHttpRequestStage<OutputT>
         }
 
         private OutputT callExecutionInterceptors(OutputT legacyResponse) {
-            // TODO: Duplicate code
-            // Super-huge hack. Drop this when we drop the Response<> type.
+            // TODO: Big hack. Drop this when we drop the Response<> type.
+            // TODO: This is very similar to the way things are done in the sync HTTP client. Is there any way we can avoid
+            // that duplication?
             SdkResponse response = (SdkResponse) legacyResponse;
 
             // Update interceptor context

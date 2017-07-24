@@ -235,8 +235,8 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
         public <OutputT> CompletableFuture<OutputT> execute(SdkHttpResponseHandler<OutputT> responseHandler) {
             try {
                 return RequestPipelineBuilder
-                        .first(RequestPipelineBuilder
-                                .first(MakeRequestMutable::new)
+                        .firstAsync(RequestPipelineBuilder
+                                .firstAsync(MakeRequestMutable::new)
                                 .then(ApplyTransactionIdStage::new)
                                 .then(ApplyUserAgentStage::new)
                                 .then(MergeCustomHeadersStage::new)
@@ -245,7 +245,7 @@ public class AmazonAsyncHttpClient implements AutoCloseable {
                                 .then(MakeRequestImmutable::new)
                                 .then(ReportRequestContentLengthStage::new)
                                 .then(RequestPipelineBuilder
-                                      .first(SigningStage::new)
+                                      .firstAsync(SigningStage::new)
                                       .then(BeforeTransmissionExecutionInterceptorsStage::new)
                                       .then(d -> new MakeAsyncHttpRequestStage<>(responseHandler, errorResponseHandler, d))
                                       .wrap(AsyncRetryableStage::new)

@@ -110,7 +110,7 @@ public class AmazonHttpClient implements AutoCloseable {
      */
     private final RequestMetricCollector requestMetricCollector;
 
-    private final HttpClientDependencies httpClientDependencies;
+    private final HttpSyncClientDependencies httpClientDependencies;
 
     private AmazonHttpClient(Builder builder) {
         this.httpClientDependencies = HttpSyncClientDependencies.builder()
@@ -391,8 +391,8 @@ public class AmazonHttpClient implements AutoCloseable {
             try {
                 return RequestPipelineBuilder
                         // Start of mutating request
-                        .first(RequestPipelineBuilder
-                                .first(MakeRequestMutable::new)
+                        .firstSync(RequestPipelineBuilder
+                                .firstSync(MakeRequestMutable::new)
                                 .then(ApplyTransactionIdStage::new)
                                 .then(ApplyUserAgentStage::new)
                                 .then(MergeCustomHeadersStage::new)
@@ -402,18 +402,18 @@ public class AmazonHttpClient implements AutoCloseable {
                                 // End of mutating request
                                 .then(ReportRequestContentLengthStage::new)
                                 .then(RequestPipelineBuilder
-                                        .first(SigningStage::new)
-                                        .then(BeforeTransmissionExecutionInterceptorsStage::new)
-                                        .then(MakeHttpRequestStage::new)
-                                        .then(AfterTransmissionExecutionInterceptorsStage::new)
-                                        .then(HttpResponseAdaptingStage::new)
-                                        .then(InstrumentHttpResponseContentStage::new)
-                                        .then(BeforeUnmarshallingExecutionInterceptorsStage::new)
-                                        .then(() -> new HandleResponseStage<>(getNonNullResponseHandler(responseHandler),
-                                                                              getNonNullResponseHandler(errorResponseHandler)))
-                                        .wrap(ExceptionReportingStage::new)
-                                        .wrap(TimerExceptionHandlingStage::new)
-                                        .wrap(RetryableStage::new)::build)
+                                          .firstSync(SigningStage::new)
+                                          .then(BeforeTransmissionExecutionInterceptorsStage::new)
+                                          .then(MakeHttpRequestStage::new)
+                                          .then(AfterTransmissionExecutionInterceptorsStage::new)
+                                          .then(HttpResponseAdaptingStage::new)
+                                          .then(InstrumentHttpResponseContentStage::new)
+                                          .then(BeforeUnmarshallingExecutionInterceptorsStage::new)
+                                          .then(() -> new HandleResponseStage<>(getNonNullResponseHandler(responseHandler),
+                                                                                getNonNullResponseHandler(errorResponseHandler)))
+                                          .wrap(ExceptionReportingStage::new)
+                                          .wrap(TimerExceptionHandlingStage::new)
+                                          .wrap(RetryableStage::new)::build)
                                 .wrap(StreamManagingStage::new)
                                 .wrap(AfterCallbackStage::new)
                                 .wrap(ClientExecutionTimedStage::new)::build)
